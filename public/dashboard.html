@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Consola Criptográfica</title>
+    <title>Vanguardia | Centro de Comando V11</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,13 +16,22 @@
         body { font-family: 'Inter', sans-serif; background-color: #000; color: #f3f4f6; overflow-x: hidden; }
         .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 60%); opacity: 0.08; pointer-events: none; z-index: -1; transition: all 1s ease; }
         .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
-        select { -webkit-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') no-repeat right 10px center; }
+        
+        /* Modal de Pre-Vuelo */
+        #modalPreVuelo { background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); display: flex; }
+        
+        /* HUD de Batalla */
+        #hudBatalla { display: none; background: rgba(0,0,0,0.9); z-index: 100; border: 2px solid var(--accent-color); }
+        .recording-pulse { animation: pulseHUD 1s infinite; }
+        @keyframes pulseHUD { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
         .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.05); }
         .sensor.glow-blue { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); }
         .sensor.glow-purple { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); }
         .sensor.glow-red { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; }
         .is-locked .locked-overlay { display: flex; }
         .vista { display: none; animation: fadeIn 0.5s ease forwards; }
         .vista.activa { display: block; }
@@ -33,65 +42,84 @@
 
     <div id="ambient" class="ambient-bg"></div>
 
+    <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
+        <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
+            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Check-in de Preparación SNC</h2>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[10px] uppercase text-gray-500 tracking-widest block mb-2 text-center">Horas de Sueño</label>
+                    <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-xl text-blue-400 outline-none">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase text-gray-500 tracking-widest block mb-2 text-center">Nivel de Estrés Sistémico (1-10)</label>
+                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500">
+                    <div class="flex justify-between text-[10px] text-gray-600 mt-1 uppercase"><span>Calma</span><span>Caos</span></div>
+                </div>
+                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-blue-50 transition-all">Iniciar Secuencia</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hudBatalla" class="fixed inset-4 rounded-3xl flex-col items-center justify-center text-center p-6">
+        <div class="text-[10px] text-blue-500 font-bold tracking-[0.5em] uppercase mb-4 recording-pulse">Escaneando Tensión Mecánica</div>
+        <div id="relojHUD" class="text-8xl font-black text-white mb-8 tracking-tighter">00<span class="text-blue-500">s</span></div>
+        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase tracking-[0.3em] rounded-full text-sm shadow-[0_0_30px_rgba(220,38,38,0.5)]">Finalizar Serie (Fallo)</button>
+    </div>
+
     <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
-        <div class="text-lg font-black tracking-tighter uppercase flex items-center gap-2">
-            Vanguardia. <span class="text-[8px] border border-red-500 text-red-500 px-1 rounded">AES-256</span>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase tracking-widest px-3 py-1 rounded shadow-[0_0_10px_rgba(255,255,255,0.3)]">Macro (Vulcano)</button>
-            <button onclick="localStorage.clear(); location.reload();" class="text-[10px] text-gray-500 hover:text-white uppercase tracking-widest border border-gray-500/20 px-2 py-1 rounded">Purgar</button>
-        </div>
+        <div class="text-lg font-black tracking-tighter uppercase">Vanguardia.</div>
+        <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase tracking-widest px-3 py-1 rounded">Modo Macro</button>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 relative">
+    <main class="max-w-7xl mx-auto p-4 space-y-6">
 
         <div id="vistaMicro" class="vista activa space-y-6">
             
             <div class="glass-card p-6 rounded-2xl border-l-4" id="panelDirectriz">
                 <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase mb-2 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-white animate-pulse" id="dotDirectriz"></span> Directriz Operativa Diaria
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse" id="dotDirectriz"></span> Directriz Operativa
                 </h2>
-                <div id="textoDirectriz" class="text-sm text-gray-300 font-light mt-4">Analizando telemetría histórica...</div>
+                <div id="textoDirectriz" class="text-sm text-gray-300 font-light mt-4 italic">Analizando readiness...</div>
             </div>
 
             <div class="glass-card p-5 rounded-2xl border-l-2 border-l-blue-500">
                 <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3">Identidad Biométrica</h2>
                 <div class="grid grid-cols-3 gap-3">
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Edad</label><input type="number" id="bioEdad" required class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none"></div>
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Estatura</label><input type="number" id="bioEstatura" required class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none"></div>
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Peso (Kg)</label><input type="number" id="bioPeso" required class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none"></div>
+                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Edad</label><input type="number" id="bioEdad" value="41" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
+                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Estatura</label><input type="number" id="bioEstatura" value="169" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
+                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Peso (Kg)</label><input type="number" id="bioPeso" value="85" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none text-blue-400 font-bold"></div>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
                 <div class="lg:col-span-5 glass-card p-5 rounded-2xl relative" id="panelIngreso">
-                    <div class="locked-overlay text-center p-4 rounded-2xl">
-                        <span class="text-red-500 text-2xl mb-2">⚠️</span>
-                        <h3 class="text-white font-bold tracking-widest uppercase text-xs mb-2">Bloqueo Táctico</h3>
-                        <div id="relojRecuperacion" class="text-xl font-mono text-red-500 tracking-widest mt-2">00:00:00</div>
-                    </div>
-
                     <form id="formVanguardia" class="space-y-5">
-                        <div>
+                        <div class="space-y-2">
                             <label class="text-[10px] uppercase tracking-widest text-gray-400">Patrón de Movimiento</label>
-                            <select id="ejercicioSelector" class="w-full bg-black/50 border border-white/10 rounded-lg p-3 mt-1 text-white text-sm outline-none cursor-pointer">
+                            <select id="ejercicioSelector" class="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white text-sm outline-none">
                                 <option value="Sentadilla">Sentadilla Libre</option><option value="Prensa">Prensa de Piernas</option><option value="Peso Muerto">Peso Muerto</option><option value="Press Banca">Press de Banca</option><option value="Dominadas">Dominadas</option>
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] uppercase tracking-widest text-gray-400">Carga (Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center outline-none text-white focus:border-blue-500"></div>
-                            <div><label class="text-[10px] uppercase tracking-widest text-gray-400">TUT (Seg)</label><input type="number" id="tut" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center outline-none text-white focus:border-purple-400"></div>
+                            <div><label class="text-[10px] uppercase tracking-widest text-gray-400">Carga (Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center text-white outline-none"></div>
+                            <div class="relative">
+                                <label class="text-[10px] uppercase tracking-widest text-gray-400">TUT (Seg)</label>
+                                <input type="number" id="tut" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center text-white outline-none">
+                                <button type="button" onclick="iniciarHUD()" class="absolute -bottom-6 right-0 text-[8px] bg-blue-600 text-white px-2 py-1 rounded uppercase font-bold tracking-widest">▶ Iniciar HUD</button>
+                            </div>
                         </div>
-                        <div>
-                            <div class="flex justify-between mb-1"><label class="text-[10px] uppercase tracking-widest text-red-400">Fatiga Central (RPE)</label><span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span></div>
+                        <div class="pt-4">
+                            <div class="flex justify-between mb-1"><label class="text-[10px] uppercase tracking-widest text-red-400">RPE (Fallo)</label><span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span></div>
                             <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none">
                         </div>
-                        <button type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] rounded hover:bg-gray-200">Generar Diagnóstico</button>
+                        <button type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-blue-50">Computar Impacto</button>
                     </form>
                 </div>
 
                 <div class="lg:col-span-7 flex flex-col gap-6">
-                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-48 relative overflow-hidden">
+                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-48 relative">
                         <svg viewBox="0 0 200 400" class="h-64 w-auto opacity-70">
                             <path d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
                             <path d="M70,75 L130,75 L145,150 L55,150 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
@@ -101,276 +129,115 @@
                         </svg>
                     </div>
                     <div class="glass-card p-5 rounded-2xl flex-grow">
-                        <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Prescripción de Impacto</h2>
-                        <div id="bioInsight" class="text-xs font-light leading-relaxed text-gray-300">Esperando registro de telemetría.</div>
+                        <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico Biológico</h2>
+                        <div id="bioInsight" class="text-xs font-light text-gray-300">...</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="vistaMacro" class="vista space-y-6">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-black text-white uppercase tracking-widest">NÚCLEO <span class="text-blue-500">/</span> Vulcano OS</h1>
-                <p class="text-[10px] text-gray-500 uppercase tracking-widest">Telemetría de Macro-Ciclo</p>
-            </div>
-            
-            <div class="glass-card p-4 rounded-2xl">
-                <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-4">Evolución: Estrés vs. Fatiga</h2>
-                <div class="w-full h-64 relative"><canvas id="macroChart"></canvas></div>
-            </div>
-
+            <div class="glass-card p-4 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="extraerDatos('csv')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-green-400 hover:bg-green-900/20">↓ Extraer Excel Libre</button>
-                <button onclick="extraerDatos('json')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-blue-400 hover:bg-blue-900/20">↓ JSON Puente Vulcano</button>
-            </div>
-
-            <div class="glass-card p-5 rounded-2xl border border-red-500/30 bg-red-900/10 mt-6 relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
-                <h2 class="text-[10px] font-bold tracking-[0.2em] text-red-500 uppercase mb-4 flex items-center gap-2">
-                    🔒 Soberanía Militar (Encriptación AES-256)
-                </h2>
-                <p class="text-[10px] text-gray-400 mb-4 leading-relaxed">Sella tu historial biométrico. El archivo resultante (.van) será indescifrable sin tu llave táctica. Útil para respaldos en la nube o transferencia segura a Códice.</p>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onclick="sellarBoveda()" class="bg-red-600 text-white font-bold p-3 rounded text-[10px] uppercase tracking-widest hover:bg-red-500 transition-colors">
-                        Sellar y Extraer (.VAN)
-                    </button>
-                    <button onclick="document.getElementById('fileUpload').click()" class="bg-transparent border border-gray-600 text-gray-300 font-bold p-3 rounded text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-colors">
-                        Desencriptar Archivo
-                    </button>
-                    <input type="file" id="fileUpload" class="hidden" accept=".van" onchange="desencriptarBoveda(event)">
-                </div>
+                <button onclick="extraerDatos('csv')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-green-400">CSV</button>
+                <button onclick="sellarBoveda()" class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-[10px] uppercase tracking-widest text-red-500">Sellar .VAN</button>
             </div>
         </div>
 
     </main>
 
     <script>
-        // --- MOTOR HÁPTICO ---
+        // --- 1. MOTOR SENSORIAL ---
         const AudioContext = window.AudioContext || window.webkitAudioContext; let audioCtx;
         const TacticoSensorial = {
             init: function() { if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); },
             vibrar: function(p) { if (navigator.vibrate) navigator.vibrate(p); },
             tick: function() { this.init(); this.vibrar(15); },
-            computar: function() { this.init(); this.vibrar([30, 50, 30]); },
-            alarma: function() { this.init(); this.vibrar([100, 50, 100, 50, 200]); }
+            alarma: function() { this.init(); this.vibrar([100, 50, 200]); }
         };
 
-        // --- SISTEMA DE DATOS ---
-        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_data_v10')) || [];
+        // --- 2. LÓGICA DE PRE-VUELO (READINESS) ---
+        let bioData = { sueno: 7, estres: 3 };
+        function finalizarCheckIn() {
+            TacticoSensorial.init();
+            bioData.sueno = parseFloat(document.getElementById('inputSueño').value) || 7;
+            bioData.estres = parseFloat(document.getElementById('inputEstres').value) || 3;
+            document.getElementById('modalPreVuelo').style.display = 'none';
+            evaluarEstadoDiario();
+        }
 
-        // --- ORÁCULO PREDICTIVO (HEAVY DUTY) ---
+        // --- 3. HUD DE BATALLA (CHRONO) ---
+        let timerInterval; let seg = 0;
+        function iniciarHUD() {
+            TacticoSensorial.init();
+            document.getElementById('hudBatalla').style.display = 'flex';
+            seg = 0;
+            timerInterval = setInterval(() => {
+                seg++;
+                document.getElementById('relojHUD').innerHTML = `${seg}<span class="text-blue-500 text-4xl">s</span>`;
+                TacticoSensorial.tick(); // Vibra cada segundo
+            }, 1000);
+        }
+        function detenerHUD() {
+            clearInterval(timerInterval);
+            document.getElementById('tut').value = seg;
+            document.getElementById('hudBatalla').style.display = 'none';
+            TacticoSensorial.vibrar([50, 100, 50]);
+        }
+
+        // --- 4. MOTOR LÓGICO V11 ---
+        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_data_v11')) || [];
+
         function evaluarEstadoDiario() {
             const panel = document.getElementById('panelDirectriz');
-            const dot = document.getElementById('dotDirectriz');
             const texto = document.getElementById('textoDirectriz');
-            const selector = document.getElementById('ejercicioSelector');
-
-            if (historialSeries.length === 0) {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-blue-500";
-                dot.className = "w-2 h-2 rounded-full bg-blue-500 animate-pulse";
-                texto.innerHTML = "<strong class='text-white text-base block mb-1'>CALIBRACIÓN INICIAL</strong>Bóveda vacía. Autorización para fijar línea base de RPE.";
-                return;
-            }
-
-            const ahora = new Date().getTime();
-            const seriesRecientes = historialSeries.filter(s => (ahora - s.timestampNum) < (48 * 60 * 60 * 1000)); 
             
-            if (seriesRecientes.length === 0) {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-green-500";
-                dot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
-                texto.innerHTML = "<strong class='text-green-400 text-base block mb-1'>SNC AL 100%</strong>Supercompensación completada. Protocolo Heavy Duty autorizado.";
-                return;
-            }
+            // Penalización por Sueño y Estrés
+            let readinessScore = 100;
+            if (bioData.sueno < 7) readinessScore -= (7 - bioData.sueno) * 15;
+            if (bioData.estres > 6) readinessScore -= (bioData.estres - 6) * 10;
 
-            let fatigaMaxima = 0; let ultimoEje = "";
-            seriesRecientes.forEach(s => {
-                if(s.rpe > fatigaMaxima) fatigaMaxima = s.rpe;
-                if(s.ejercicio.includes("Sentadilla") || s.ejercicio.includes("Prensa")) ultimoEje = "Tren Inferior";
-                else if(s.ejercicio.includes("Press")) ultimoEje = "Empuje";
-                else ultimoEje = "Tracción";
-            });
-
-            if (fatigaMaxima >= 8.5) {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-orange-500";
-                dot.className = "w-2 h-2 rounded-full bg-orange-500 animate-pulse";
-                texto.innerHTML = `<strong class='text-orange-400 text-base block mb-1'>FATIGA RESIDUAL DETECTADA</strong>El eje <span class="text-white">${ultimoEje}</span> está dañado (RPE ${fatigaMaxima}). Cambia de patrón de movimiento hoy.`;
-                Array.from(selector.options).forEach(opt => { opt.disabled = opt.text.includes(ultimoEje); });
+            if (readinessScore < 60) {
+                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-red-500";
+                texto.innerHTML = `<strong class="text-red-500 text-sm block mb-1">ALERTA: CAPACIDAD ADAPTATIVA BAJA (${readinessScore}%)</strong>Tu SNC está comprometido por falta de sueño o estrés sistémico. El riesgo de lesión fascial se multiplica. <br><span class="text-white">Prescripción: Prohibido RPE 10. Limítate a RPE 7 (Mantenimiento).</span>`;
             } else {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-purple-500";
-                dot.className = "w-2 h-2 rounded-full bg-purple-500 animate-pulse";
-                texto.innerHTML = `<strong class='text-purple-400 text-base block mb-1'>FIBRAS PRE-FATIGADAS</strong>Autorización para buscar el fallo absoluto hoy. Rompe la barrera.`;
+                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-blue-500";
+                texto.innerHTML = `<strong class="text-blue-400 text-sm block mb-1">SISTEMA LISTO (${readinessScore}%)</strong>Entorno hormonal favorable. Autorización para buscar tensión mecánica máxima.`;
             }
         }
 
-        // --- LÓGICA SESIÓN Y BLOQUEO ---
         document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + '/10'; TacticoSensorial.tick(); };
-        const anatomia = { "Sentadilla": ["sensor-piernas1", "sensor-piernas2"], "Prensa": ["sensor-piernas1", "sensor-piernas2"], "Peso Muerto": ["sensor-cadenaPost1", "sensor-cadenaPost2", "sensor-espalda"], "Press Banca": ["sensor-pecho"], "Dominadas": ["sensor-espalda"] };
-
-        let recoveryInterval;
-        function checkLockdown() {
-            const unlockTime = localStorage.getItem('vanguardia_unlock_v10');
-            const p = document.getElementById('panelIngreso');
-            const r = document.getElementById('relojRecuperacion');
-            if (unlockTime && new Date().getTime() < parseInt(unlockTime, 10)) {
-                p.classList.add('is-locked');
-                if(recoveryInterval) clearInterval(recoveryInterval);
-                recoveryInterval = setInterval(() => {
-                    const d = parseInt(unlockTime, 10) - new Date().getTime();
-                    if (d < 0) { clearInterval(recoveryInterval); localStorage.removeItem('vanguardia_unlock_v10'); checkLockdown(); } 
-                    else { r.innerText = `${Math.floor((d%(1000*60*60))/(1000*60))}m ${Math.floor((d%(1000*60))/1000)}s`; }
-                }, 1000);
-                return true;
-            }
-            p.classList.remove('is-locked'); if(recoveryInterval) clearInterval(recoveryInterval); return false;
-        }
 
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault();
-            if (checkLockdown()) return;
-            TacticoSensorial.init();
-
-            const peso = parseFloat(document.getElementById('bioPeso').value);
-            const edad = parseFloat(document.getElementById('bioEdad').value);
-            const ej = document.getElementById('ejercicioSelector').value;
             const carga = parseFloat(document.getElementById('carga').value);
             const tut = parseFloat(document.getElementById('tut').value);
             const rpe = parseFloat(document.getElementById('rpe').value);
-            if(!peso || !edad) return alert("Biometría requerida.");
+            const peso = parseFloat(document.getElementById('bioPeso').value) || 85;
 
-            const cr = carga / peso; 
-            const fe = edad > 35 ? (edad - 35) * 0.05 : 0; 
-            const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
-            let riesgo = ((cr * 2) + (rpe * 0.5) + (tut/60) + fe).toFixed(1);
-
+            // EL ALGORITMO AHORA PENALIZA POR READINESS
+            let factorCastigo = (bioData.sueno < 6) ? 1.5 : 1.0;
+            let riesgo = (((carga/peso)*2) + (rpe*0.5) + (tut/60)) * factorCastigo;
+            
             const ts = new Date().getTime();
-            const dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', hour:'2-digit', minute:'2-digit' });
-            historialSeries.push({ timestampNum: ts, fechaStr: dateStr, ejercicio: ej, carga, tut, rpe, ifi: parseFloat(ifi), riesgo: parseFloat(riesgo) });
-            localStorage.setItem('vanguardia_data_v10', JSON.stringify(historialSeries));
+            historialSeries.push({ timestampNum: ts, ejercicio: document.getElementById('ejercicioSelector').value, carga, tut, rpe, riesgo: riesgo.toFixed(1) });
+            localStorage.setItem('vanguardia_data_v11', JSON.stringify(historialSeries));
 
-            let diag = ""; let c = "";
-            if(riesgo < 5) { c = "glow-blue"; diag = `<span class="text-blue-400 font-bold block mb-1">INFRADOSIS</span>Sube el RPE o la Carga.`; TacticoSensorial.computar(); } 
-            else if(riesgo < 8) { c = "glow-purple"; diag = `<span class="text-purple-400 font-bold block mb-1">HIPERTROFIA ÓPTIMA</span>Protocolo ICU activo.`; TacticoSensorial.computar(); } 
-            else { c = "glow-red"; diag = `<span class="text-red-500 font-bold block mb-1">DAÑO FASCIAL</span>Bloqueo de seguridad activado.`; TacticoSensorial.alarma(); localStorage.setItem('vanguardia_unlock_v10', ts + 60000); }
-            
+            let diag = "";
+            if (riesgo > 8.5) {
+                diag = `<span class="text-red-500 font-bold">RIESGO CRÍTICO.</span> Tu falta de descanso (${bioData.sueno}h) eleva el riesgo a ${riesgo.toFixed(1)}. Detén la sesión.`;
+                TacticoSensorial.alarma();
+            } else {
+                diag = `<span class="text-purple-400 font-bold">ESTÍMULO CORRECTO.</span> Riesgo calculado: ${riesgo.toFixed(1)}.`;
+                TacticoSensorial.vibrar([30, 50, 30]);
+            }
             document.getElementById('bioInsight').innerHTML = diag;
-            document.querySelectorAll('.sensor').forEach(s => s.className.baseVal = "sensor");
-            (anatomia[ej] || []).forEach(id => document.getElementById(id).className.baseVal = `sensor ${c}`);
-            
-            checkLockdown(); evaluarEstadoDiario();
         };
 
-        // --- VISTAS MACRO Y EXTRACCIÓN BÁSICA ---
-        let vistaActual = 'micro';
         function toggleVista() {
-            TacticoSensorial.tick();
-            if (vistaActual === 'micro') {
-                document.getElementById('vistaMicro').classList.remove('activa'); document.getElementById('vistaMacro').classList.add('activa');
-                document.getElementById('btnVista').innerText = "Volver a Sesión";
-                renderizarMacroChart(); vistaActual = 'macro';
-            } else {
-                document.getElementById('vistaMacro').classList.remove('activa'); document.getElementById('vistaMicro').classList.add('activa');
-                document.getElementById('btnVista').innerText = "Macro (Vulcano)";
-                vistaActual = 'micro';
-            }
+            document.getElementById('vistaMicro').classList.toggle('activa');
+            document.getElementById('vistaMacro').classList.toggle('activa');
         }
-
-        let macroChartInstance = null;
-        function renderizarMacroChart() {
-            const ctx = document.getElementById('macroChart').getContext('2d');
-            const dataSlice = historialSeries.slice(-20);
-            if(macroChartInstance) macroChartInstance.destroy();
-            Chart.defaults.color = '#6b7280';
-            macroChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: { labels: dataSlice.map(s => s.fechaStr.split(',')[0]), datasets: [ { type: 'line', label: 'RPE', data: dataSlice.map(s => s.rpe), borderColor: '#ef4444', borderWidth: 2, yAxisID: 'y1' }, { type: 'bar', label: 'IFI', data: dataSlice.map(s => s.ifi), backgroundColor: 'rgba(168, 85, 247, 0.4)', yAxisID: 'y' } ] },
-                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', min: 0, max: 10, grid: { display: false } } } }
-            });
-        }
-
-        function extraerDatos(formato) {
-            if(historialSeries.length === 0) return alert("Bóveda vacía.");
-            TacticoSensorial.computar();
-            let c = ""; let n = "";
-            if(formato === 'csv') { c = "Fecha,Ejercicio,Carga,TUT,RPE,IFI\n"; historialSeries.forEach(s => c += `${s.fechaStr},${s.ejercicio},${s.carga},${s.tut},${s.rpe},${s.ifi}\n`); n = 'Vanguardia_Libre.csv'; } 
-            else { c = JSON.stringify({ "sistema": "Vanguardia V10", "registros": historialSeries }, null, 2); n = 'Vulcano_Bridge.json'; }
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([c], { type: formato==='csv'?'text/csv':'application/json' })); a.download = n; a.click();
-        }
-
-        // --- NUEVO: SISTEMA CRIPTOGRÁFICO AES-256 ---
-        function sellarBoveda() {
-            if(historialSeries.length === 0) return alert("No hay datos para encriptar.");
-            
-            // Solicitar Llave Táctica
-            const password = prompt("ESTABLECE UNA LLAVE TÁCTICA PARA SELLAR LA BÓVEDA:\n(No la olvides, o la data se perderá para siempre)");
-            if (!password) return; // Cancelado por el usuario
-            
-            TacticoSensorial.tick();
-            try {
-                // Generar paquete JSON
-                const payload = JSON.stringify({ "origen": "Vanguardia_AES256", "registros": historialSeries });
-                // Cifrado Militar AES
-                const cipherText = CryptoJS.AES.encrypt(payload, password).toString();
-                
-                // Descargar archivo .van
-                const blob = new Blob([cipherText], { type: 'text/plain' });
-                const a = document.createElement('a');
-                a.href = window.URL.createObjectURL(blob);
-                a.download = `Vanguardia_Secure_${new Date().getTime()}.van`;
-                a.click();
-                
-                alert("BÓVEDA SELLADA.\nEl archivo .van ha sido exportado. Guárdalo en un lugar seguro.");
-            } catch (e) {
-                alert("Error crítico en el cifrado.");
-            }
-        }
-
-        function desencriptarBoveda(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const password = prompt("SISTEMA BLOQUEADO.\nIngresa la Llave Táctica para desencriptar el archivo:");
-            if (!password) {
-                event.target.value = ''; // Reset input
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const cipherText = e.target.result;
-                try {
-                    // Descifrado Militar AES
-                    const bytes = CryptoJS.AES.decrypt(cipherText, password);
-                    const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-                    
-                    if (!decryptedText) throw new Error("Fallo de llave");
-
-                    const data = JSON.parse(decryptedText);
-                    if (data.origen === "Vanguardia_AES256" && data.registros) {
-                        // Inyectar datos a la memoria local
-                        historialSeries = data.registros;
-                        localStorage.setItem('vanguardia_data_v10', JSON.stringify(historialSeries));
-                        
-                        TacticoSensorial.accesoConcedido || TacticoSensorial.computar();
-                        alert("BÓVEDA DESENCRIPTADA CON ÉXITO.\nDatos restaurados en el sistema.");
-                        
-                        renderizarMacroChart();
-                        evaluarEstadoDiario();
-                    } else {
-                        throw new Error("Archivo corrupto");
-                    }
-                } catch (error) {
-                    TacticoSensorial.alarma();
-                    alert("ACCESO DENEGADO.\nLlave Táctica incorrecta o archivo corrompido.");
-                }
-                event.target.value = ''; // Reset input
-            };
-            reader.readAsText(file);
-        }
-
-        // Inicialización
-        evaluarEstadoDiario();
-        checkLockdown();
     </script>
 </body>
 </html>
