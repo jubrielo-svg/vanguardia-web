@@ -3,239 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Panel de Élite</title>
+    <title>Vanguardia | Inferencia Biomecánica</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #050505; color: #f3f4f6; }
-        .glass-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
-        progress::-webkit-progress-bar { background-color: #1f2937; border-radius: 4px; }
-        progress::-webkit-progress-value { background-color: #3b82f6; border-radius: 4px; transition: width 0.5s ease; }
+        body { font-family: 'Inter', sans-serif; background-color: #030303; color: #f3f4f6; }
+        .glass-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); }
+        
+        /* Pantalla de Alerta Crítica (Oculta por defecto) */
+        #alertaCritica {
+            display: none;
+            background: rgba(220, 38, 38, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        #alertaCritica.activa { display: flex; animation: pulseRed 2s infinite; }
+        @keyframes pulseRed { 0% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0.7); } 50% { box-shadow: inset 0 0 50px 10px rgba(255,0,0,0.4); } 100% { box-shadow: inset 0 0 0 0 rgba(255,0,0,0.7); } }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden">
 
-    <nav class="w-full p-4 flex justify-between items-center border-b border-gray-800 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-        <div class="flex items-center gap-4">
-            <div class="text-lg font-bold tracking-widest uppercase text-white">Vanguardia.</div>
-            <div class="hidden md:block h-4 w-[1px] bg-gray-700"></div>
-            <div class="hidden md:block text-xs text-gray-500 tracking-wider">Motor Biomecánico Activo</div>
+    <script>
+        if (localStorage.getItem('vanguardia_auth') !== 'true') { window.location.href = 'login.html'; }
+        function logout() { localStorage.removeItem('vanguardia_auth'); window.location.href = 'index.html'; }
+    </script>
+
+    <div id="alertaCritica" class="fixed inset-0 z-[100] flex-col items-center justify-center text-center p-6">
+        <h1 class="text-6xl font-black text-white uppercase tracking-widest mb-4">BLOQUEO TÁCTICO</h1>
+        <div class="bg-black/50 p-8 rounded-xl border border-red-400 max-w-2xl">
+            <h2 class="text-2xl font-bold text-red-400 mb-4">RIESGO DE DESGARRO: 87%</h2>
+            <p class="text-white text-lg font-light mb-6">
+                Tu factor de Tensión Mecánica (IFI) ha superado tu capacidad de recuperación del Sistema Nervioso (RPE Crítico). 
+                Continuar induciendo hipertrofia en este estado no generará adaptación, generará ruptura fascial e inflamación sistémica.
+            </p>
+            <p class="text-gray-300 text-sm uppercase tracking-widest mb-8">El ecosistema recomienda cese inmediato de sesión.</p>
+            <button onclick="document.getElementById('alertaCritica').classList.remove('activa')" class="px-8 py-4 bg-white text-red-600 font-bold uppercase tracking-widest rounded-lg hover:bg-gray-200">
+                Aceptar y Transicionar a Descanso
+            </button>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-xs text-green-500 uppercase tracking-widest flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Memoria Activa
+    </div>
+
+    <nav class="w-full p-4 flex justify-between items-center border-b border-gray-900 bg-black/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="text-lg font-bold tracking-widest uppercase text-white">Vanguardia.</div>
+        <div class="flex items-center gap-6">
+            <span class="text-xs text-blue-500 uppercase tracking-widest flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span> Telemetría Activa
             </span>
-            <button id="btnLimpiar" class="text-xs text-red-500 hover:text-red-400 uppercase tracking-wider transition-colors ml-4">Reiniciar Sesión</button>
-            <a href="index.html" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider transition-colors">Salir</a>
+            <button onclick="logout()" class="text-xs text-gray-500 hover:text-white uppercase tracking-wider transition-colors">Salir</button>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto p-6 mt-4">
         
-        <header class="mb-10 flex flex-col md:flex-row justify-between items-end gap-4">
-            <div>
-                <h1 class="text-3xl font-bold text-white mb-2" id="tituloSesion">Protocolo ICU</h1>
-                <p class="text-gray-400 text-sm">Registro de métricas en tiempo real</p>
-            </div>
-            <div class="text-right">
-                <div class="text-4xl font-light text-blue-500" id="timer">00:00:00</div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest mt-1">Tiempo de Sesión</div>
-            </div>
-        </header>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass-card p-6 rounded-xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">Tensión Muscular</div>
-                <h2 class="text-xl font-bold text-white mb-1">Último TUT Real</h2>
-                <div class="flex items-baseline gap-2 mb-4">
-                    <span class="text-5xl font-light text-white transition-all duration-500" id="displayTut">0</span>
-                    <span class="text-gray-400">segundos</span>
-                </div>
-                <div class="w-full">
-                    <div class="flex justify-between text-xs mb-1 text-gray-400">
-                        <span>Objetivo: 60s</span>
-                        <span id="tutPorcentajeTexto">0%</span>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            
+            <div class="lg:col-span-2 glass-card p-8 rounded-2xl border border-gray-800">
+                <h2 class="text-xs text-gray-500 uppercase tracking-[0.2em] mb-6 border-b border-gray-800 pb-4">Consola de Diagnóstico y Carga</h2>
+                
+                <form id="formularioSerie" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">Ejercicio</label>
+                            <input type="text" id="inputEjercicio" required placeholder="Ej: Prensa Atlética" class="w-full bg-black border border-gray-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">Carga (Kg)</label>
+                            <input type="number" id="inputCarga" required min="1" placeholder="Ej: 140" class="w-full bg-black border border-gray-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">TUT Real (Segundos)</label>
+                            <input type="number" id="inputTut" required min="1" placeholder="Ej: 55" class="w-full bg-black border border-gray-800 rounded-lg p-4 text-white focus:border-blue-500 outline-none">
+                        </div>
                     </div>
-                    <progress id="barraTut" class="w-full h-1" value="0" max="100"></progress>
-                </div>
+
+                    <div class="pt-4 border-t border-gray-800">
+                        <label class="block text-xs text-red-400 font-bold uppercase tracking-wider mb-2 flex justify-between">
+                            <span>Percepción de Fatiga (SNC)</span>
+                            <span id="valorRpe">5 / 10</span>
+                        </label>
+                        <input type="range" id="inputRpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer" oninput="document.getElementById('valorRpe').innerText = this.value + ' / 10'">
+                        <div class="flex justify-between text-[10px] text-gray-600 mt-2 uppercase tracking-widest">
+                            <span>1 - Recuperación Activa</span>
+                            <span>10 - Fallo Nervioso Absoluto</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-white text-black font-bold uppercase tracking-[0.2em] p-4 rounded-lg hover:bg-gray-200 transition-colors mt-4">
+                        Computar Riesgo y Serie
+                    </button>
+                </form>
             </div>
 
-            <div class="glass-card p-6 rounded-xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-purple-500"></div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">Algoritmo de Carga</div>
-                <h2 class="text-xl font-bold text-white mb-1">Factor IFI</h2>
-                <div class="flex items-baseline gap-2 mb-4">
-                    <span class="text-5xl font-light text-white transition-all duration-500" id="displayIfi">0.00</span>
-                    <span class="text-gray-400">/ 1.5</span>
-                </div>
-                <p id="estadoIfi" class="text-xs text-gray-500 uppercase tracking-wider">Esperando datos...</p>
-            </div>
-
-            <div class="glass-card p-6 rounded-xl relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">Registro Histórico</div>
-                <h2 class="text-xl font-bold text-white mb-4">Series Computadas</h2>
-                <div id="historialSerie" class="text-gray-400 text-sm max-h-32 overflow-y-auto pr-2 space-y-3">
-                    Aún no hay series registradas en esta sesión.
+            <div class="glass-card p-6 rounded-2xl border border-gray-800 flex flex-col justify-center items-center">
+                <h2 class="text-xs text-gray-500 uppercase tracking-[0.2em] mb-4 w-full text-left">Radar de Riesgo (SNC)</h2>
+                <div class="w-full h-64 relative">
+                    <canvas id="radarChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <section class="glass-card p-6 rounded-xl border border-gray-800">
-            <h3 class="text-lg font-bold text-white mb-6 border-b border-gray-800 pb-4">Consola de Ingreso</h3>
-            
-            <form id="formularioSerie" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">Ejercicio</label>
-                    <input type="text" id="inputEjercicio" required placeholder="Ej: Prensa" class="w-full bg-black/50 border border-gray-700 rounded p-3 text-white focus:border-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">Carga (Kg)</label>
-                    <input type="number" id="inputCarga" required min="1" placeholder="Ej: 120" class="w-full bg-black/50 border border-gray-700 rounded p-3 text-white focus:border-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 uppercase tracking-wider mb-2">TUT (Segundos)</label>
-                    <input type="number" id="inputTut" required min="1" placeholder="Ej: 52" class="w-full bg-black/50 border border-gray-700 rounded p-3 text-white focus:border-blue-500 outline-none">
-                </div>
-                <div>
-                    <button type="submit" id="btnGuardar" class="w-full bg-white text-black font-bold uppercase tracking-widest p-3 rounded hover:bg-gray-200 transition-colors">
-                        Computar Serie
-                    </button>
-                </div>
-            </form>
-        </section>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-2 glass-card p-6 rounded-2xl border border-gray-800">
+                 <h2 class="text-xs text-gray-500 uppercase tracking-[0.2em] mb-4">Curva de Supercompensación (Historial IFI)</h2>
+                 <div class="h-48 w-full">
+                     <canvas id="lineChart"></canvas>
+                 </div>
+            </div>
+            <div class="glass-card p-6 rounded-2xl border border-gray-800 overflow-hidden flex flex-col">
+                <h2 class="text-xs text-gray-500 uppercase tracking-[0.2em] mb-4">Bitácora de Riesgo</h2>
+                <div id="historialSerie" class="space-y-4 overflow-y-auto flex-1 pr-2">
+                    </div>
+            </div>
+        </div>
 
     </main>
 
     <script>
-        // 1. Cronómetro de Sesión (Se reinicia al cargar la página)
-        let seconds = 0;
-        setInterval(() => {
-            seconds++;
-            const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
-            const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-            const secs = String(seconds % 60).padStart(2, '0');
-            document.getElementById('timer').innerText = `${hrs}:${mins}:${secs}`;
-        }, 1000);
+        // --- 1. CONFIGURACIÓN DE GRÁFICAS (Chart.js) ---
+        Chart.defaults.color = '#6b7280';
+        Chart.defaults.font.family = 'Inter';
 
-        // 2. Sistema de Memoria Persistente (Local Storage)
+        // Gráfica de Radar (Sistema Nervioso)
+        const ctxRadar = document.getElementById('radarChart').getContext('2d');
+        const radarChart = new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: ['Estrés Mecánico (IFI)', 'Fatiga Central (RPE)', 'Tensión (TUT)', 'Riesgo de Ruptura'],
+                datasets: [{
+                    label: 'Estado Actual',
+                    data: [0, 0, 0, 0],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    pointBackgroundColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                        pointLabels: { color: '#9ca3af', font: { size: 10 } },
+                        ticks: { display: false, min: 0, max: 10 }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Gráfica de Líneas (Supercompensación)
+        const ctxLine = document.getElementById('lineChart').getContext('2d');
+        const lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Factor IFI Evolutivo',
+                    data: [],
+                    borderColor: 'rgba(168, 85, 247, 1)',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                    x: { grid: { display: false } }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // --- 2. MOTOR LÓGICO PREDICTIVO ---
         let historialSeries = JSON.parse(localStorage.getItem('vanguardia_series')) || [];
 
-        // Función para cargar los datos guardados al entrar a la página
         function cargarMemoria() {
-            if (historialSeries.length > 0) {
-                // Tomar la última serie para actualizar las tarjetas principales
-                const ultimaSerie = historialSeries[historialSeries.length - 1];
-                actualizarTarjetas(ultimaSerie.tut, ultimaSerie.ifiCalculado, ultimaSerie.porcentajeTut);
-                
-                // Dibujar toda la lista del historial
-                dibujarHistorial();
-            }
+            historialSeries.forEach(serie => {
+                actualizarGraficas(serie);
+            });
+            dibujarHistorial();
         }
 
-        // Función para actualizar las tarjetas visuales (TUT e IFI)
-        function actualizarTarjetas(tut, ifiCalculado, porcentajeTut) {
-            document.getElementById('displayTut').innerText = tut;
-            document.getElementById('barraTut').value = porcentajeTut;
-            document.getElementById('tutPorcentajeTexto').innerText = Math.round(porcentajeTut) + '%';
-            document.getElementById('displayIfi').innerText = ifiCalculado;
+        function actualizarGraficas(serie) {
+            // Actualizar Radar
+            radarChart.data.datasets[0].data = [
+                Math.min(serie.ifiCalculado * 5, 10), // Escalar IFI de 0-2 a 0-10
+                serie.rpe,
+                Math.min((serie.tut / 60) * 10, 10), // Escalar TUT a base 10
+                serie.riesgoLesion // Nivel de riesgo 0-10
+            ];
             
-            const estadoIfi = document.getElementById('estadoIfi');
-            if (ifiCalculado >= 1.0) {
-                estadoIfi.innerText = "Zona de Hipertrofia Óptima";
-                estadoIfi.className = "text-xs text-purple-400 uppercase tracking-wider font-bold";
+            // Cambiar color del radar si hay peligro
+            if (serie.riesgoLesion >= 8) {
+                radarChart.data.datasets[0].borderColor = 'rgba(239, 68, 68, 1)'; // Rojo
+                radarChart.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.2)';
             } else {
-                estadoIfi.innerText = "Sub-óptimo. Aumentar carga o TUT";
-                estadoIfi.className = "text-xs text-yellow-500 uppercase tracking-wider";
+                radarChart.data.datasets[0].borderColor = 'rgba(59, 130, 246, 1)'; // Azul
+                radarChart.data.datasets[0].backgroundColor = 'rgba(59, 130, 246, 0.2)';
             }
+            radarChart.update();
+
+            // Actualizar Línea de Supercompensación
+            lineChart.data.labels.push(serie.ejercicio.substring(0, 5) + '...');
+            lineChart.data.datasets[0].data.push(serie.ifiCalculado);
+            if(lineChart.data.labels.length > 10) {
+                lineChart.data.labels.shift();
+                lineChart.data.datasets[0].data.shift();
+            }
+            lineChart.update();
         }
 
-        // Función para dibujar la lista de series en el historial
         function dibujarHistorial() {
-            const contenedorHistorial = document.getElementById('historialSerie');
-            contenedorHistorial.innerHTML = ''; // Limpiar antes de dibujar
-
-            // Dibujar desde la más reciente a la más antigua
+            const contenedor = document.getElementById('historialSerie');
+            contenedor.innerHTML = '';
             [...historialSeries].reverse().forEach(serie => {
-                contenedorHistorial.innerHTML += `
-                    <div class="border-b border-gray-800 pb-2 mb-2">
+                let colorRiesgo = serie.riesgoLesion >= 8 ? 'text-red-500' : 'text-green-500';
+                contenedor.innerHTML += `
+                    <div class="bg-black/40 p-3 rounded border border-gray-800">
                         <div class="flex justify-between text-white font-bold text-sm mb-1">
                             <span>${serie.ejercicio}</span>
-                            <span class="text-purple-400">IFI: ${serie.ifiCalculado}</span>
+                            <span class="${colorRiesgo}">Riesgo: ${serie.riesgoLesion}/10</span>
                         </div>
-                        <div class="flex justify-between text-xs">
-                            <span>Carga: ${serie.carga} kg</span>
-                            <span>TUT: ${serie.tut} s</span>
+                        <div class="flex justify-between text-xs text-gray-400">
+                            <span>IFI: ${serie.ifiCalculado}</span>
+                            <span>RPE: ${serie.rpe}</span>
                         </div>
                     </div>
                 `;
             });
         }
 
-        // 3. Lógica al Computar una nueva serie
         document.getElementById('formularioSerie').addEventListener('submit', function(e) {
             e.preventDefault(); 
             
             const ejercicio = document.getElementById('inputEjercicio').value;
             const carga = parseFloat(document.getElementById('inputCarga').value);
             const tut = parseFloat(document.getElementById('inputTut').value);
+            const rpe = parseFloat(document.getElementById('inputRpe').value);
 
+            // CÁLCULO DE IFI
             const ifiCalculado = ((carga / 100) * (tut / 50)).toFixed(2);
-            let porcentajeTut = (tut / 60) * 100;
-            if (porcentajeTut > 100) porcentajeTut = 100;
+            
+            // EL ALGORITMO DE PROFECÍA DE LESIÓN (ACWR Simulado)
+            // Si el RPE es alto (>8) y la carga/IFI es alta, el riesgo se dispara logarítmicamente.
+            let riesgoLesion = ((ifiCalculado * 0.5) + (rpe * 0.5)).toFixed(1);
+            if (rpe >= 9 && ifiCalculado > 1.2) riesgoLesion = 9.5; // Alerta Crítica Garantizada
 
-            // Guardar en la variable
-            const nuevaSerie = { ejercicio, carga, tut, ifiCalculado, porcentajeTut };
+            const nuevaSerie = { ejercicio, carga, tut, rpe, ifiCalculado, riesgoLesion };
             historialSeries.push(nuevaSerie);
-
-            // Guardar en el LocalStorage (La memoria del navegador)
             localStorage.setItem('vanguardia_series', JSON.stringify(historialSeries));
 
-            // Actualizar interfaz
-            actualizarTarjetas(tut, ifiCalculado, porcentajeTut);
+            actualizarGraficas(nuevaSerie);
             dibujarHistorial();
 
-            // Efecto de botón
-            const btn = document.getElementById('btnGuardar');
-            const textoOriginal = btn.innerText;
-            btn.innerText = "¡GUARDADO!";
-            btn.classList.replace('bg-white', 'bg-green-500');
-            btn.classList.replace('text-black', 'text-white');
-            
-            setTimeout(() => {
-                btn.innerText = textoOriginal;
-                btn.classList.replace('bg-green-500', 'bg-white');
-                btn.classList.replace('text-white', 'text-black');
-                document.getElementById('formularioSerie').reset();
-            }, 1000);
-        });
-
-        // 4. Botón de Limpiar Sesión (Peligro)
-        document.getElementById('btnLimpiar').addEventListener('click', function() {
-            if(confirm("¿Estás seguro de reiniciar la sesión? Esto borrará el historial actual.")) {
-                localStorage.removeItem('vanguardia_series'); // Borrar memoria
-                historialSeries = []; // Vaciar variable
-                location.reload(); // Recargar página para limpiar visualmente
+            // DISPARADOR DE LA PROFECÍA (BLOQUEO TÁCTICO)
+            if (riesgoLesion >= 8.5) {
+                document.getElementById('alertaCritica').classList.add('activa');
             }
+
+            document.getElementById('formularioSerie').reset();
+            document.getElementById('valorRpe').innerText = '5 / 10';
         });
 
-        // 5. Arrancar el motor al cargar la página
         cargarMemoria();
-
     </script>
-        // --- EL GUARDIÁN ---
-        if (localStorage.getItem('vanguardia_auth') !== 'true') {
-            window.location.href = 'login.html';
-        }
-
-        function logout() {
-            localStorage.removeItem('vanguardia_auth');
-            window.location.href = 'index.html';
-        }
-        // -------------------
-
-        // 1. Cronómetro de Sesión (Se reinicia al cargar la página)
-        let seconds = 0;
 </body>
 </html>
