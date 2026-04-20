@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a; /* Aquí está tu fondo negro */
+            background-color: #0a0a0a;
             color: #f3f4f6;
         }
         .glow-text {
@@ -24,9 +24,7 @@
     </div>
 
     <nav class="absolute top-0 w-full p-6 flex justify-between items-center z-10 max-w-6xl mx-auto">
-        <div class="text-xl font-bold tracking-widest uppercase text-white">
-            Vanguardia.
-        </div>
+        <div class="text-xl font-bold tracking-widest uppercase text-white">Vanguardia.</div>
         <div>
             <span class="text-sm text-gray-500 uppercase tracking-widest">Acceso Restringido</span>
         </div>
@@ -41,9 +39,10 @@
             Diseñado para quienes no negocian su potencial.
         </p>
 
-        <form class="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-lg mx-auto w-full">
+        <form action="https://formsubmit.co/jubrielo@gmail.com" method="POST" class="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-lg mx-auto w-full">
             <input 
                 type="email" 
+                name="email"
                 placeholder="Tu correo electrónico" 
                 required
                 class="w-full sm:w-auto px-6 py-4 bg-gray-900 border border-gray-800 rounded-md text-white focus:outline-none focus:border-gray-500 transition-colors"
@@ -53,80 +52,35 @@
                 class="w-full sm:w-auto px-8 py-4 bg-white text-black font-bold uppercase tracking-wider rounded-md hover:bg-gray-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                 Solicitar Acceso
             </button>
+
+            <input type="hidden" name="_next" value="https://vanguardia-web.vercel.app">
+            <input type="hidden" name="_captcha" value="false">
         </form>
         
         <p class="mt-6 text-xs text-gray-600 uppercase tracking-widest">
             Apertura exclusiva. Cupos limitados.
         </p>
     </main>
-<section class="max-w-6xl mx-auto px-4 py-24 z-10 relative">
+
+    <section class="max-w-6xl mx-auto px-4 py-24 z-10 relative">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
-            
             <div class="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-gray-600 transition-colors">
                 <div class="text-gray-500 mb-4 text-2xl">01 //</div>
                 <h3 class="text-xl font-bold text-white mb-4">Inteligencia Simbiótica</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Asistencia cognitiva en tiempo real. El ecosistema aprende de tus patrones de comportamiento para optimizar tu salud mental y evitar el agotamiento.
-                </p>
+                <p class="text-gray-400 text-sm leading-relaxed">Asistencia cognitiva en tiempo real. El ecosistema aprende de tus patrones de comportamiento para optimizar tu salud mental.</p>
             </div>
-
             <div class="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-gray-600 transition-colors">
                 <div class="text-gray-500 mb-4 text-2xl">02 //</div>
                 <h3 class="text-xl font-bold text-white mb-4">Métricas de Élite</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Control absoluto sobre el estrés físico. Monitorización y análisis de variables biomecánicas críticas como TUT, IFI y RPE para dominar metodologías de alta intensidad.
-                </p>
+                <p class="text-gray-400 text-sm leading-relaxed">Control absoluto sobre el estrés físico. Monitorización de TUT, IFI y RPE para dominar metodologías de alta intensidad.</p>
             </div>
-
             <div class="bg-gray-900/50 p-8 rounded-xl border border-gray-800 hover:border-gray-600 transition-colors">
                 <div class="text-gray-500 mb-4 text-2xl">03 //</div>
                 <h3 class="text-xl font-bold text-white mb-4">Soberanía de Datos</h3>
-                <p class="text-gray-400 text-sm leading-relaxed">
-                    Arquitectura híbrida impenetrable. Operatividad total en modo offline que garantiza que tu información más crítica nunca abandone tu control.
-                </p>
+                <p class="text-gray-400 text-sm leading-relaxed">Arquitectura híbrida impenetrable. Operatividad total en modo offline que garantiza el control de tu información.</p>
             </div>
-
         </div>
     </section>
-    <script>
-        const form = document.querySelector('form');
-        const emailInput = document.querySelector('input[type="email"]');
-        const submitButton = document.querySelector('button[type="submit"]');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
-
-            const email = emailInput.value;
-            const originalButtonText = submitButton.innerText;
-            
-            submitButton.innerText = 'PROCESANDO...';
-            submitButton.disabled = true;
-
-            try {
-                const response = await fetch('http://localhost:3000/api/leads', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ email: email })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    form.innerHTML = `<p class="text-green-400 font-bold tracking-widest uppercase text-sm border border-green-500 p-4 rounded bg-green-900/20 w-full text-center">${data.message}</p>`;
-                } else {
-                    alert(data.error);
-                    submitButton.innerText = originalButtonText;
-                    submitButton.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Hubo un error de conexión. Intenta nuevamente.');
-                submitButton.innerText = originalButtonText;
-                submitButton.disabled = false;
-            }
-        });
-    </script>
 </body>
 </html>
