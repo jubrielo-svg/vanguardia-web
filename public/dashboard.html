@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Centro de Comando V13</title>
+    <title>Vanguardia | Laboratorio V14</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
@@ -18,25 +19,22 @@
         .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
         
         #modalPreVuelo { background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); display: flex; }
-        #hudBatalla { display: none; background: rgba(0,0,0,0.9); z-index: 100; border: 2px solid var(--accent-color); }
+        #hudBatalla, #videoRecorder { display: none; background: rgba(0,0,0,0.95); z-index: 100; border: 2px solid var(--accent-color); }
+        
         .recording-pulse { animation: pulseHUD 1s infinite; }
         @keyframes pulseHUD { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .avatar-path { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.4); stroke-width: 2.5; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); }
+        .avatar-path { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.4); stroke-width: 2.5; }
         .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.15); }
         .sensor.glow-blue { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); }
         .sensor.glow-purple { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); }
         .sensor.glow-red { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.9); z-index: 50; display: none; flex-direction: column; justify-content: center; align-items: center; }
         .is-locked .locked-overlay { display: flex; }
         .vista { display: none; animation: fadeIn 0.5s ease forwards; }
         .vista.activa { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        input[type=range]::-webkit-slider-thumb { cursor: pointer; }
-        input[type=range]::-moz-range-thumb { cursor: pointer; }
     </style>
 </head>
 <body class="min-h-screen pb-20">
@@ -44,173 +42,150 @@
     <div id="ambient" class="ambient-bg"></div>
 
     <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
-        <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
-            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">¿Cómo está tu cuerpo hoy?</h2>
-            
+        <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30">
+            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">¿Cómo está tu cuerpo?</h2>
             <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] font-bold uppercase text-blue-400 tracking-widest block mb-1 text-center">¿Cuántas horas dormiste anoche?</label>
-                    <input type="number" id="inputSueño" placeholder="Ej: 7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-xl text-white outline-none">
-                    <p class="text-[9px] text-gray-500 text-center mt-2 leading-relaxed">Dormir poco hace que te canses más rápido y aumenta el riesgo de que te lastimes. Sé honesto para ajustar tu entrenamiento.</p>
+                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Horas de Sueño</label>
+                    <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none">
                 </div>
-                
                 <div class="pt-4 border-t border-white/10">
-                    <label class="text-[10px] font-bold uppercase text-blue-400 tracking-widest block mb-1 text-center">¿Qué tan estresado te sientes? (1 al 10)</label>
-                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full h-2 bg-gray-800 rounded-lg appearance-none accent-blue-500 mt-2">
-                    
-                    <div class="flex justify-between text-[10px] text-blue-300 px-1 mt-2 font-bold">
-                        <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                    </div>
-                    
-                    <div class="flex justify-between text-[8px] text-gray-500 mt-1 uppercase font-bold">
-                        <span>Muy Tranquilo</span><span>Con Mucha Ansiedad</span>
-                    </div>
-                    <p class="text-[9px] text-gray-500 text-center mt-3 leading-relaxed">El estrés diario afecta tus músculos. Si tuviste un mal día, no es buena idea cargar demasiado peso.</p>
+                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Estrés (1 al 10)</label>
+                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500 mt-2">
+                    <div class="flex justify-between text-[10px] text-blue-300 font-bold"><span>1</span><span>10</span></div>
                 </div>
-                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200 transition-all mt-4">Iniciar Entrenamiento</button>
+                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl">Iniciar</button>
             </div>
         </div>
     </div>
 
     <div id="hudBatalla" class="fixed inset-4 rounded-3xl flex-col items-center justify-center text-center p-6">
-        <div class="text-[10px] text-blue-500 font-bold tracking-[0.5em] uppercase mb-4 recording-pulse">Midiendo tu esfuerzo...</div>
+        <div class="text-[10px] text-blue-500 font-bold uppercase mb-4 recording-pulse tracking-widest">Midiendo Tensión</div>
         <div id="relojHUD" class="text-8xl font-black text-white mb-8 tracking-tighter">00<span class="text-blue-500">s</span></div>
-        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase tracking-[0.3em] rounded-full text-sm shadow-[0_0_30px_rgba(220,38,38,0.5)]">¡Terminé la serie!</button>
-        <p class="text-xs text-gray-400 mt-6">Toca el botón rojo en cuanto sueltes la pesa.</p>
+        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase rounded-full">Finalizar Serie</button>
+    </div>
+
+    <div id="videoRecorder" class="fixed inset-4 rounded-3xl flex-col items-center justify-center p-6">
+        <video id="cameraFeed" autoplay playsinline muted class="w-full h-2/3 rounded-xl object-cover bg-black border border-white/10"></video>
+        <div class="mt-8 flex gap-6">
+            <button id="startRecBtn" onclick="toggleRecording()" class="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center">
+                <div id="recCircle" class="w-14 h-14 bg-red-600 rounded-full"></div>
+            </button>
+            <button onclick="closeVideoRecorder()" class="text-[10px] uppercase tracking-widest text-white border border-white/20 px-6 rounded-full">Cerrar</button>
+        </div>
+        <p id="recStatus" class="text-[10px] text-gray-500 uppercase mt-4 tracking-widest">Listo para grabar técnica</p>
     </div>
 
     <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
         <div class="text-lg font-black tracking-tighter uppercase">Vanguardia.</div>
-        <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase tracking-widest px-3 py-1 rounded">Ver mi Progreso</button>
+        <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase tracking-widest px-3 py-1 rounded">Modo Macro</button>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 space-y-6">
+    <main id="reportContent" class="max-w-7xl mx-auto p-4 space-y-6">
 
         <div id="vistaMicro" class="vista activa space-y-6">
             
-            <div class="glass-card p-4 rounded-2xl border-l-4" id="panelDirectriz">
-                <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-white animate-pulse" id="dotDirectriz"></span> Consejo del Entrenador
-                </h2>
-                <div id="textoDirectriz" class="text-xs text-gray-300 mt-2 italic">Calculando cómo estás hoy...</div>
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-l-blue-500">
+                <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase flex items-center gap-2">Consejo del Entrenador</h2>
+                <div id="textoDirectriz" class="text-xs text-gray-300 mt-2 italic">Analizando readiness...</div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
                 <div class="lg:col-span-6 glass-card p-5 rounded-2xl relative" id="panelIngreso">
-                    <div class="locked-overlay text-center p-4 rounded-2xl">
-                        <span class="text-red-500 text-2xl mb-2">⚠️</span>
-                        <h3 class="text-white font-bold tracking-widest uppercase text-xs mb-2">Descanso Obligatorio</h3>
-                        <div id="relojRecuperacion" class="text-xl font-mono text-red-500 tracking-widest mt-2">00:00:00</div>
-                    </div>
-
                     <form id="formVanguardia" class="space-y-4">
-                        
-                        <div class="bg-blue-900/10 border border-blue-500/20 p-3 rounded-lg mb-4">
-                            <p class="text-[9px] text-gray-300 leading-relaxed">
-                                <strong>Paso 1:</strong> Selecciona qué tipo de movimiento general vas a hacer. El sistema necesita saber esto para iluminar tu cuerpo.
-                            </p>
-                            <label class="text-[10px] font-bold uppercase tracking-widest text-blue-400 mt-2 block">Tipo de Movimiento</label>
-                            <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none mt-1">
-                                <option value="Piernas (Sentadillas, Prensa)">Piernas (Sentadillas, Prensa, etc)</option>
-                                <option value="Piernas Traseras (Peso Muerto)">Parte Trasera de la Pierna (Peso Muerto, Hip Thrust)</option>
-                                <option value="Empuje (Pecho, Hombros)">Empuje (Pecho, Hombros, Tríceps)</option>
-                                <option value="Tracción (Espalda, Bíceps)">Jalón / Tracción (Espalda, Bíceps)</option>
-                                <option value="Metabólico / CrossFit">Metabólico / Funcional / CrossFit (Todo el cuerpo)</option>
+                        <div class="bg-blue-900/10 border border-blue-500/20 p-3 rounded-lg">
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-blue-400 block">Tipo de Movimiento</label>
+                            <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-1">
+                                <option value="Piernas (Sentadillas, Prensa)">Piernas (Sentadillas, Prensa)</option>
+                                <option value="Piernas Traseras (Peso Muerto)">Isquios / Glúteos (Peso Muerto)</option>
+                                <option value="Empuje (Pecho, Hombros)">Empuje (Pecho, Hombros)</option>
+                                <option value="Tracción (Espalda, Bíceps)">Jalón / Espalda</option>
+                                <option value="Metabólico / CrossFit">CrossFit / Funcional</option>
                             </select>
-                            
-                            <p class="text-[9px] text-gray-300 leading-relaxed mt-3">
-                                <strong>Paso 2:</strong> Ahora sí, escribe libremente el nombre de tu ejercicio para que quede en tu historial.
-                            </p>
-                            <input type="text" id="ejercicioNombre" required placeholder="Ej: Thruster con Mancuernas, Wall Balls..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none mt-1">
+                            <input type="text" id="ejercicioNombre" required placeholder="Nombre del ejercicio..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Series Totales</label>
-                                <input type="number" id="series" required placeholder="Ej: 3" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Repeticiones</label>
-                                <input type="number" id="reps" required placeholder="Ej: 10" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
-                            </div>
+                            <div><label class="text-[10px] font-bold text-white uppercase">Series</label><input type="number" id="series" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none"></div>
+                            <div><label class="text-[10px] font-bold text-white uppercase">Reps</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none"></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Peso Usado (Kg)</label>
-                                <input type="number" id="carga" required placeholder="Ej: 80" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
-                                <p class="text-[8px] text-gray-500 mt-1">Si no usas peso extra, pon tu peso corporal.</p>
-                            </div>
+                            <div><label class="text-[10px] font-bold text-white uppercase">Peso (Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none"></div>
                             <div class="relative">
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Tiempo Total (Segundos)</label>
-                                <input type="number" id="tut" required placeholder="Ej: 45" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
-                                <button type="button" onclick="iniciarHUD()" class="absolute top-0 right-0 text-[9px] bg-blue-600 text-white px-2 py-1 rounded uppercase font-bold tracking-widest shadow-[0_0_10px_rgba(37,99,235,0.5)]">Usar Cronómetro</button>
-                                <p class="text-[8px] text-blue-400 mt-1 font-bold">¿Cuánto tiempo duró la serie? Toca "Usar Cronómetro" para medirlo fácil.</p>
+                                <label class="text-[10px] font-bold text-white uppercase">TUT (Seg)</label>
+                                <input type="number" id="tut" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none">
+                                <div class="absolute top-0 right-0 flex gap-1">
+                                    <button type="button" onclick="iniciarHUD()" class="bg-blue-600 text-[8px] p-1 rounded uppercase font-bold">HUD</button>
+                                    <button type="button" onclick="openVideoRecorder()" class="bg-purple-600 text-[8px] p-1 rounded uppercase font-bold">Video</button>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-white/10 mt-4">
-                            <div class="flex justify-between mb-2"><label class="text-[10px] font-bold uppercase tracking-widest text-red-400">Nivel de Cansancio (1 al 10)</label><span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span></div>
-                            <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
-                            
-                            <div class="flex justify-between text-[10px] text-gray-400 px-1 mt-2 font-bold">
-                                <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span>
-                            </div>
-                            
-                            <p class="text-[8px] text-gray-500 mt-2 leading-relaxed">
-                                <strong>1:</strong> Súper fácil (Podría hacer 10 reps más). <br>
-                                <strong>10:</strong> Totalmente agotado (No pude hacer ni una repetición más).
-                            </p>
+                        <div class="pt-4 border-t border-white/10">
+                            <label class="text-[10px] font-bold text-red-400 uppercase">Cansancio (RPE 1-10)</label>
+                            <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none mt-2 accent-red-500">
+                            <div class="flex justify-between text-[10px] text-gray-500 mt-1 font-bold"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span></div>
                         </div>
-                        
-                        <input type="hidden" id="bioPeso" value="70">
-                        <input type="hidden" id="bioEdad" value="20">
-
-                        <button type="submit" class="w-full py-4 mt-6 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-gray-200 shadow-[0_0_15px_rgba(255,255,255,0.2)]">Calificar mi Serie</button>
+                        <button type="submit" class="w-full py-4 bg-white text-black font-black uppercase text-[10px] rounded hover:bg-gray-200">Guardar Serie</button>
                     </form>
                 </div>
 
                 <div class="lg:col-span-6 flex flex-col gap-6">
-                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-64 relative overflow-hidden bg-black/40">
-                        <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100 drop-shadow-2xl">
+                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-48 relative overflow-hidden">
+                        <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100">
                             <path class="avatar-path" d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z"/>
                             <path class="avatar-path" d="M70,75 L130,75 L145,150 L55,150 Z"/>
                             <path class="avatar-path" d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240"/>
                             <path class="avatar-path" d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380"/>
-                            
-                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor"/>
-                            <circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor"/>
-                            
-                            <circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor"/>
-                            <circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor"/>
-
-                            <circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor"/>
-                            <circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor"/>
-                            <circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor"/>
-                            <circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor"/>
+                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor"/><circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor"/><circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor"/><circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor"/><circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor"/><circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor"/><circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor"/><circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor"/>
                         </svg>
                     </div>
+                    
+                    <div id="videoPreviewContainer" class="hidden glass-card p-4 rounded-2xl overflow-hidden">
+                        <h3 class="text-[10px] text-gray-500 uppercase tracking-widest mb-2">Video de Técnica</h3>
+                        <video id="recordedVideo" controls loop class="w-full rounded-lg border border-white/10"></video>
+                    </div>
+
                     <div class="glass-card p-5 rounded-2xl flex-grow">
-                        <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico de la App</h2>
-                        <div id="bioInsight" class="text-sm font-light text-gray-300 leading-relaxed">Guarda tu ejercicio para ver cómo te fue.</div>
+                        <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico Biológico</h2>
+                        <div id="bioInsight" class="text-sm font-light text-gray-300 italic leading-relaxed">Esperando telemetría...</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div id="vistaMacro" class="vista space-y-6">
-            <div class="glass-card p-4 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="extraerDatos('csv')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-green-400">Descargar mi Historial (Excel)</button>
-                <button onclick="sellarBoveda()" class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-[10px] uppercase tracking-widest text-red-500">Asegurar mis Datos con Clave</button>
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-black text-white uppercase tracking-widest">EXPEDIENTE VULCANO</h1>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest">Auditoría de Rendimiento y Salud</p>
+                </div>
+                <button onclick="generarReportePDF()" class="bg-white text-black text-[10px] font-bold px-4 py-2 rounded uppercase tracking-tighter">📄 Generar PDF Clínico</button>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl h-80 relative" id="chartToPdf">
+                <canvas id="macroChart"></canvas>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card p-5 rounded-2xl">
+                    <h3 class="text-[10px] text-blue-400 uppercase font-bold mb-4">Resumen de Biometría</h3>
+                    <div id="resumenBio" class="text-xs text-gray-400 space-y-2 uppercase tracking-tighter">
+                        </div>
+                </div>
+                <div class="glass-card p-5 rounded-2xl">
+                    <h3 class="text-[10px] text-purple-400 uppercase font-bold mb-4">Últimas Ingerencias</h3>
+                    <div id="listaMacro" class="text-[10px] text-gray-500 space-y-2 h-40 overflow-y-auto">
+                        </div>
+                </div>
             </div>
         </div>
 
     </main>
 
     <script>
-        // --- MOTOR SENSORIAL ---
+        // --- 1. MOTOR SENSORIAL ---
         const AudioContext = window.AudioContext || window.webkitAudioContext; let audioCtx;
         const TacticoSensorial = {
             init: function() { if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); },
@@ -219,159 +194,150 @@
             alarma: function() { this.init(); this.vibrar([100, 50, 200]); }
         };
 
-        // --- PRE-VUELO ---
+        // --- 2. OJO DE HALCÓN (VIDEO RECORDER) ---
+        let mediaRecorder; let recordedChunks = [];
+        const videoElement = document.getElementById('cameraFeed');
+        const previewElement = document.getElementById('recordedVideo');
+
+        async function openVideoRecorder() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+                videoElement.srcObject = stream;
+                document.getElementById('videoRecorder').style.display = 'flex';
+            } catch (err) { alert("Permiso de cámara denegado."); }
+        }
+
+        function closeVideoRecorder() {
+            const stream = videoElement.srcObject;
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            document.getElementById('videoRecorder').style.display = 'none';
+        }
+
+        function toggleRecording() {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        }
+
+        function startRecording() {
+            recordedChunks = [];
+            const stream = videoElement.srcObject;
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = () => {
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+                previewElement.src = url;
+                document.getElementById('videoPreviewContainer').classList.remove('hidden');
+            };
+            mediaRecorder.start();
+            document.getElementById('recCircle').classList.add('rounded-sm');
+            document.getElementById('recStatus').innerText = "GRABANDO TÉCNICA...";
+            document.getElementById('recStatus').classList.add('text-red-500');
+        }
+
+        function stopRecording() {
+            mediaRecorder.stop();
+            document.getElementById('recCircle').classList.remove('rounded-sm');
+            document.getElementById('recStatus').innerText = "VIDEO PROCESADO";
+            document.getElementById('recStatus').classList.remove('text-red-500');
+            setTimeout(closeVideoRecorder, 1000);
+        }
+
+        // --- 3. GENERADOR DE REPORTES PDF ---
+        function generarReportePDF() {
+            TacticoSensorial.init();
+            const element = document.getElementById('reportContent');
+            const opt = {
+                margin: 0.5,
+                filename: `Vanguardia_Expediente_${new Date().getTime()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, backgroundColor: '#000000' },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // --- 4. LÓGICA V14 (HUD, ORÁCULO, MACRO) ---
         let bioData = { sueno: 7, estres: 3 };
-        document.getElementById('inputEstres').addEventListener('input', function() { TacticoSensorial.tick(); });
+        let historial = JSON.parse(localStorage.getItem('vanguardia_v14')) || [];
 
         function finalizarCheckIn() {
             TacticoSensorial.init();
-            bioData.sueno = parseFloat(document.getElementById('inputSueño').value) || 7;
-            bioData.estres = parseFloat(document.getElementById('inputEstres').value) || 3;
+            bioData.sueno = document.getElementById('inputSueño').value || 7;
+            bioData.estres = document.getElementById('inputEstres').value || 3;
             document.getElementById('modalPreVuelo').style.display = 'none';
-            evaluarEstadoDiario();
+            evaluarEstado();
         }
 
-        // --- HUD ---
-        let timerInterval; let seg = 0;
+        let timer; let s=0;
         function iniciarHUD() {
-            TacticoSensorial.init();
-            document.getElementById('hudBatalla').style.display = 'flex';
-            seg = 0; document.getElementById('relojHUD').innerHTML = `0<span class="text-blue-500 text-4xl">s</span>`;
-            timerInterval = setInterval(() => { seg++; document.getElementById('relojHUD').innerHTML = `${seg}<span class="text-blue-500 text-4xl">s</span>`; TacticoSensorial.tick(); }, 1000);
+            document.getElementById('hudBatalla').style.display='flex';
+            s=0; timer = setInterval(() => { s++; document.getElementById('relojHUD').innerHTML = s+'s'; TacticoSensorial.tick(); }, 1000);
         }
-        function detenerHUD() { clearInterval(timerInterval); document.getElementById('tut').value = seg; document.getElementById('hudBatalla').style.display = 'none'; TacticoSensorial.vibrar([50, 100, 50]); }
+        function detenerHUD() { clearInterval(timer); document.getElementById('tut').value = s; document.getElementById('hudBatalla').style.display='none'; }
 
-        // --- LÓGICA V13 ---
-        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_data_v13')) || [];
-
-        function evaluarEstadoDiario() {
-            const panel = document.getElementById('panelDirectriz');
-            const texto = document.getElementById('textoDirectriz');
-            let readinessScore = 100;
-            if (bioData.sueno < 7) readinessScore -= (7 - bioData.sueno) * 15;
-            if (bioData.estres > 6) readinessScore -= (bioData.estres - 6) * 10;
-
-            if (readinessScore < 60) {
-                panel.className = "glass-card p-4 rounded-2xl border-l-4 border-red-500";
-                texto.innerHTML = `<strong class="text-red-500 text-sm block mb-1">Tu cuerpo no está al 100% hoy</strong><span class="text-gray-400">Dormiste poco o estás muy estresado. Te recomendamos hacer una rutina suave. No intentes levantar tu peso máximo hoy porque podrías lastimarte.</span>`;
+        function evaluarEstado() {
+            const p = document.getElementById('panelDirectriz');
+            let readiness = 100 - ((7-bioData.sueno)*15) - ((bioData.estres-3)*10);
+            if(readiness < 60) {
+                p.classList.replace('border-l-blue-500', 'border-l-red-500');
+                document.getElementById('textoDirectriz').innerHTML = `CAPACIDAD BAJA (${readiness}%). Prohibido RPE 10 hoy. Sesión de bombeo recomendada.`;
             } else {
-                panel.className = "glass-card p-4 rounded-2xl border-l-4 border-blue-500";
-                texto.innerHTML = `<strong class="text-blue-400 text-sm block mb-1">¡Todo Excelente!</strong><span class="text-gray-400">Has descansado bien y tus niveles de estrés son buenos. Tu cuerpo está listo para dar el máximo. ¡A entrenar duro!</span>`;
+                p.classList.replace('border-l-red-500', 'border-l-blue-500');
+                document.getElementById('textoDirectriz').innerHTML = `SISTEMA LISTO (${readiness}%). Entorno favorable para máxima intensidad.`;
             }
+            document.getElementById('resumenBio').innerHTML = `Sueño: ${bioData.sueno}h | Estrés: ${bioData.estres}/10 | Readiness: ${readiness}%`;
         }
 
-        document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + '/10'; TacticoSensorial.tick(); };
+        document.getElementById('rpe').oninput = function() { TacticoSensorial.tick(); };
 
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault();
-            const carga = parseFloat(document.getElementById('carga').value);
-            const tut = parseFloat(document.getElementById('tut').value);
-            const rpe = parseFloat(document.getElementById('rpe').value);
-            const series = parseInt(document.getElementById('series').value);
-            const reps = parseInt(document.getElementById('reps').value);
-            const peso = parseFloat(document.getElementById('bioPeso').value) || 70;
-            
-            // Recoger Dominio y Nombre Específico
-            const dominio = document.getElementById('dominioSelector').value;
-            const nombreEjercicio = document.getElementById('ejercicioNombre').value;
+            const carga = document.getElementById('carga').value;
+            const tut = document.getElementById('tut').value;
+            const rpe = document.getElementById('rpe').value;
+            const ej = document.getElementById('ejercicioSelector').value;
+            const nombre = document.getElementById('ejercicioNombre').value;
 
-            let factorCastigo = (bioData.sueno < 6) ? 1.5 : 1.0;
-            let riesgo = (((carga/peso)*2) + (rpe*0.5) + (tut/60)) * factorCastigo;
+            let riesgo = (( (carga/70)*2 ) + (rpe*0.5) + (tut/60)).toFixed(1);
             const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
-            const ts = new Date().getTime();
-            const dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
             
-            historialSeries.push({ timestampNum: ts, fechaStr: dateStr, dominio: dominio, ejercicio: nombreEjercicio, series, reps, carga, tut, rpe, ifi, riesgo: riesgo.toFixed(1) });
-            localStorage.setItem('vanguardia_data_v13', JSON.stringify(historialSeries));
+            historial.push({ fecha: new Date().toLocaleDateString(), ej: nombre, ifi, rpe, riesgo });
+            localStorage.setItem('vanguardia_v14', JSON.stringify(historial));
 
             let diag = ""; let c = "";
-            if (riesgo < 5) {
-                c = "glow-blue";
-                diag = `<strong class="text-blue-400 text-base block mb-2">Entrenamiento muy suave</strong><span class="text-gray-400">Esto sirve para calentar, pero no es suficiente esfuerzo para crear músculo. Te recomendamos subirle un poco al peso o esforzarte un poco más en la siguiente serie.</span>`;
-            } else if (riesgo < 8) {
-                c = "glow-purple";
-                diag = `<strong class="text-purple-400 text-base block mb-2">¡Excelente Serie!</strong><span class="text-gray-400">Ese es el esfuerzo exacto que necesitas para mejorar y ganar fuerza. Descansa bien 2 o 3 minutos antes de hacer la siguiente serie.</span>`;
-            } else {
-                c = "glow-red";
-                diag = `<strong class="text-red-500 text-base block mb-2">¡CUIDADO! Te estás pasando del límite</strong><span class="text-gray-400">A este ritmo podrías lastimarte la zona muscular. Por favor, baja el peso o haz menos repeticiones en tu siguiente serie. El sistema bloqueará tu pantalla unos segundos para obligarte a descansar.</span>`;
-                TacticoSensorial.alarma();
-                
-                // Bloqueo pedagógico de 20 segundos
-                localStorage.setItem('vanguardia_unlock_v13', ts + 20000);
-            }
+            if (riesgo < 5) { c = "glow-blue"; diag = "ESTÍMULO SUAVE. Te recomendamos subir el peso en la próxima."; }
+            else if (riesgo < 8) { c = "glow-purple"; diag = "ZONA ÓPTIMA. Esfuerzo perfecto para hipertrofia."; }
+            else { c = "glow-red"; diag = "PELIGRO. Riesgo de lesión detectado. Baja el peso."; TacticoSensorial.alarma(); }
+
             document.getElementById('bioInsight').innerHTML = diag;
-            
-            // Iluminar el Avatar basado en el Dominio Biomecánico
-            const anatomia = { 
-                "Piernas (Sentadillas, Prensa)": ["sensor-piernas1", "sensor-piernas2"], 
-                "Piernas Traseras (Peso Muerto)": ["sensor-cadenaPost1", "sensor-cadenaPost2", "sensor-espalda"], 
-                "Empuje (Pecho, Hombros)": ["sensor-pecho", "sensor-brazo1", "sensor-brazo2"], 
-                "Tracción (Espalda, Bíceps)": ["sensor-espalda", "sensor-brazo1", "sensor-brazo2"],
-                "Metabólico / CrossFit": ["sensor-pecho", "sensor-espalda", "sensor-piernas1", "sensor-piernas2", "sensor-brazo1", "sensor-brazo2"]
-            };
-            
+            const anat = { "Piernas (Sentadillas, Prensa)": ["sensor-piernas1", "sensor-piernas2"], "Piernas Traseras (Peso Muerto)": ["sensor-cadenaPost1", "sensor-cadenaPost2", "sensor-espalda"], "Empuje (Pecho, Hombros)": ["sensor-pecho", "sensor-brazo1", "sensor-brazo2"], "Tracción (Espalda, Bíceps)": ["sensor-espalda", "sensor-brazo1", "sensor-brazo2"], "Metabólico / CrossFit": ["sensor-pecho", "sensor-espalda", "sensor-piernas1", "sensor-piernas2"] };
             document.querySelectorAll('.sensor').forEach(s => s.className.baseVal = "sensor");
-            (anatomia[dominio] || []).forEach(id => {
-                let elemento = document.getElementById(id);
-                if(elemento) elemento.className.baseVal = `sensor ${c}`;
-            });
-            
-            checkLockdown();
+            (anat[ej] || []).forEach(id => document.getElementById(id).className.baseVal = `sensor ${c}`);
         };
 
-        // --- SISTEMA DE BLOQUEO EDUCATIVO ---
-        let recoveryInterval;
-        function checkLockdown() {
-            const unlockTime = localStorage.getItem('vanguardia_unlock_v13');
-            const p = document.getElementById('panelIngreso');
-            const r = document.getElementById('relojRecuperacion');
-            if (unlockTime && new Date().getTime() < parseInt(unlockTime, 10)) {
-                p.classList.add('is-locked');
-                if(recoveryInterval) clearInterval(recoveryInterval);
-                recoveryInterval = setInterval(() => {
-                    const d = parseInt(unlockTime, 10) - new Date().getTime();
-                    if (d < 0) { clearInterval(recoveryInterval); localStorage.removeItem('vanguardia_unlock_v13'); checkLockdown(); } 
-                    else { r.innerText = `${Math.floor((d%(1000*60*60))/(1000*60))}m ${Math.floor((d%(1000*60))/1000)}s`; }
-                }, 1000);
-                return true;
-            }
-            p.classList.remove('is-locked'); if(recoveryInterval) clearInterval(recoveryInterval); return false;
+        let macroChart;
+        function toggleVista() {
+            document.getElementById('vistaMicro').classList.toggle('activa');
+            document.getElementById('vistaMacro').classList.toggle('activa');
+            if(document.getElementById('vistaMacro').classList.contains('activa')) renderChart();
         }
 
-        function toggleVista() { 
-            document.getElementById('vistaMicro').classList.toggle('activa'); 
-            document.getElementById('vistaMacro').classList.toggle('activa'); 
-            const btn = document.getElementById('btnVista');
-            if(document.getElementById('vistaMacro').classList.contains('activa')){
-                btn.innerText = "Volver a mi Entrenamiento";
-                renderizarMacroChart();
-            } else {
-                btn.innerText = "Ver mi Progreso";
-            }
+        function renderChart() {
+            const ctx = document.getElementById('macroChart').getContext('2d');
+            const dataSlice = historial.slice(-10);
+            if(macroChart) macroChart.destroy();
+            macroChart = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'IFI', data:dataSlice.map(s => s.ifi), backgroundColor:'#a855f7' }, { label:'RPE', type:'line', data:dataSlice.map(s => s.rpe), borderColor:'#ef4444' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid:{color:'rgba(255,255,255,0.05)'} } } }
+            });
+            const list = document.getElementById('listaMacro'); list.innerHTML = "";
+            [...historial].reverse().forEach(s => list.innerHTML += `<div>${s.fecha} - ${s.ej} - IFI: ${s.ifi} - Riesgo: ${s.riesgo}</div>`);
         }
-
-        let macroChartInstance = null;
-        function renderizarMacroChart() {
-            const ctx = document.getElementById('macroChart').getContext('2d'); const dataSlice = historialSeries.slice(-20);
-            if(macroChartInstance) macroChartInstance.destroy(); Chart.defaults.color = '#6b7280';
-            macroChartInstance = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fechaStr), datasets: [ { type: 'line', label: 'Cansancio (RPE)', data: dataSlice.map(s => s.rpe), borderColor: '#ef4444', borderWidth: 2, yAxisID: 'y1' }, { type: 'bar', label: 'Esfuerzo (IFI)', data: dataSlice.map(s => s.ifi), backgroundColor: 'rgba(168, 85, 247, 0.4)', yAxisID: 'y' } ] }, options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', min: 0, max: 10, grid: { display: false } } } } });
-        }
-
-        function extraerDatos(formato) {
-            if(historialSeries.length === 0) return alert("No hay datos guardados."); TacticoSensorial.tick();
-            let c = "Fecha,Dominio,Ejercicio,Series,Reps,Carga,TUT,RPE,IFI,Riesgo\n"; 
-            historialSeries.forEach(s => c += `${s.fechaStr},${s.dominio},${s.ejercicio},${s.series},${s.reps},${s.carga},${s.tut},${s.rpe},${s.ifi},${s.riesgo}\n`);
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([c], { type: 'text/csv' })); a.download = 'Mis_Entrenamientos.csv'; a.click();
-        }
-
-        function sellarBoveda() {
-            const p = prompt("Crea una contraseña para proteger tu archivo:"); if(!p) return;
-            const cifrado = CryptoJS.AES.encrypt(JSON.stringify(historialSeries), p).toString();
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([cifrado], {type:'text/plain'})); a.download = 'Mis_Entrenamientos_Seguros.van'; a.click();
-        }
-
-        // Init
-        checkLockdown();
     </script>
 </body>
 </html>
