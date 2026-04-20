@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Consola Biométrica</title>
+    <title>Vanguardia | Consola Biométrica Global</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     <style>
         :root { --accent-color: #3b82f6; }
-        body { font-family: 'Inter', sans-serif; background-color: #000; color: #f3f4f6; transition: background 1.5s ease; }
-        .ambient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 70%); opacity: 0.05; pointer-events: none; z-index: -1; transition: all 1.5s ease; }
-        .glass-card { background: rgba(10, 10, 10, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        body { font-family: 'Inter', sans-serif; background-color: #000; color: #f3f4f6; transition: background 1.5s ease; overflow-x: hidden; }
+        .ambient-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 60%); opacity: 0.08; pointer-events: none; z-index: -1; transition: all 1.5s ease; }
+        .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
         select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>') no-repeat right 10px center; }
+        
+        /* Efectos del Avatar */
+        .sensor { transition: fill 0.8s ease, filter 0.8s ease; fill: rgba(255,255,255,0.05); }
+        .sensor.glow-blue { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); }
+        .sensor.glow-purple { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); }
+        .sensor.glow-red { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulseRed 1s infinite; }
+        @keyframes pulseRed { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        
+        /* Bloqueo del Reloj */
+        .locked-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 50; display: none; flex-direction: column; justify-content: center; items-center; border-radius: 1rem; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .is-locked .locked-overlay { display: flex; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -22,82 +33,92 @@
     <nav class="p-4 md:p-6 flex justify-between items-center border-b border-white/5 relative z-10">
         <div class="text-xl font-black tracking-tighter uppercase">Vanguardia.</div>
         <div class="flex items-center gap-4">
-            <span class="hidden md:block text-[10px] text-gray-500 uppercase tracking-widest border border-white/10 px-2 py-1 rounded">Motor Biomecánico V4</span>
-            <button onclick="localStorage.clear(); location.reload();" class="text-[10px] text-red-500 hover:text-white uppercase tracking-widest transition-colors">Purgar Sistema</button>
+            <span class="text-[10px] text-green-500 uppercase tracking-widest border border-green-500/20 px-2 py-1 rounded bg-green-900/10"><span class="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse mr-1"></span>Telemetría Online</span>
+            <button onclick="localStorage.clear(); location.reload();" class="text-[10px] text-red-500 hover:text-red-400 uppercase tracking-widest transition-colors border border-red-500/20 px-2 py-1 rounded">Purgar / Reset</button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-6">
+    <main class="max-w-[90rem] mx-auto p-4 md:p-6">
         
-        <div class="glass-card p-6 rounded-2xl mb-6 border-l-4 border-l-blue-500">
-            <h2 class="text-xs font-bold tracking-[0.2em] text-white uppercase mb-1">Calibración de Sistema</h2>
-            <div class="grid grid-cols-3 gap-4 mt-4">
-                <div>
-                    <label class="text-[10px] uppercase text-gray-400">Edad</label>
-                    <input type="number" id="bioEdad" value="41" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+            <div class="md:col-span-3 glass-card p-4 rounded-2xl flex items-center gap-6">
+                <div class="border-r border-white/10 pr-6">
+                    <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">Perfil Biométrico Activo</h2>
+                    <div class="flex gap-4">
+                        <div><span class="block text-[9px] text-gray-600 uppercase">Edad</span><input type="number" id="bioEdad" value="41" class="w-12 bg-transparent text-white font-bold outline-none"></div>
+                        <div><span class="block text-[9px] text-gray-600 uppercase">Estatura</span><input type="number" id="bioEstatura" value="169" class="w-16 bg-transparent text-white font-bold outline-none"></div>
+                        <div><span class="block text-[9px] text-gray-600 uppercase">Peso (Kg)</span><input type="number" id="bioPeso" value="85" class="w-16 bg-transparent text-white font-bold outline-none text-blue-400"></div>
+                    </div>
                 </div>
-                <div>
-                    <label class="text-[10px] uppercase text-gray-400">Estatura (cm)</label>
-                    <input type="number" id="bioEstatura" value="169" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="text-[10px] uppercase text-gray-400">Peso (Kg)</label>
-                    <input type="number" id="bioPeso" value="85" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center focus:border-blue-500 outline-none">
+                <div class="flex-grow">
+                    <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">Fase de Recuperación (SNC)</h2>
+                    <div id="relojRecuperacion" class="text-2xl font-mono text-green-500 tracking-widest">SISTEMA LISTO. CAPACIDAD AL 100%.</div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
             
-            <div class="lg:col-span-2 glass-card p-6 md:p-8 rounded-2xl">
+            <div class="lg:col-span-4 glass-card p-6 md:p-8 rounded-2xl relative" id="panelIngreso">
+                <div class="locked-overlay text-center p-6">
+                    <span class="text-red-500 mb-2">⚠️</span>
+                    <h3 class="text-white font-bold tracking-widest uppercase text-sm mb-2">Bloqueo Táctico Activo</h3>
+                    <p class="text-xs text-gray-400 font-light">El ecosistema ha bloqueado el ingreso de tensión mecánica para proteger el sistema nervioso. Respeta el tiempo de supercompensación.</p>
+                </div>
+
                 <form id="formVanguardia" class="space-y-6">
-                    
+                    <h2 class="text-xs font-bold tracking-[0.2em] text-white uppercase mb-4 border-b border-white/10 pb-2">Ingreso de Carga</h2>
                     <div class="space-y-2">
-                        <label class="text-[10px] uppercase tracking-widest text-white font-bold">Patrón de Movimiento</label>
-                        <select id="ejercicioSelector" onchange="toggleEjercicioLibre()" class="w-full bg-black border border-white/10 rounded-lg p-4 text-white focus:border-blue-500 outline-none cursor-pointer">
-                            <option value="Prensa">Prensa de Piernas (Tren Inferior)</option>
-                            <option value="Sentadilla">Sentadilla Libre (Compuesto Global)</option>
-                            <option value="Peso Muerto">Peso Muerto (Cadena Posterior)</option>
-                            <option value="Press Banca">Press de Banca (Empuje Horizontal)</option>
-                            <option value="Dominadas">Dominadas Lastradas (Tracción Vertical)</option>
-                            <option value="Otro" class="text-blue-400 font-bold">▶ Otro (Entrada Manual)</option>
+                        <label class="text-[10px] uppercase tracking-widest text-gray-400">Patrón de Movimiento</label>
+                        <select id="ejercicioSelector" class="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white focus:border-blue-500 outline-none cursor-pointer text-sm">
+                            <option value="Sentadilla">Sentadilla Libre</option>
+                            <option value="Prensa">Prensa de Piernas</option>
+                            <option value="Peso Muerto">Peso Muerto</option>
+                            <option value="Press Banca">Press de Banca</option>
+                            <option value="Dominadas">Dominadas</option>
                         </select>
-                        <input type="text" id="ejercicioLibre" placeholder="Escribe el ejercicio detallado..." class="hidden w-full mt-2 bg-black/50 border border-blue-500/50 rounded-lg p-4 text-white focus:border-blue-500 outline-none">
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1">
-                            <label class="text-[10px] uppercase tracking-widest text-white font-bold">Carga Absoluta (Kg)</label>
-                            <input type="number" id="carga" required placeholder="Ej: 120" class="w-full bg-transparent border-b border-white/20 py-3 text-2xl focus:border-blue-500 outline-none text-blue-400">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400">Carga (Kg)</label>
+                            <input type="number" id="carga" required placeholder="120" class="w-full bg-transparent border-b border-white/20 py-2 text-xl focus:border-blue-500 outline-none text-white text-center">
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] uppercase tracking-widest text-white font-bold">TUT Real (Segundos)</label>
-                            <input type="number" id="tut" required placeholder="Ej: 55" class="w-full bg-transparent border-b border-white/20 py-3 text-2xl focus:border-purple-400 outline-none text-purple-400">
+                            <label class="text-[10px] uppercase tracking-widest text-gray-400">TUT (Seg)</label>
+                            <input type="number" id="tut" required placeholder="50" class="w-full bg-transparent border-b border-white/20 py-2 text-xl focus:border-purple-400 outline-none text-white text-center">
                         </div>
                     </div>
 
-                    <div class="space-y-2 pt-4 border-t border-white/5">
+                    <div class="space-y-2 pt-2 border-t border-white/5">
                         <div class="flex justify-between">
-                            <label class="text-[10px] uppercase tracking-widest text-red-400 font-bold">Fatiga Central (RPE)</label>
-                            <span id="rpeVal" class="text-lg font-bold text-red-500">5 / 10</span>
+                            <label class="text-[10px] uppercase tracking-widest text-red-400">Fatiga Central (RPE)</label>
+                            <span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span>
                         </div>
-                        <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
+                        <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer">
                     </div>
 
-                    <button type="submit" class="w-full py-5 bg-white text-black font-black uppercase tracking-[0.3em] text-xs hover:bg-gray-200 transition-colors rounded">
-                        Computar Impacto Relativo
-                    </button>
+                    <button type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-[0.2em] text-[10px] hover:bg-gray-200 transition-colors rounded">Computar Serie</button>
                 </form>
             </div>
 
-            <div class="flex flex-col gap-6">
-                <div class="glass-card p-6 rounded-2xl flex-grow flex flex-col justify-center">
-                    <h2 class="text-xs font-bold tracking-[0.2em] text-gray-500 uppercase mb-4 border-b border-white/5 pb-2">Oráculo Biomecánico</h2>
+            <div class="lg:col-span-4 glass-card p-6 rounded-2xl flex flex-col items-center justify-between">
+                <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-4 w-full text-center">Telemetría de Daño Fascial</h2>
+                
+                <div class="relative w-full h-80 flex justify-center items-center opacity-80">
+                    <svg viewBox="0 0 200 400" class="h-full w-auto drop-shadow-2xl">
+                        <path d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/> <path d="M70,75 L130,75 L145,150 L55,150 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/> <path d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/> <path d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/> <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor"/> <circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor"/> <circle id="sensor-brazos1" cx="45" cy="120" r="10" class="sensor"/> <circle id="sensor-brazos2" cx="155" cy="120" r="10" class="sensor"/> <circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor"/> <circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor"/> <circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor"/> <circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor"/> </svg>
+                </div>
+                <div class="text-[9px] text-gray-500 uppercase tracking-widest mt-4 text-center" id="avatarStatus">Esperando transferencia biomecánica...</div>
+            </div>
+
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <div class="glass-card p-6 rounded-2xl flex-grow">
+                    <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-4 border-b border-white/5 pb-2">Prescripción Biológica (Oráculo)</h2>
                     <div id="bioInsight" class="text-sm font-light leading-relaxed text-gray-300">
-                        <span class="text-gray-500 italic">Esperando telemetría para generar la receta de supercompensación...</span>
+                        <span class="text-gray-600 italic">El algoritmo requiere datos para generar receta de supercompensación.</span>
                     </div>
                 </div>
-                
                 <div class="glass-card p-4 rounded-2xl flex items-center justify-center h-48">
                     <canvas id="radarRisk"></canvas>
                 </div>
@@ -106,112 +127,177 @@
     </main>
 
     <script>
-        // Lógica para mostrar/ocultar el campo de ejercicio libre
-        function toggleEjercicioLibre() {
-            const selector = document.getElementById('ejercicioSelector');
-            const libre = document.getElementById('ejercicioLibre');
-            if(selector.value === "Otro") {
-                libre.classList.remove('hidden');
-                libre.required = true;
-            } else {
-                libre.classList.add('hidden');
-                libre.required = false;
+        // ------------------------------------------------------------------------
+        // 1. SISTEMA DEL RELOJ DE SUPERCOMPENSACIÓN (EL CANDADO)
+        // ------------------------------------------------------------------------
+        let recoveryInterval;
+
+        function checkLockdown() {
+            const unlockTime = localStorage.getItem('vanguardia_unlock_time');
+            const panelIngreso = document.getElementById('panelIngreso');
+            const relojUI = document.getElementById('relojRecuperacion');
+
+            if (unlockTime) {
+                const now = new Date().getTime();
+                const target = parseInt(unlockTime, 10);
+                
+                if (now < target) {
+                    // BLOQUEADO
+                    panelIngreso.classList.add('is-locked');
+                    document.documentElement.style.setProperty('--accent-color', '#ef4444');
+                    
+                    if(recoveryInterval) clearInterval(recoveryInterval);
+                    
+                    recoveryInterval = setInterval(() => {
+                        const distance = target - new Date().getTime();
+                        if (distance < 0) {
+                            clearInterval(recoveryInterval);
+                            localStorage.removeItem('vanguardia_unlock_time');
+                            checkLockdown(); // Desbloquear
+                        } else {
+                            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            const s = Math.floor((distance % (1000 * 60)) / 1000);
+                            relojUI.innerHTML = `<span class="text-red-500">BLOQUEO ACTIVO: </span> ${h}h ${m}m ${s}s restantes`;
+                        }
+                    }, 1000);
+                    return true;
+                }
             }
+            
+            // DESBLOQUEADO
+            panelIngreso.classList.remove('is-locked');
+            relojUI.innerHTML = `SISTEMA LISTO. CAPACIDAD AL 100%.`;
+            relojUI.className = "text-xl md:text-2xl font-mono text-green-500 tracking-widest";
+            if(recoveryInterval) clearInterval(recoveryInterval);
+            return false;
         }
 
-        // CONFIGURACIÓN RADAR
+        // Ejecutar al cargar la página
+        checkLockdown();
+
+
+        // ------------------------------------------------------------------------
+        // 2. CONFIGURACIÓN DEL RADAR Y MAPA MUSCULAR
+        // ------------------------------------------------------------------------
         const ctxRadar = document.getElementById('radarRisk').getContext('2d');
         const radar = new Chart(ctxRadar, {
             type: 'radar',
             data: {
-                labels: ['Carga/Peso', 'RPE', 'TUT', 'Edad/SNC'],
-                datasets: [{ data: [0,0,0,0], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0 }]
+                labels: ['Carga/Peso', 'RPE', 'TUT', 'Fatiga'],
+                datasets: [{ data: [0,0,0,0], backgroundColor: 'rgba(59,130,246,0.2)', borderColor: '#3b82f6', borderWidth: 2, pointRadius: 0 }]
             },
             options: { scales: { r: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { display: false, min: 0, max: 10 }, pointLabels: { color: '#666', font: { size: 9 } } } }, plugins: { legend: { display: false } } }
         });
 
-        document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + ' / 10'; };
+        // Mapeo de ejercicios a Sensores del Avatar
+        const anatomia = {
+            "Sentadilla": ["sensor-piernas1", "sensor-piernas2", "sensor-espalda"],
+            "Prensa": ["sensor-piernas1", "sensor-piernas2"],
+            "Peso Muerto": ["sensor-cadenaPost1", "sensor-cadenaPost2", "sensor-espalda"],
+            "Press Banca": ["sensor-pecho", "sensor-brazos1", "sensor-brazos2"],
+            "Dominadas": ["sensor-espalda", "sensor-brazos1", "sensor-brazos2"]
+        };
+
+        function resetAvatar() {
+            document.querySelectorAll('.sensor').forEach(s => s.className.baseVal = "sensor");
+        }
+
+        function iluminarAvatar(ejercicio, nivelColor) {
+            resetAvatar();
+            const zonas = anatomia[ejercicio] || [];
+            zonas.forEach(id => {
+                const elemento = document.getElementById(id);
+                if (elemento) elemento.className.baseVal = `sensor ${nivelColor}`;
+            });
+            document.getElementById('avatarStatus').innerText = `Mapeo activo: ${ejercicio.toUpperCase()}`;
+        }
+
+
+        // ------------------------------------------------------------------------
+        // 3. MOTOR LÓGICO Y ORÁCULO
+        // ------------------------------------------------------------------------
+        document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + '/10'; };
 
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault();
             
-            // Recolectar Datos
-            const peso = parseFloat(document.getElementById('bioPeso').value) || 85;
-            const edad = parseFloat(document.getElementById('bioEdad').value) || 41;
-            
-            // Validar si es ejercicio de la lista o manual
-            let ejercicio = document.getElementById('ejercicioSelector').value;
-            if(ejercicio === "Otro") ejercicio = document.getElementById('ejercicioLibre').value;
+            if (checkLockdown()) return; // Si está bloqueado, no hacer nada
 
+            const peso = parseFloat(document.getElementById('bioPeso').value) || 85;
+            const ejercicio = document.getElementById('ejercicioSelector').value;
             const carga = parseFloat(document.getElementById('carga').value);
             const tut = parseFloat(document.getElementById('tut').value);
             const rpe = parseFloat(document.getElementById('rpe').value);
             
-            // MOTOR MATEMÁTICO
             const cargaRelativa = carga / peso; 
-            const factorEdad = edad > 35 ? (edad - 35) * 0.05 : 0; 
-            let riesgo = ((cargaRelativa * 2) + (rpe * 0.5) + (tut/60) + factorEdad).toFixed(1);
+            let riesgo = ((cargaRelativa * 2) + (rpe * 0.5) + (tut/60)).toFixed(1);
             if (riesgo > 10) riesgo = 10;
+            const reps = Math.max(1, Math.round(tut / 5));
 
-            // CÁLCULO DE REPS (Asumiendo ~5 seg por repetición controlada en Alta Intensidad)
-            const repeticionesEstimadas = Math.max(1, Math.round(tut / 5));
-
-            // EL ORÁCULO 2.0 (Generación de Receta)
             const insightBox = document.getElementById('bioInsight');
-            let diagnostico = "";
-            let receta = "";
+            let diagnostico = ""; let receta = ""; let avatarColor = "";
 
             if(riesgo < 4) {
-                // REGULAR / INFRADOSIS
+                // INFRADOSIS
                 document.documentElement.style.setProperty('--accent-color', '#3b82f6');
-                radar.data.datasets[0].borderColor = '#3b82f6';
-                radar.data.datasets[0].backgroundColor = 'rgba(59, 130, 246, 0.2)';
+                avatarColor = "glow-blue";
+                radar.data.datasets[0].borderColor = '#3b82f6'; radar.data.datasets[0].backgroundColor = 'rgba(59, 130, 246, 0.2)';
                 
-                diagnostico = `<span class="text-blue-400 font-bold block mb-2 text-base">ESTADO: INFRADOSIS (Mediocre)</span>
-                               El estímulo es insuficiente para tu biometría. Estás quemando calorías, no creando tejido.`;
-                receta = `<div class="mt-4 bg-black/50 p-3 rounded border border-blue-900/50 text-[11px] uppercase tracking-widest space-y-2">
-                            <div class="flex justify-between"><span>TUT Efectivo:</span><span class="text-white">${tut}s (Falta Tensión)</span></div>
-                            <div class="flex justify-between"><span>Prescripción:</span><span class="text-white">3-4 Series (Volumen Basura)</span></div>
-                            <div class="flex justify-between"><span>Descanso:</span><span class="text-white">60 seg</span></div>
-                            <div class="text-blue-400 font-bold mt-2 pt-2 border-t border-white/5">Acción: Sube el RPE a 7 mínimo.</div>
+                diagnostico = `<span class="text-blue-400 font-bold block mb-2 text-[12px]">ESTADO: INFRADOSIS BIOMECÁNICA</span>
+                               El estímulo es insuficiente. Tensión muscular detectada pero sin adaptación nerviosa.`;
+                receta = `<div class="mt-4 bg-black/40 p-3 border-l-2 border-blue-500 text-[10px] uppercase tracking-widest text-gray-300 space-y-1">
+                            <div>Reps Controladas: ~${reps}</div>
+                            <div>Descanso Recomendado: 60s</div>
+                            <div class="text-blue-400 mt-2">Acción: Sube el RPE o la carga.</div>
                           </div>`;
                           
             } else if(riesgo < 7.5) {
-                // BUENO / ÓPTIMO (Alta Intensidad / Protocolo ICU)
+                // ÓPTIMO (Bloqueo Ligero 24h)
                 document.documentElement.style.setProperty('--accent-color', '#a855f7');
-                radar.data.datasets[0].borderColor = '#a855f7';
-                radar.data.datasets[0].backgroundColor = 'rgba(168, 85, 247, 0.2)';
+                avatarColor = "glow-purple";
+                radar.data.datasets[0].borderColor = '#a855f7'; radar.data.datasets[0].backgroundColor = 'rgba(168, 85, 247, 0.2)';
                 
-                diagnostico = `<span class="text-purple-400 font-bold block mb-2 text-base">ESTADO: ESTÍMULO DE ÉLITE</span>
-                               Has alcanzado el umbral hipertrófico perfecto. Tu ratio de Carga (${cargaRelativa.toFixed(1)}x tu peso) es óptimo.`;
-                receta = `<div class="mt-4 bg-black/50 p-3 rounded border border-purple-900/50 text-[11px] uppercase tracking-widest space-y-2">
-                            <div class="flex justify-between"><span>Reps Controladas:</span><span class="text-white">Aprox. ${repeticionesEstimadas} reps</span></div>
-                            <div class="flex justify-between"><span>Prescripción:</span><span class="text-white">1-2 Series al Fallo</span></div>
-                            <div class="flex justify-between"><span>Descanso:</span><span class="text-white">120 - 180 seg (Recuperación ATP)</span></div>
-                            <div class="text-purple-400 font-bold mt-2 pt-2 border-t border-white/5">Acción: Mantén la técnica. No añadas series basura.</div>
+                diagnostico = `<span class="text-purple-400 font-bold block mb-2 text-[12px]">ESTADO: HIPERTROFIA ÓPTIMA (ICU)</span>
+                               Ratio perfecto (${cargaRelativa.toFixed(1)}x peso). Generando daño muscular con estrés central controlado.`;
+                receta = `<div class="mt-4 bg-black/40 p-3 border-l-2 border-purple-500 text-[10px] uppercase tracking-widest text-gray-300 space-y-1">
+                            <div>Reps Controladas: ~${reps} al fallo técnico</div>
+                            <div>Prescripción: Descanso de SNC requerido (24H)</div>
+                            <div class="text-purple-400 mt-2">Acción: Iniciando protocolo de recuperación.</div>
                           </div>`;
                           
+                // Bloqueo simulado de 24 horas (Para pruebas, lo pondremos de 1 minuto)
+                // En producción sería: Date.now() + (24 * 60 * 60 * 1000)
+                const lockTime = new Date().getTime() + (60 * 1000); // 1 MINUTO PARA PRUEBAS
+                localStorage.setItem('vanguardia_unlock_time', lockTime);
+
             } else {
-                // MALO / PELIGRO FASCIAL
+                // PELIGRO (Bloqueo Severo 72h)
                 document.documentElement.style.setProperty('--accent-color', '#ef4444');
-                radar.data.datasets[0].borderColor = '#ef4444';
-                radar.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.2)';
+                avatarColor = "glow-red";
+                radar.data.datasets[0].borderColor = '#ef4444'; radar.data.datasets[0].backgroundColor = 'rgba(239, 68, 68, 0.2)';
                 
-                diagnostico = `<span class="text-red-500 font-bold block mb-2 text-base">ESTADO: RIESGO FASCIAL CRÍTICO</span>
-                               Tu SNC está colapsando. Un RPE de ${rpe} frenará la hipertrofia y disparará el cortisol.`;
-                receta = `<div class="mt-4 bg-black/50 p-3 rounded border border-red-900/50 text-[11px] uppercase tracking-widest space-y-2">
-                            <div class="flex justify-between"><span>Estrés Acumulado:</span><span class="text-white">Severo</span></div>
-                            <div class="flex justify-between"><span>Prescripción:</span><span class="text-red-400 font-bold">0 Series Adicionales</span></div>
-                            <div class="flex justify-between"><span>Descanso:</span><span class="text-white">48 - 72 Horas</span></div>
-                            <div class="text-red-500 font-bold mt-2 pt-2 border-t border-white/5">Acción: Aborta el ejercicio. Inicia supercompensación.</div>
+                diagnostico = `<span class="text-red-500 font-bold block mb-2 text-[12px]">ESTADO: DAÑO FASCIAL INMINENTE</span>
+                               Sistema Nervioso Central agotado. Continuar en este patrón generará inflamación sistémica aguda.`;
+                receta = `<div class="mt-4 bg-black/40 p-3 border-l-2 border-red-500 text-[10px] uppercase tracking-widest text-gray-300 space-y-1">
+                            <div class="font-bold text-red-400">DESCANSO OBLIGATORIO: 72 HORAS</div>
+                            <div class="text-red-500 mt-2">Acción: Bloqueo Táctico de seguridad activado.</div>
                           </div>`;
+                
+                // Bloqueo simulado de 72 horas (Para pruebas, lo pondremos de 2 minutos)
+                const lockTime = new Date().getTime() + (120 * 1000); // 2 MINUTOS PARA PRUEBAS
+                localStorage.setItem('vanguardia_unlock_time', lockTime);
             }
 
             insightBox.innerHTML = diagnostico + receta;
-
-            // Actualizar Radar
-            radar.data.datasets[0].data = [Math.min(cargaRelativa * 3, 10), rpe, Math.min((tut/60)*10, 10), Math.min(factorEdad * 5, 10)];
+            
+            // Actualizar Radar y Avatar
+            radar.data.datasets[0].data = [Math.min(cargaRelativa * 3, 10), rpe, Math.min((tut/60)*10, 10), Math.min(rpe * cargaRelativa, 10)];
             radar.update();
+            iluminarAvatar(ejercicio, avatarColor);
+
+            // Verificar si debe bloquearse la pantalla inmediatamente
+            checkLockdown();
         };
     </script>
 </body>
