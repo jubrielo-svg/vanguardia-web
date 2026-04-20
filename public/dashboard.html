@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Centro de Comando V11</title>
+    <title>Vanguardia | Centro de Comando V12</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,15 +17,14 @@
         .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 60%); opacity: 0.08; pointer-events: none; z-index: -1; transition: all 1s ease; }
         .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
         
-        /* Modal de Pre-Vuelo */
         #modalPreVuelo { background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); display: flex; }
-        
-        /* HUD de Batalla */
         #hudBatalla { display: none; background: rgba(0,0,0,0.9); z-index: 100; border: 2px solid var(--accent-color); }
         .recording-pulse { animation: pulseHUD 1s infinite; }
         @keyframes pulseHUD { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
 
-        .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.05); }
+        /* AVATAR MEJORADO */
+        .avatar-path { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.4); stroke-width: 2.5; filter: drop-shadow(0 0 5px rgba(255,255,255,0.1)); }
+        .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.15); }
         .sensor.glow-blue { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); }
         .sensor.glow-purple { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); }
         .sensor.glow-red { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulse 1s infinite; }
@@ -45,19 +44,21 @@
     <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
         <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-1 bg-blue-500 shadow-[0_0_15px_#3b82f6]"></div>
-            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Check-in de Preparación SNC</h2>
+            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Auditoría del SNC</h2>
             
             <div class="space-y-6">
                 <div>
-                    <label class="text-[10px] uppercase text-gray-500 tracking-widest block mb-2 text-center">Horas de Sueño</label>
-                    <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-xl text-blue-400 outline-none">
+                    <label class="text-[10px] font-bold uppercase text-blue-400 tracking-widest block mb-1 text-center">Horas de Sueño Anoche</label>
+                    <input type="number" id="inputSueño" placeholder="Ej: 7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-xl text-white outline-none">
+                    <p class="text-[9px] text-gray-500 text-center mt-2 leading-relaxed">¿Por qué lo pedimos? El músculo crece en la cama, no en el gimnasio. Dormir poco frena la recuperación nerviosa y eleva el riesgo de lesión.</p>
                 </div>
-                <div>
-                    <label class="text-[10px] uppercase text-gray-500 tracking-widest block mb-2 text-center">Nivel de Estrés Sistémico (1-10)</label>
-                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500">
-                    <div class="flex justify-between text-[10px] text-gray-600 mt-1 uppercase"><span>Calma</span><span>Caos</span></div>
+                <div class="pt-2 border-t border-white/10">
+                    <label class="text-[10px] font-bold uppercase text-blue-400 tracking-widest block mb-1 text-center">Nivel de Estrés Actual (1-10)</label>
+                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500 mt-2">
+                    <div class="flex justify-between text-[9px] text-gray-400 mt-1 uppercase font-bold"><span>1: Relajado</span><span>10: Ansiedad Total</span></div>
+                    <p class="text-[9px] text-gray-500 text-center mt-3 leading-relaxed">¿Por qué lo pedimos? El estrés sistémico mantiene el cortisol alto. Entrenar pesado muy estresado destruye tejido muscular en lugar de crearlo.</p>
                 </div>
-                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-blue-50 transition-all">Iniciar Secuencia</button>
+                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200 transition-all mt-4">Calibrar Sistema</button>
             </div>
         </div>
     </div>
@@ -65,7 +66,8 @@
     <div id="hudBatalla" class="fixed inset-4 rounded-3xl flex-col items-center justify-center text-center p-6">
         <div class="text-[10px] text-blue-500 font-bold tracking-[0.5em] uppercase mb-4 recording-pulse">Escaneando Tensión Mecánica</div>
         <div id="relojHUD" class="text-8xl font-black text-white mb-8 tracking-tighter">00<span class="text-blue-500">s</span></div>
-        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase tracking-[0.3em] rounded-full text-sm shadow-[0_0_30px_rgba(220,38,38,0.5)]">Finalizar Serie (Fallo)</button>
+        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase tracking-[0.3em] rounded-full text-sm shadow-[0_0_30px_rgba(220,38,38,0.5)]">Finalizar (Fallo)</button>
+        <p class="text-xs text-gray-400 mt-6">Golpea el botón rojo al soltar la pesa.</p>
     </div>
 
     <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
@@ -77,60 +79,95 @@
 
         <div id="vistaMicro" class="vista activa space-y-6">
             
-            <div class="glass-card p-6 rounded-2xl border-l-4" id="panelDirectriz">
-                <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase mb-2 flex items-center gap-2">
+            <div class="glass-card p-4 rounded-2xl border-l-4" id="panelDirectriz">
+                <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-white animate-pulse" id="dotDirectriz"></span> Directriz Operativa
                 </h2>
-                <div id="textoDirectriz" class="text-sm text-gray-300 font-light mt-4 italic">Analizando readiness...</div>
+                <div id="textoDirectriz" class="text-xs text-gray-300 mt-2 italic">Analizando readiness...</div>
             </div>
 
-            <div class="glass-card p-5 rounded-2xl border-l-2 border-l-blue-500">
-                <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3">Identidad Biométrica</h2>
+            <div class="glass-card p-4 rounded-2xl border-l-2 border-l-blue-500">
+                <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-2">Identidad Biométrica</h2>
                 <div class="grid grid-cols-3 gap-3">
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Edad</label><input type="number" id="bioEdad" value="41" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Estatura</label><input type="number" id="bioEstatura" value="169" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
-                    <div><label class="block text-[9px] text-gray-600 uppercase mb-1">Peso (Kg)</label><input type="number" id="bioPeso" value="85" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none text-blue-400 font-bold"></div>
+                    <div><label class="block text-[9px] text-gray-400 uppercase mb-1">Edad</label><input type="number" id="bioEdad" value="20" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
+                    <div><label class="block text-[9px] text-gray-400 uppercase mb-1">Estatura</label><input type="number" id="bioEstatura" value="170" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none"></div>
+                    <div><label class="block text-[9px] text-gray-400 uppercase mb-1">Peso(Kg)</label><input type="number" id="bioPeso" value="70" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center outline-none text-blue-400"></div>
                 </div>
+                <p class="text-[8px] text-gray-500 mt-2">La carga absoluta no importa. El algoritmo usa tu peso para calcular cuánto esfuerzo real haces.</p>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
-                <div class="lg:col-span-5 glass-card p-5 rounded-2xl relative" id="panelIngreso">
-                    <form id="formVanguardia" class="space-y-5">
-                        <div class="space-y-2">
-                            <label class="text-[10px] uppercase tracking-widest text-gray-400">Patrón de Movimiento</label>
-                            <select id="ejercicioSelector" class="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-white text-sm outline-none">
+                <div class="lg:col-span-6 glass-card p-5 rounded-2xl relative" id="panelIngreso">
+                    <div class="locked-overlay text-center p-4 rounded-2xl">
+                        <span class="text-red-500 text-2xl mb-2">⚠️</span>
+                        <h3 class="text-white font-bold tracking-widest uppercase text-xs mb-2">Bloqueo Activo</h3>
+                        <div id="relojRecuperacion" class="text-xl font-mono text-red-500 tracking-widest mt-2">00:00:00</div>
+                    </div>
+
+                    <form id="formVanguardia" class="space-y-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase tracking-widest text-white">Patrón de Movimiento</label>
+                            <select id="ejercicioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none mt-1">
                                 <option value="Sentadilla">Sentadilla Libre</option><option value="Prensa">Prensa de Piernas</option><option value="Peso Muerto">Peso Muerto</option><option value="Press Banca">Press de Banca</option><option value="Dominadas">Dominadas</option>
                             </select>
+                            <p class="text-[8px] text-gray-500 mt-1">Elige el ejercicio principal. Esto indicará qué zona muscular se daña.</p>
                         </div>
+
                         <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] uppercase tracking-widest text-gray-400">Carga (Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center text-white outline-none"></div>
-                            <div class="relative">
-                                <label class="text-[10px] uppercase tracking-widest text-gray-400">TUT (Seg)</label>
-                                <input type="number" id="tut" required class="w-full bg-transparent border-b border-white/20 py-2 text-xl text-center text-white outline-none">
-                                <button type="button" onclick="iniciarHUD()" class="absolute -bottom-6 right-0 text-[8px] bg-blue-600 text-white px-2 py-1 rounded uppercase font-bold tracking-widest">▶ Iniciar HUD</button>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Series</label>
+                                <input type="number" id="series" required placeholder="Ej: 3" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
+                                <p class="text-[8px] text-gray-500 mt-1">Bloques de trabajo totales.</p>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Reps</label>
+                                <input type="number" id="reps" required placeholder="Ej: 10" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
+                                <p class="text-[8px] text-gray-500 mt-1">Movimientos por serie.</p>
                             </div>
                         </div>
-                        <div class="pt-4">
-                            <div class="flex justify-between mb-1"><label class="text-[10px] uppercase tracking-widest text-red-400">RPE (Fallo)</label><span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span></div>
-                            <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none">
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">Carga (Kg)</label>
+                                <input type="number" id="carga" required placeholder="Ej: 80" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
+                                <p class="text-[8px] text-gray-500 mt-1">Peso total levantado en Kilos.</p>
+                            </div>
+                            <div class="relative">
+                                <label class="text-[10px] font-bold uppercase tracking-widest text-white">TUT (Segundos)</label>
+                                <input type="number" id="tut" required placeholder="Ej: 45" class="w-full bg-transparent border-b border-white/20 py-2 text-lg text-center text-white outline-none">
+                                <button type="button" onclick="iniciarHUD()" class="absolute top-0 right-0 text-[9px] bg-blue-600 text-white px-2 py-1 rounded uppercase font-bold tracking-widest">▶ Activar HUD</button>
+                                <p class="text-[8px] text-blue-400 mt-1 font-bold">Tiempo Bajo Tensión. Usa el HUD para medir automáticamente.</p>
+                            </div>
                         </div>
-                        <button type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-blue-50">Computar Impacto</button>
+
+                        <div class="pt-2">
+                            <div class="flex justify-between mb-1"><label class="text-[10px] font-bold uppercase tracking-widest text-red-400">RPE (Esfuerzo del 1 al 10)</label><span id="rpeVal" class="text-sm font-bold text-red-500">5/10</span></div>
+                            <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none">
+                            <p class="text-[8px] text-gray-500 mt-2">1: Muy fácil | 10: Fallo muscular total (No puedes hacer ni una repetición más).</p>
+                        </div>
+                        <button type="submit" class="w-full py-4 mt-2 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-gray-200">Generar Diagnóstico</button>
                     </form>
                 </div>
 
-                <div class="lg:col-span-7 flex flex-col gap-6">
-                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-48 relative">
-                        <svg viewBox="0 0 200 400" class="h-64 w-auto opacity-70">
-                            <path d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-                            <path d="M70,75 L130,75 L145,150 L55,150 Z" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-                            <path d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-                            <path d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2"/>
-                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor"/><circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor"/><circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor"/><circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor"/><circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor"/><circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor"/>
+                <div class="lg:col-span-6 flex flex-col gap-6">
+                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-64 relative overflow-hidden bg-black/40">
+                        <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100 drop-shadow-2xl">
+                            <path class="avatar-path" d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z"/>
+                            <path class="avatar-path" d="M70,75 L130,75 L145,150 L55,150 Z"/>
+                            <path class="avatar-path" d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240"/>
+                            <path class="avatar-path" d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380"/>
+                            
+                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor"/>
+                            <circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor"/>
+                            <circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor"/>
+                            <circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor"/>
+                            <circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor"/>
+                            <circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor"/>
                         </svg>
                     </div>
                     <div class="glass-card p-5 rounded-2xl flex-grow">
                         <h2 class="text-[10px] font-bold tracking-[0.2em] text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico Biológico</h2>
-                        <div id="bioInsight" class="text-xs font-light text-gray-300">...</div>
+                        <div id="bioInsight" class="text-xs font-light text-gray-300 leading-relaxed">Esperando datos de la serie...</div>
                     </div>
                 </div>
             </div>
@@ -139,8 +176,8 @@
         <div id="vistaMacro" class="vista space-y-6">
             <div class="glass-card p-4 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
             <div class="grid grid-cols-2 gap-4">
-                <button onclick="extraerDatos('csv')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-green-400">CSV</button>
-                <button onclick="sellarBoveda()" class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-[10px] uppercase tracking-widest text-red-500">Sellar .VAN</button>
+                <button onclick="extraerDatos('csv')" class="glass-card p-4 rounded-xl text-[10px] uppercase tracking-widest text-green-400">Descargar Excel CSV</button>
+                <button onclick="sellarBoveda()" class="bg-red-900/20 border border-red-500/30 p-4 rounded-xl text-[10px] uppercase tracking-widest text-red-500">Sellar Data .VAN</button>
             </div>
         </div>
 
@@ -172,10 +209,11 @@
             TacticoSensorial.init();
             document.getElementById('hudBatalla').style.display = 'flex';
             seg = 0;
+            document.getElementById('relojHUD').innerHTML = `0<span class="text-blue-500 text-4xl">s</span>`;
             timerInterval = setInterval(() => {
                 seg++;
                 document.getElementById('relojHUD').innerHTML = `${seg}<span class="text-blue-500 text-4xl">s</span>`;
-                TacticoSensorial.tick(); // Vibra cada segundo
+                TacticoSensorial.tick();
             }, 1000);
         }
         function detenerHUD() {
@@ -185,24 +223,23 @@
             TacticoSensorial.vibrar([50, 100, 50]);
         }
 
-        // --- 4. MOTOR LÓGICO V11 ---
-        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_data_v11')) || [];
+        // --- 4. MOTOR LÓGICO V12 ---
+        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_data_v12')) || [];
 
         function evaluarEstadoDiario() {
             const panel = document.getElementById('panelDirectriz');
             const texto = document.getElementById('textoDirectriz');
             
-            // Penalización por Sueño y Estrés
             let readinessScore = 100;
             if (bioData.sueno < 7) readinessScore -= (7 - bioData.sueno) * 15;
             if (bioData.estres > 6) readinessScore -= (bioData.estres - 6) * 10;
 
             if (readinessScore < 60) {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-red-500";
-                texto.innerHTML = `<strong class="text-red-500 text-sm block mb-1">ALERTA: CAPACIDAD ADAPTATIVA BAJA (${readinessScore}%)</strong>Tu SNC está comprometido por falta de sueño o estrés sistémico. El riesgo de lesión fascial se multiplica. <br><span class="text-white">Prescripción: Prohibido RPE 10. Limítate a RPE 7 (Mantenimiento).</span>`;
+                panel.className = "glass-card p-4 rounded-2xl border-l-4 border-red-500";
+                texto.innerHTML = `<strong class="text-red-500 text-sm block mb-1">CAPACIDAD ADAPTATIVA BAJA (${readinessScore}%)</strong><span class="text-gray-400">Por falta de sueño o estrés, tu riesgo de lesión es alto hoy.</span> <br><strong class="text-white">Se recomienda sesión de mantenimiento (Bajo peso).</strong>`;
             } else {
-                panel.className = "glass-card p-6 rounded-2xl border-l-4 border-blue-500";
-                texto.innerHTML = `<strong class="text-blue-400 text-sm block mb-1">SISTEMA LISTO (${readinessScore}%)</strong>Entorno hormonal favorable. Autorización para buscar tensión mecánica máxima.`;
+                panel.className = "glass-card p-4 rounded-2xl border-l-4 border-blue-500";
+                texto.innerHTML = `<strong class="text-blue-400 text-sm block mb-1">SISTEMA LISTO (${readinessScore}%)</strong><span class="text-gray-400">Descanso adecuado detectado. Puedes entrenar con intensidad.</span>`;
             }
         }
 
@@ -213,30 +250,75 @@
             const carga = parseFloat(document.getElementById('carga').value);
             const tut = parseFloat(document.getElementById('tut').value);
             const rpe = parseFloat(document.getElementById('rpe').value);
-            const peso = parseFloat(document.getElementById('bioPeso').value) || 85;
+            const series = parseInt(document.getElementById('series').value);
+            const reps = parseInt(document.getElementById('reps').value);
+            const peso = parseFloat(document.getElementById('bioPeso').value) || 70;
+            const ej = document.getElementById('ejercicioSelector').value;
 
-            // EL ALGORITMO AHORA PENALIZA POR READINESS
             let factorCastigo = (bioData.sueno < 6) ? 1.5 : 1.0;
             let riesgo = (((carga/peso)*2) + (rpe*0.5) + (tut/60)) * factorCastigo;
+            const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
             
             const ts = new Date().getTime();
-            historialSeries.push({ timestampNum: ts, ejercicio: document.getElementById('ejercicioSelector').value, carga, tut, rpe, riesgo: riesgo.toFixed(1) });
-            localStorage.setItem('vanguardia_data_v11', JSON.stringify(historialSeries));
+            const dateStr = new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+            
+            // Guardamos todo en memoria, incluyendo series y reps
+            historialSeries.push({ timestampNum: ts, fechaStr: dateStr, ejercicio: ej, series, reps, carga, tut, rpe, ifi, riesgo: riesgo.toFixed(1) });
+            localStorage.setItem('vanguardia_data_v12', JSON.stringify(historialSeries));
 
-            let diag = "";
-            if (riesgo > 8.5) {
-                diag = `<span class="text-red-500 font-bold">RIESGO CRÍTICO.</span> Tu falta de descanso (${bioData.sueno}h) eleva el riesgo a ${riesgo.toFixed(1)}. Detén la sesión.`;
-                TacticoSensorial.alarma();
+            let diag = ""; let c = "";
+            if (riesgo < 5) {
+                c = "glow-blue";
+                diag = `<strong class="text-blue-400 text-sm block mb-1">Entrenamiento Suave (Infradosis)</strong><span class="text-gray-400">El esfuerzo fue muy bajo para generar masa muscular. Te recomendamos subir el peso o el RPE en la siguiente serie.</span>`;
+            } else if (riesgo < 8) {
+                c = "glow-purple";
+                diag = `<strong class="text-purple-400 text-sm block mb-1">Excelente Esfuerzo (Óptimo)</strong><span class="text-gray-400">Has dado el estímulo perfecto para que el músculo crezca. Mantén este ritmo y descansa bien al terminar.</span>`;
             } else {
-                diag = `<span class="text-purple-400 font-bold">ESTÍMULO CORRECTO.</span> Riesgo calculado: ${riesgo.toFixed(1)}.`;
-                TacticoSensorial.vibrar([30, 50, 30]);
+                c = "glow-red";
+                diag = `<strong class="text-red-500 text-sm block mb-1">¡CUIDADO! (Riesgo Alto)</strong><span class="text-gray-400">El sistema detecta demasiado esfuerzo. Podrías lesionarte. Baja el peso en la próxima serie.</span>`;
+                TacticoSensorial.alarma();
             }
+            
             document.getElementById('bioInsight').innerHTML = diag;
+            
+            const anatomia = { "Sentadilla": ["sensor-piernas1", "sensor-piernas2"], "Prensa": ["sensor-piernas1", "sensor-piernas2"], "Peso Muerto": ["sensor-cadenaPost1", "sensor-cadenaPost2", "sensor-espalda"], "Press Banca": ["sensor-pecho"], "Dominadas": ["sensor-espalda"] };
+            document.querySelectorAll('.sensor').forEach(s => s.className.baseVal = "sensor");
+            (anatomia[ej] || []).forEach(id => document.getElementById(id).className.baseVal = `sensor ${c}`);
         };
 
+        // --- 5. EXTRACCIÓN Y VISTAS ---
         function toggleVista() {
             document.getElementById('vistaMicro').classList.toggle('activa');
             document.getElementById('vistaMacro').classList.toggle('activa');
+            renderizarMacroChart();
+        }
+
+        let macroChartInstance = null;
+        function renderizarMacroChart() {
+            const ctx = document.getElementById('macroChart').getContext('2d');
+            const dataSlice = historialSeries.slice(-20);
+            if(macroChartInstance) macroChartInstance.destroy();
+            Chart.defaults.color = '#6b7280';
+            macroChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: dataSlice.map(s => s.fechaStr), datasets: [ { type: 'line', label: 'RPE', data: dataSlice.map(s => s.rpe), borderColor: '#ef4444', borderWidth: 2, yAxisID: 'y1' }, { type: 'bar', label: 'IFI', data: dataSlice.map(s => s.ifi), backgroundColor: 'rgba(168, 85, 247, 0.4)', yAxisID: 'y' } ] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { x: { display: false }, y: { type: 'linear', position: 'left' }, y1: { type: 'linear', position: 'right', min: 0, max: 10, grid: { display: false } } } }
+            });
+        }
+
+        function extraerDatos(formato) {
+            if(historialSeries.length === 0) return alert("No hay datos guardados.");
+            TacticoSensorial.tick();
+            let c = "Fecha,Ejercicio,Series,Reps,Carga,TUT,RPE,IFI,Riesgo\n";
+            historialSeries.forEach(s => c += `${s.fechaStr},${s.ejercicio},${s.series},${s.reps},${s.carga},${s.tut},${s.rpe},${s.ifi},${s.riesgo}\n`);
+            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([c], { type: 'text/csv' })); a.download = 'Vanguardia_Completo.csv'; a.click();
+        }
+
+        function sellarBoveda() {
+            const p = prompt("Crea una contraseña para proteger tu archivo (AES-256):");
+            if(!p) return;
+            const cifrado = CryptoJS.AES.encrypt(JSON.stringify(historialSeries), p).toString();
+            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([cifrado], {type:'text/plain'})); a.download = 'Vanguardia.van'; a.click();
         }
     </script>
 </body>
