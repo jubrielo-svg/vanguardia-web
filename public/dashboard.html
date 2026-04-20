@@ -224,5 +224,18 @@
         cargarMemoria();
 
     </script>
+        // --- EL GUARDIÁN ---
+        if (localStorage.getItem('vanguardia_auth') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('vanguardia_auth');
+            window.location.href = 'index.html';
+        }
+        // -------------------
+
+        // 1. Cronómetro de Sesión (Se reinicia al cargar la página)
+        let seconds = 0;
 </body>
 </html>
