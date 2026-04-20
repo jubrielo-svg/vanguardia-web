@@ -23,8 +23,9 @@
         </div>
         <div class="flex items-center gap-4">
             <span class="text-xs text-green-500 uppercase tracking-widest flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Sistema Online
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Memoria Activa
             </span>
+            <button id="btnLimpiar" class="text-xs text-red-500 hover:text-red-400 uppercase tracking-wider transition-colors ml-4">Reiniciar Sesión</button>
             <a href="index.html" class="text-xs text-gray-400 hover:text-white uppercase tracking-wider transition-colors">Salir</a>
         </div>
     </nav>
@@ -73,9 +74,9 @@
 
             <div class="glass-card p-6 rounded-xl relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-1 h-full bg-green-500"></div>
-                <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">Registro Inmediato</div>
-                <h2 class="text-xl font-bold text-white mb-4">Última Serie</h2>
-                <div id="historialSerie" class="text-gray-400 text-sm">
+                <div class="text-xs text-gray-500 uppercase tracking-widest mb-4">Registro Histórico</div>
+                <h2 class="text-xl font-bold text-white mb-4">Series Computadas</h2>
+                <div id="historialSerie" class="text-gray-400 text-sm max-h-32 overflow-y-auto pr-2 space-y-3">
                     Aún no hay series registradas en esta sesión.
                 </div>
             </div>
@@ -108,7 +109,7 @@
     </main>
 
     <script>
-        // 1. Cronómetro de Sesión
+        // 1. Cronómetro de Sesión (Se reinicia al cargar la página)
         let seconds = 0;
         setInterval(() => {
             seconds++;
@@ -118,32 +119,28 @@
             document.getElementById('timer').innerText = `${hrs}:${mins}:${secs}`;
         }, 1000);
 
-        // 2. Lógica Biomecánica
-        document.getElementById('formularioSerie').addEventListener('submit', function(e) {
-            e.preventDefault(); // Evita que la página se recargue
-            
-            // Capturar datos
-            const ejercicio = document.getElementById('inputEjercicio').value;
-            const carga = parseFloat(document.getElementById('inputCarga').value);
-            const tut = parseFloat(document.getElementById('inputTut').value);
+        // 2. Sistema de Memoria Persistente (Local Storage)
+        let historialSeries = JSON.parse(localStorage.getItem('vanguardia_series')) || [];
 
-            // Cálculos del Motor Vanguardia
-            // IFI = Relación entre Kilos movidos y Segundos de tensión (Fórmula base para Heavy Duty)
-            // Se asume un multiplicador para llevarlo a un índice entre 0.5 y 1.5
-            const ifiCalculado = ((carga / 100) * (tut / 50)).toFixed(2);
-            
-            // Cálculo de porcentaje de la barra TUT (Asumiendo 60s como el 100% ideal)
-            let porcentajeTut = (tut / 60) * 100;
-            if (porcentajeTut > 100) porcentajeTut = 100;
+        // Función para cargar los datos guardados al entrar a la página
+        function cargarMemoria() {
+            if (historialSeries.length > 0) {
+                // Tomar la última serie para actualizar las tarjetas principales
+                const ultimaSerie = historialSeries[historialSeries.length - 1];
+                actualizarTarjetas(ultimaSerie.tut, ultimaSerie.ifiCalculado, ultimaSerie.porcentajeTut);
+                
+                // Dibujar toda la lista del historial
+                dibujarHistorial();
+            }
+        }
 
-            // 3. Actualizar la Interfaz Gráfica (Dashboard)
+        // Función para actualizar las tarjetas visuales (TUT e IFI)
+        function actualizarTarjetas(tut, ifiCalculado, porcentajeTut) {
             document.getElementById('displayTut').innerText = tut;
             document.getElementById('barraTut').value = porcentajeTut;
             document.getElementById('tutPorcentajeTexto').innerText = Math.round(porcentajeTut) + '%';
-            
             document.getElementById('displayIfi').innerText = ifiCalculado;
             
-            // Diagnóstico visual según el IFI
             const estadoIfi = document.getElementById('estadoIfi');
             if (ifiCalculado >= 1.0) {
                 estadoIfi.innerText = "Zona de Hipertrofia Óptima";
@@ -152,21 +149,57 @@
                 estadoIfi.innerText = "Sub-óptimo. Aumentar carga o TUT";
                 estadoIfi.className = "text-xs text-yellow-500 uppercase tracking-wider";
             }
+        }
 
-            // Actualizar Historial
-            document.getElementById('historialSerie').innerHTML = `
-                <div class="mb-2"><span class="text-white font-bold">${ejercicio}</span></div>
-                <div class="flex justify-between border-b border-gray-800 pb-2">
-                    <span>Carga: <span class="text-white">${carga} kg</span></span>
-                    <span>TUT: <span class="text-white">${tut} s</span></span>
-                </div>
-                <div class="mt-2 text-green-400 text-xs uppercase tracking-widest">Registrado Correctamente</div>
-            `;
+        // Función para dibujar la lista de series en el historial
+        function dibujarHistorial() {
+            const contenedorHistorial = document.getElementById('historialSerie');
+            contenedorHistorial.innerHTML = ''; // Limpiar antes de dibujar
 
-            // Efecto visual en el botón
+            // Dibujar desde la más reciente a la más antigua
+            [...historialSeries].reverse().forEach(serie => {
+                contenedorHistorial.innerHTML += `
+                    <div class="border-b border-gray-800 pb-2 mb-2">
+                        <div class="flex justify-between text-white font-bold text-sm mb-1">
+                            <span>${serie.ejercicio}</span>
+                            <span class="text-purple-400">IFI: ${serie.ifiCalculado}</span>
+                        </div>
+                        <div class="flex justify-between text-xs">
+                            <span>Carga: ${serie.carga} kg</span>
+                            <span>TUT: ${serie.tut} s</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. Lógica al Computar una nueva serie
+        document.getElementById('formularioSerie').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const ejercicio = document.getElementById('inputEjercicio').value;
+            const carga = parseFloat(document.getElementById('inputCarga').value);
+            const tut = parseFloat(document.getElementById('inputTut').value);
+
+            const ifiCalculado = ((carga / 100) * (tut / 50)).toFixed(2);
+            let porcentajeTut = (tut / 60) * 100;
+            if (porcentajeTut > 100) porcentajeTut = 100;
+
+            // Guardar en la variable
+            const nuevaSerie = { ejercicio, carga, tut, ifiCalculado, porcentajeTut };
+            historialSeries.push(nuevaSerie);
+
+            // Guardar en el LocalStorage (La memoria del navegador)
+            localStorage.setItem('vanguardia_series', JSON.stringify(historialSeries));
+
+            // Actualizar interfaz
+            actualizarTarjetas(tut, ifiCalculado, porcentajeTut);
+            dibujarHistorial();
+
+            // Efecto de botón
             const btn = document.getElementById('btnGuardar');
             const textoOriginal = btn.innerText;
-            btn.innerText = "¡COMPUTADO!";
+            btn.innerText = "¡GUARDADO!";
             btn.classList.replace('bg-white', 'bg-green-500');
             btn.classList.replace('text-black', 'text-white');
             
@@ -175,8 +208,21 @@
                 btn.classList.replace('bg-green-500', 'bg-white');
                 btn.classList.replace('text-white', 'text-black');
                 document.getElementById('formularioSerie').reset();
-            }, 1500);
+            }, 1000);
         });
+
+        // 4. Botón de Limpiar Sesión (Peligro)
+        document.getElementById('btnLimpiar').addEventListener('click', function() {
+            if(confirm("¿Estás seguro de reiniciar la sesión? Esto borrará el historial actual.")) {
+                localStorage.removeItem('vanguardia_series'); // Borrar memoria
+                historialSeries = []; // Vaciar variable
+                location.reload(); // Recargar página para limpiar visualmente
+            }
+        });
+
+        // 5. Arrancar el motor al cargar la página
+        cargarMemoria();
+
     </script>
 </body>
 </html>
