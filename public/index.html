@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Elite Biomechanics</title>
+    <title>Vanguardia | Elite SaaS</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#030508">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -18,16 +18,18 @@
         .ambient-glow { position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%), radial-gradient(circle at 50% 100%, rgba(176, 38, 255, 0.08) 0%, transparent 60%); opacity: 1; pointer-events: none; z-index: -1; }
         .glass-panel { background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); backdrop-filter: blur(20px); border-radius: 16px; }
         
-        .vista { display: none; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .vista.activa { display: block; }
+        .vista { display: none; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .vista.activa { display: block; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
         .btn-cyber { background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border: 1px solid var(--cyan); color: var(--cyan); font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; cursor: pointer; }
         .btn-cyber:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
         
+        .btn-pay { background: white; color: black; border-radius: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; cursor: pointer; display: flex; justify-content: center; items-center; gap: 10px; }
+        .btn-pay:hover { background: #f0f0f0; transform: scale(1.02); }
+
         .input-clinical { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; padding: 12px; outline: none; transition: border 0.3s; font-family: 'Share Tech Mono', monospace; }
         .input-clinical:focus { border-color: var(--cyan); box-shadow: inset 0 0 10px rgba(0,240,255,0.15); }
 
-        /* AVATAR BIOMECÁNICO POTENCIADO */
         .avatar-mesh { fill: rgba(0,240,255,0.05); stroke: rgba(0,240,255,0.5); stroke-width: 1.5; stroke-linejoin: round; transition: all 0.5s ease; filter: drop-shadow(0 0 5px rgba(0,240,255,0.2)); }
         .sensor-node { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); fill: rgba(255,255,255,0.1); stroke: rgba(255,255,255,0.3); stroke-width: 1; }
         .sensor-node.optimal { fill: rgba(0, 240, 255, 0.8); filter: drop-shadow(0 0 10px var(--cyan)); stroke: #fff; }
@@ -41,9 +43,9 @@
         .lang-btn { background: transparent; border: none; color: #888; padding: 4px 12px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-family: 'Share Tech Mono', monospace; }
         .lang-btn.active { background: white; color: black; }
 
-        #clinicalOnboarding { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
-        .step-module { display: none; width: 100%; max-w: 400px; animation: fadeUp 0.5s; }
-        .step-module.active { display: block; }
+        /* Sync Cloud Animation */
+        .cloud-sync { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--cyan); box-shadow: 0 0 10px var(--cyan); animation: syncPulse 1.5s infinite alternate; }
+        @keyframes syncPulse { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
     </style>
 </head>
 <body>
@@ -57,80 +59,17 @@
         </div>
     </div>
 
-    <div id="clinicalOnboarding">
-        <div class="absolute top-10 w-full flex justify-center flex-col items-center">
-            <h1 class="cinzel text-3xl text-white tracking-[0.4em] uppercase mb-1">Vanguardia</h1>
-            <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
-        </div>
-
-        <div id="step1" class="step-module active mt-12">
-            <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-6 border-b border-white/10 pb-2" data-i18n="id_protocol">PROTOCOLO DE IDENTIDAD</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_name">Nombre del Sujeto</label>
-                    <input type="text" id="obName" class="input-clinical w-full text-center text-lg" data-i18n-placeholder="ph_name" placeholder="ID Cliente">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_sex">Sexo Biológico</label>
-                        <select id="obSex" class="input-clinical w-full text-center text-sm appearance-none">
-                            <option value="M" data-i18n="opt_m">Masculino</option>
-                            <option value="F" data-i18n="opt_f">Femenino</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_age">Edad</label>
-                        <input type="number" id="obAge" class="input-clinical w-full text-center text-sm" placeholder="00">
-                    </div>
-                </div>
-            </div>
-            <button onclick="nextStep(2)" class="w-full btn-cyber py-4 mt-8 text-xs" data-i18n="btn_continue">Inicializar Biometría</button>
-        </div>
-
-        <div id="step2" class="step-module mt-12">
-            <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-6 border-b border-white/10 pb-2" data-i18n="bio_protocol">PARÁMETROS BIOMÉTRICOS</h2>
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_height">Estatura (cm)</label>
-                    <input type="number" id="obHeight" class="input-clinical w-full text-center text-xl" placeholder="170" oninput="calcularIMCOnboarding()">
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_weight">Masa (Kg)</label>
-                    <input type="number" id="obWeight" class="input-clinical w-full text-center text-xl" placeholder="70" oninput="calcularIMCOnboarding()">
-                </div>
-            </div>
-            
-            <div class="bg-black/40 border border-white/5 p-4 rounded-lg text-center mb-6">
-                <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="lbl_bmi">Índice de Masa Corporal (IMC)</p>
-                <p id="obIMC" class="text-2xl tech-mono text-white">00.0</p>
-                <p class="text-[7px] text-cyan-400 uppercase tracking-widest mt-1" data-i18n="desc_bmi">Relación peso/estatura</p>
-            </div>
-
-            <button onclick="nextStep(3)" class="w-full btn-cyber py-4 mt-4 text-xs" data-i18n="btn_continue">Proceder</button>
-        </div>
-
-        <div id="step3" class="step-module mt-12">
-            <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-2 border-b border-white/10 pb-2" data-i18n="path_protocol">HISTORIAL PATOLÓGICO</h2>
-            <p class="text-gray-500 text-[9px] mb-6 tracking-widest uppercase tech-mono" data-i18n="path_sub">Prevención de estrés articular cruzado.</p>
-            
-            <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_path">Restricciones Estructurales</label>
-            <select id="obPain" class="input-clinical w-full text-center text-sm appearance-none mb-8">
-                <option value="Ninguno" data-i18n="path_none">Integridad Estructural Óptima</option>
-                <option value="Rodillas" data-i18n="path_knee">Patología en Complejo Patelar / Rodilla</option>
-                <option value="Lumbar" data-i18n="path_back">Compresión Lumbar / Sacro</option>
-                <option value="Hombros" data-i18n="path_shoul">Déficit en Manguito Rotador / Hombro</option>
-            </select>
-
-            <button onclick="finishOnboarding()" class="w-full btn-cyber py-4 text-xs shadow-[0_0_20px_rgba(0,240,255,0.2)]" data-i18n="btn_finish">Desplegar Interfaz Maestra</button>
-        </div>
-    </div>
-
-    <div id="mainContent" style="display: none;">
+    <div id="mainContent" style="display: block;">
         
         <header class="px-6 py-4 border-b border-white/5 bg-black/60 backdrop-blur-xl sticky top-0 z-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
                 <h1 class="cinzel text-xl text-white tracking-[0.3em] uppercase">Vanguardia.</h1>
-                <p class="text-[8px] text-cyan-400 tech-mono tracking-widest uppercase mt-1">ID: <span id="userName" class="text-white">USER</span> | IMC: <span id="userIMC">00.0</span></p>
+                <p class="text-[8px] text-cyan-400 tech-mono tracking-widest uppercase mt-1 flex items-center gap-2">
+                    ID: <span id="userName" class="text-white">JUAN GABRIEL</span> | 
+                    IMC: <span id="userIMC" class="text-white">24.5</span> 
+                    <span class="text-gray-600" onclick="editWeight()" style="cursor:pointer;">✏️</span>
+                    <span class="ml-2 flex items-center gap-1 text-[7px] text-cyan-400"><div class="cloud-sync"></div> CLOUD ACTIVE</span>
+                </p>
             </div>
             
             <div class="flex items-center gap-4 w-full sm:w-auto justify-end pr-16 sm:pr-0">
@@ -139,15 +78,22 @@
         </header>
 
         <main class="max-w-6xl mx-auto p-6 space-y-8 pb-20">
+
+            <div id="paywallBanner" class="hidden glass-panel p-6 border-2 border-red-500/50 bg-red-900/10 mb-8 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 opacity-10 text-9xl">💳</div>
+                <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                        <h2 class="cinzel text-lg text-white tracking-widest uppercase mb-1 text-red-400" data-i18n="sub_alert">Suscripción Crítica</h2>
+                        <p class="text-[10px] text-gray-300 tech-mono uppercase" data-i18n="sub_desc">Te restan <span id="alertSesiones" class="text-white font-bold text-sm">2</span> sesiones de tu plan actual. Renueva para no perder tu data en la nube.</p>
+                    </div>
+                    <a href="#" target="_blank" class="btn-pay py-3 px-8 w-full md:w-auto">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M16.4 12.8c-.1-2.9 2.4-4.5 2.5-4.5-1.4-2-3.8-2.2-4.6-2.3-2-.2-3.9 1.2-4.9 1.2-.9 0-2.6-1.2-4.2-1.1-2.1 0-4 1.2-5 3.1-2.2 3.8-.6 9.4 1.5 12.4 1 1.5 2.2 3.1 3.8 3.1 1.5 0 2.1-.9 3.9-.9 1.8 0 2.3.9 3.9.9 1.6.1 2.6-1.3 3.6-2.8 1.2-1.7 1.7-3.4 1.7-3.5-.1 0-3.3-1.3-3.4-4.6zM11.9 5.5c.8-1 1.4-2.4 1.2-3.8-1.2.1-2.7.8-3.6 1.8-.8.8-1.5 2.2-1.3 3.6 1.3.1 2.7-.6 3.7-1.6z"/></svg>
+                        <span data-i18n="btn_renew">Renovar con Apple Pay / Card</span>
+                    </a>
+                </div>
+            </div>
             
             <div id="vistaMicro" class="vista activa">
-                
-                <div class="glass-panel p-5 border-l-2 border-l-cyan-400 flex justify-between items-center mb-8 bg-[#0a1128]/40">
-                    <div>
-                        <h2 class="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-1" data-i18n="ai_directive">Directriz Ontológica</h2>
-                        <p id="aiMessage" class="text-sm text-cyan-100 font-medium tracking-wide tech-mono leading-relaxed" data-i18n="ai_load">Calibrando telemetría...</p>
-                    </div>
-                </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     
@@ -155,58 +101,32 @@
                         <div class="glass-panel p-8">
                             <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
                                 <h3 class="cinzel text-lg text-white tracking-widest uppercase" data-i18n="mod_exec">Módulo de Ejecución</h3>
-                                <button type="button" onclick="toggleCamera()" class="border border-purple-500 text-purple-400 hover:bg-purple-900/30 px-3 py-1 text-[9px] uppercase tracking-widest transition rounded tech-mono flex items-center gap-2"><span class="text-xs">📷</span> <span data-i18n="btn_cam">Análisis Video</span></button>
-                            </div>
-
-                            <div id="videoContainer" class="hidden mb-6 rounded-lg overflow-hidden border border-purple-500/50 shadow-[0_0_15px_rgba(176,38,255,0.2)] relative">
-                                <div class="absolute top-2 left-2 bg-black/60 px-2 py-1 text-[8px] text-purple-400 tech-mono uppercase tracking-widest z-10 border border-purple-500/30">REC // Biomechanics</div>
-                                <video id="cameraFeed" autoplay playsinline muted class="w-full h-48 object-cover bg-black"></video>
+                                <div class="text-[10px] text-cyan-400 tech-mono uppercase border border-cyan-400/30 px-3 py-1 rounded">
+                                    Target Sets: <input type="number" id="targetSets" value="4" class="bg-transparent w-8 text-center text-white outline-none border-b border-white/20">
+                                </div>
                             </div>
 
                             <form id="formVanguardia" class="space-y-6">
                                 
                                 <div>
                                     <label class="text-[9px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_target">Target Anatómico</label>
-                                    <select id="dominioSelector" class="input-clinical w-full text-sm appearance-none">
-                                        <option value="Cuádriceps" data-i18n="mus_quad">Tren Inferior: Cuádriceps</option>
-                                        <option value="Isquios/Glúteo" data-i18n="mus_ham">Tren Inferior: Isquiosurales y Glúteo</option>
-                                        <option value="Pectoral" data-i18n="mus_chest">Tren Superior: Pectoral</option>
-                                        <option value="Dorsal" data-i18n="mus_back">Tren Superior: Dorsal / Espalda</option>
-                                        <option value="Deltoides" data-i18n="mus_shoul">Articular: Deltoides / Hombros</option>
-                                        <option value="Brazos" data-i18n="mus_arm">Brazos: Bíceps / Tríceps</option>
-                                        <option value="Core" data-i18n="mus_core">Zona Media: Core Abdominal</option>
+                                    <select id="dominioSelector" class="input-clinical w-full text-sm appearance-none" onchange="actualizarGraficaProgreso()">
+                                        <option value="Sentadilla Libre" data-i18n="ex_squat">Tren Inferior: Sentadilla Libre</option>
+                                        <option value="Peso Muerto" data-i18n="ex_dl">Tren Inferior: Peso Muerto</option>
+                                        <option value="Press de Banca" data-i18n="ex_bench">Tren Superior: Press de Banca</option>
+                                        <option value="Dominadas" data-i18n="ex_pull">Tren Superior: Dominadas</option>
                                     </select>
                                 </div>
 
-                                <div class="grid grid-cols-3 gap-4">
-                                    <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_sets">Series</label><input type="number" id="series" required class="input-clinical w-full text-center text-xl text-white"></div>
-                                    <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_reps">Reps</label><input type="number" id="reps" required class="input-clinical w-full text-center text-xl text-white" oninput="calcularTUT()"></div>
-                                    <div><label class="text-[9px] text-cyan-400 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_kg">Carga (Kg)</label><input type="number" id="carga" required class="input-clinical w-full text-center text-xl text-cyan-400 border-cyan-400/30"></div>
-                                </div>
-
-                                <div class="bg-black/40 border border-white/5 p-5 rounded-lg">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <div>
-                                            <label class="text-[9px] text-gray-400 uppercase tracking-widest block" data-i18n="lbl_cadence">Protocolo I.C.U.</label>
-                                            <p class="text-[7px] text-gray-600 tech-mono uppercase mt-1" data-i18n="desc_icu">Control biomecánico del movimiento</p>
-                                        </div>
-                                        <div class="text-right">
-                                            <span class="text-[9px] text-cyan-400 uppercase tech-mono tracking-widest">TUT: <strong id="tutDisplay" class="text-white text-sm">0s</strong></span>
-                                            <p class="text-[6px] text-gray-500 tech-mono uppercase mt-1" data-i18n="desc_tut">Tiempo Bajo Tensión Muscular</p>
-                                        </div>
-                                    </div>
-                                    <div class="grid grid-cols-3 gap-4">
-                                        <div><p class="text-[8px] text-center text-cyan-400 uppercase mb-1 tech-mono" data-i18n="cad_ecc">Excéntrica</p><input type="number" id="cadExc" value="3" class="input-clinical w-full p-2 text-center text-sm" oninput="calcularTUT()"></div>
-                                        <div><p class="text-[8px] text-center text-purple-400 uppercase mb-1 tech-mono" data-i18n="cad_iso">Isométrica</p><input type="number" id="cadIso" value="0" class="input-clinical w-full p-2 text-center text-sm" oninput="calcularTUT()"></div>
-                                        <div><p class="text-[8px] text-center text-green-400 uppercase mb-1 tech-mono" data-i18n="cad_con">Concéntrica</p><input type="number" id="cadCon" value="1" class="input-clinical w-full p-2 text-center text-sm" oninput="calcularTUT()"></div>
-                                    </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_reps">Reps Completadas</label><input type="number" id="reps" required class="input-clinical w-full text-center text-xl text-white"></div>
+                                    <div><label class="text-[9px] text-cyan-400 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_kg">Carga Actual (Kg)</label><input type="number" id="carga" required class="input-clinical w-full text-center text-xl text-cyan-400 border-cyan-400/30"></div>
                                 </div>
 
                                 <div class="pt-2">
                                     <div class="flex justify-between mb-3">
                                         <div>
                                             <label class="text-[9px] text-gray-500 uppercase tracking-widest block" data-i18n="lbl_rpe">Percepción de Esfuerzo (RPE)</label>
-                                            <p class="text-[7px] text-gray-600 tech-mono uppercase mt-1" data-i18n="desc_rpe">Escala de fatiga subjetiva</p>
                                         </div>
                                         <span id="rpeVal" class="text-white tech-mono font-bold">5.0 / 10.0</span>
                                     </div>
@@ -214,10 +134,24 @@
                                 </div>
                                 
                                 <div class="mt-8 relative">
-                                    <button id="btnSubmit" type="submit" class="w-full py-4 btn-cyber rounded text-[10px]" data-i18n="btn_compute">Computar Tensión Tisular</button>
-                                    <div id="restTimerBox" class="hidden w-full py-4 bg-black/80 border border-cyan-400/50 text-cyan-400 uppercase text-center text-[10px] tracking-widest rounded tech-mono"><span data-i18n="lbl_rest">Fase de Recuperación</span> // <span id="restTimerDisplay" class="text-white text-sm">0s</span></div>
+                                    <button id="btnSubmit" type="submit" class="w-full py-5 btn-cyber rounded text-[12px] font-black">
+                                        <span data-i18n="btn_log_set">REGISTRAR SERIE</span> <span id="currentSetDisplay" class="text-white ml-2">1</span>
+                                    </button>
+                                    <div id="restTimerBox" class="hidden w-full py-5 bg-black/80 border border-cyan-400/50 text-cyan-400 uppercase text-center text-[12px] tracking-widest rounded tech-mono font-bold shadow-[0_0_20px_rgba(0,240,255,0.2)]">
+                                        <span data-i18n="lbl_rest">Fase de Recuperación</span> // <span id="restTimerDisplay" class="text-white text-lg">0s</span>
+                                    </div>
                                 </div>
                             </form>
+                        </div>
+
+                        <div class="glass-panel p-6 border-l-2 border-l-purple-500 bg-[#0a1128]/30">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-[10px] text-purple-400 uppercase tracking-[0.2em] cinzel" data-i18n="graph_overload">Curva de Sobrecarga</h3>
+                                <span class="text-[7px] text-gray-500 tech-mono uppercase border border-gray-600 px-2 py-1 rounded">1RM Est.</span>
+                            </div>
+                            <div class="w-full h-40">
+                                <canvas id="overloadChart"></canvas>
+                            </div>
                         </div>
                     </div>
 
@@ -230,15 +164,21 @@
                             </div>
                             
                             <div class="w-full h-96 flex justify-center mt-8">
-                                <svg id="avatarSVG" viewBox="0 0 200 400" class="h-full w-auto drop-shadow-[0_0_15px_rgba(0,240,255,0.2)] overflow-visible"></svg>
-                            </div>
-                        </div>
-
-                        <div id="recetaMetabolica" class="glass-panel p-6 hidden flex-col justify-center border-t-2 border-t-green-400 bg-black/50">
-                            <p class="text-[9px] text-green-400 uppercase tracking-widest mb-4 tech-mono" data-i18n="rx_met">Prescripción Metabólica Post-Sesión</p>
-                            <div class="grid grid-cols-2 gap-4 text-center">
-                                <div><p class="text-2xl font-black text-white tech-mono" id="metAgua">0<span class="text-xs text-gray-500 ml-1">ml</span></p><p class="text-[8px] text-gray-500 uppercase mt-1 tracking-widest" data-i18n="rx_h2o">Reposición Hídrica</p></div>
-                                <div><p class="text-2xl font-black text-white tech-mono" id="metCarbs">0<span class="text-xs text-gray-500 ml-1">g</span></p><p class="text-[8px] text-gray-500 uppercase mt-1 tracking-widest" data-i18n="rx_carb">Carga Glucogénica</p></div>
+                                <svg id="avatarSVG" viewBox="0 0 200 400" class="h-full w-auto drop-shadow-[0_0_15px_rgba(0,240,255,0.2)] overflow-visible">
+                                    <g class="avatar-mesh">
+                                        <polygon points="85,30 115,30 120,60 100,75 80,60"/>
+                                        <polygon id="sensor-pecho" class="sensor-node optimal" points="70,80 130,80 140,120 100,140 60,120"/>
+                                        <polygon id="sensor-espalda" class="sensor-node optimal" points="60,120 100,140 140,120 125,190 100,200 75,190"/>
+                                        <polygon id="sensor-brazo1" class="sensor-node optimal" points="70,80 40,100 30,160 50,160 60,120"/>
+                                        <polygon id="sensor-brazo2" class="sensor-node optimal" points="130,80 160,100 170,160 150,160 140,120"/>
+                                        <polygon class="sensor-node optimal" points="30,160 20,230 40,230 50,160"/>
+                                        <polygon class="sensor-node optimal" points="170,160 180,230 160,230 150,160"/>
+                                        <polygon id="sensor-piernas1" class="sensor-node optimal" points="75,190 100,200 85,280 55,280"/>
+                                        <polygon id="sensor-piernas2" class="sensor-node optimal" points="100,200 125,190 145,280 115,280"/>
+                                        <polygon class="sensor-node optimal" points="55,280 85,280 75,370 60,370"/>
+                                        <polygon class="sensor-node optimal" points="115,280 145,280 140,370 125,370"/>
+                                    </g>
+                                </svg>
                             </div>
                         </div>
 
@@ -250,13 +190,10 @@
                 <div class="glass-panel p-8" id="pdfExportArea">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6 gap-4">
                         <div>
-                            <h2 class="cinzel text-xl text-white uppercase tracking-widest" data-i18n="diag_panel">Panel de Diagnóstico Clínico</h2>
-                            <p class="text-[9px] text-cyan-400 tech-mono uppercase mt-1">Vanguardia Analytics Suite</p>
+                            <h2 class="cinzel text-xl text-white uppercase tracking-widest" data-i18n="diag_panel">Panel de Control Global</h2>
+                            <p class="text-[9px] text-cyan-400 tech-mono uppercase mt-1">Vanguardia Cloud Analytics</p>
                         </div>
                         <div class="flex gap-2 w-full md:w-auto">
-                            <button onclick="enviarWhatsApp()" class="flex-1 md:flex-none border border-green-500/50 bg-green-900/20 text-green-400 hover:bg-green-500 hover:text-black transition px-4 py-2 text-[9px] uppercase tracking-widest rounded tech-mono text-center flex items-center justify-center gap-1">
-                                <span class="text-xs">💬</span> <span data-i18n="btn_wpp">Enviar Reporte</span>
-                            </button>
                             <button onclick="generarReportePDF()" class="flex-1 md:flex-none border border-cyan-500/50 bg-cyan-900/20 text-cyan-400 hover:bg-cyan-500 hover:text-black transition px-4 py-2 text-[9px] uppercase tracking-widest rounded tech-mono text-center">
                                 <span data-i18n="btn_pdf">Descargar PDF</span>
                             </button>
@@ -270,20 +207,15 @@
                             <p class="text-3xl tech-mono text-cyan-400" id="statsVol">0.0 <span class="text-sm text-gray-600">kg</span></p>
                         </div>
                         <div class="bg-black/50 p-6 rounded-lg border border-white/5">
-                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="c_snc">Estado del Sistema Nervioso (SNC)</p>
-                            <p class="text-[7px] text-gray-600 uppercase tracking-widest mb-3 tech-mono" data-i18n="desc_snc">Nivel de fatiga del sistema central</p>
-                            <p class="text-xl tech-mono text-purple-400 uppercase tracking-widest mt-2" id="statsSNC">Óptimo</p>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="c_ses">Sesiones Restantes (Suscripción)</p>
+                            <p class="text-[7px] text-gray-600 uppercase tracking-widest mb-3 tech-mono">Renovación mediante pasarela</p>
+                            <p class="text-3xl tech-mono text-white" id="statsSes">12</p>
                         </div>
                     </div>
 
-                    <h3 class="text-[10px] text-white uppercase tracking-widest mb-4 cinzel" data-i18n="c_history">Registro de Ejecución</h3>
+                    <h3 class="text-[10px] text-white uppercase tracking-widest mb-4 cinzel" data-i18n="c_history">Registro en la Nube (Logs)</h3>
                     <div id="listaMacro" class="text-[10px] text-gray-400 space-y-3 h-64 overflow-y-auto pr-2 tech-mono"></div>
                 </div>
-            </div>
-            
-            <div class="mt-12 pt-8 border-t border-white/5 flex flex-col items-center justify-center pb-8 opacity-60">
-                <span class="text-[8px] text-gray-500 uppercase tracking-[0.5em] mb-2 tech-mono">Engineered By</span>
-                <span class="text-lg text-white tracking-[0.3em] uppercase cinzel">Juan Gabriel Lopez</span>
             </div>
             
         </main>
@@ -293,42 +225,22 @@
         // MOTOR BILINGÜE
         const i18n = {
             en: {
-                id_protocol: "IDENTITY PROTOCOL", lbl_name: "Subject Name", ph_name: "Client ID", lbl_sex: "Biological Sex", opt_m: "Male", opt_f: "Female", lbl_age: "Chronological Age",
-                bio_protocol: "BIOMETRIC PARAMETERS", lbl_height: "Height (cm)", lbl_weight: "Mass (Kg)", lbl_bmi: "Body Mass Index (BMI)", desc_bmi: "Weight to height ratio",
-                path_protocol: "PATHOLOGICAL HISTORY", path_sub: "Prevention of cross-articular stress.", lbl_path: "Structural Restrictions",
-                path_none: "Optimal Structural Integrity", path_knee: "Patellar Complex Pathology", path_back: "Lumbar / Sacral Compression", path_shoul: "Rotator Cuff Deficit",
-                btn_continue: "Initialize Biometrics", btn_finish: "Deploy Master Interface", nav_coach: "Diagnostic Mode", nav_user: "Execution Mode",
-                ai_directive: "Ontological Directive", ai_load: "Calibrating telemetry...", mod_exec: "Execution Module", btn_cam: "Video Analysis",
-                lbl_target: "Anatomical Target", mus_quad: "Lower Body: Quadriceps", mus_ham: "Lower Body: Hamstrings / Glutes", mus_chest: "Upper Body: Pectoralis", mus_back: "Upper Body: Lats / Back", mus_shoul: "Articular: Deltoids / Shoulders", mus_bic: "Arms: Biceps", mus_tri: "Arms: Triceps", mus_core: "Midsection: Core",
-                lbl_sets: "Sets", lbl_reps: "Repetitions", lbl_kg: "Load (Kg)", 
-                lbl_cadence: "I.C.U. Protocol", desc_icu: "Biomechanical movement control", desc_tut: "Time Under Muscle Tension", cad_ecc: "Eccentric", cad_iso: "Isometric", cad_con: "Concentric",
-                lbl_rpe: "Perceived Exertion (RPE)", desc_rpe: "Subjective fatigue scale", btn_compute: "Compute Tissue Tension", lbl_rest: "Recovery Phase",
-                map_tissue: "Tissue Mapping", map_live: "Live Telemetry", rx_met: "Post-Session Metabolic Prescription", rx_h2o: "Hydration Replenishment", rx_carb: "Glycogen Load",
-                diag_panel: "Clinical Diagnostic Panel", btn_wpp: "Send Report", btn_pdf: "Download PDF", 
-                c_vol: "Accumulated Structural Tonnage", desc_vol: "Total load displaced in cycle", c_snc: "Central Nervous System Status", desc_snc: "Central system fatigue level", c_history: "Execution Log",
-                ai_opt: "Systemic parameters at 100%. Protocol authorized for maximum structural tension without limitation.",
-                ai_fat: "Neurological fatigue detected. Decrease absolute load by 20% to allow tissue regeneration.",
-                ai_warn: "Restriction active in [X]. Redirecting vectors to avoid axial load on the affected joint.",
-                snc_o: "OPTIMAL", snc_f: "COMPROMISED"
+                nav_coach: "Diagnostic Mode", nav_user: "Execution Mode", mod_exec: "Execution Module",
+                lbl_target: "Anatomical Target", ex_squat: "Lower Body: Barbell Squat", ex_dl: "Lower Body: Deadlift", ex_bench: "Upper Body: Bench Press", ex_pull: "Upper Body: Pull-ups",
+                lbl_reps: "Reps Completed", lbl_kg: "Current Load (Kg)", lbl_rpe: "Perceived Exertion (RPE)",
+                btn_log_set: "LOG SET", lbl_rest: "Recovery Phase", graph_overload: "Progressive Overload Curve",
+                map_tissue: "Tissue Mapping", map_live: "Live Telemetry", diag_panel: "Global Control Panel", btn_pdf: "Download PDF", 
+                c_vol: "Accumulated Structural Tonnage", desc_vol: "Total load displaced in cycle", c_ses: "Remaining Sessions (Subscription)", c_history: "Cloud Logs",
+                sub_alert: "Critical Subscription", sub_desc: "You have <span id='alertSesiones' class='text-white font-bold text-sm'></span> sessions left. Renew to prevent data loss.", btn_renew: "Renew with Apple Pay / Card"
             },
             es: {
-                id_protocol: "PROTOCOLO DE IDENTIDAD", lbl_name: "Nombre del Sujeto", ph_name: "ID Cliente", lbl_sex: "Sexo Biológico", opt_m: "Masculino", opt_f: "Femenino", lbl_age: "Edad Cronológica",
-                bio_protocol: "PARÁMETROS BIOMÉTRICOS", lbl_height: "Estatura (cm)", lbl_weight: "Masa (Kg)", lbl_bmi: "Índice de Masa Corporal (IMC)", desc_bmi: "Relación peso/estatura",
-                path_protocol: "HISTORIAL PATOLÓGICO", path_sub: "Prevención de estrés articular cruzado.", lbl_path: "Restricciones Estructurales",
-                path_none: "Integridad Estructural Óptima", path_knee: "Patología en Complejo Patelar / Rodilla", path_back: "Compresión Lumbar / Sacro", path_shoul: "Déficit en Manguito Rotador / Hombro",
-                btn_continue: "Inicializar Biometría", btn_finish: "Desplegar Interfaz Maestra", nav_coach: "Modo Diagnóstico", nav_user: "Modo Ejecución",
-                ai_directive: "Directriz Ontológica", ai_load: "Calibrando telemetría...", mod_exec: "Módulo de Ejecución", btn_cam: "Análisis Video",
-                lbl_target: "Target Anatómico", mus_quad: "Tren Inferior: Cuádriceps", mus_ham: "Tren Inferior: Isquiosurales y Glúteo", mus_chest: "Tren Superior: Pectoral", mus_back: "Tren Superior: Dorsal / Espalda", mus_shoul: "Articular: Deltoides / Hombros", mus_bic: "Brazos: Bíceps", mus_tri: "Brazos: Tríceps", mus_core: "Zona Media: Core",
-                lbl_sets: "Series", lbl_reps: "Repeticiones", lbl_kg: "Carga (Kg)", 
-                lbl_cadence: "Protocolo I.C.U.", desc_icu: "Control biomecánico del movimiento", desc_tut: "Tiempo Bajo Tensión Muscular", cad_ecc: "Excéntrica", cad_iso: "Isométrica", cad_con: "Concéntrica",
-                lbl_rpe: "Percepción de Esfuerzo (RPE)", desc_rpe: "Escala de fatiga subjetiva", btn_compute: "Computar Tensión Tisular", lbl_rest: "Fase de Recuperación",
-                map_tissue: "Mapeo Tisular", map_live: "Telemetría en Vivo", rx_met: "Prescripción Metabólica Post-Sesión", rx_h2o: "Reposición Hídrica", rx_carb: "Carga Glucogénica",
-                diag_panel: "Panel de Diagnóstico Clínico", btn_wpp: "Enviar Reporte", btn_pdf: "Descargar PDF", 
-                c_vol: "Tonelaje Estructural Acumulado", desc_vol: "Carga total desplazada en el ciclo", c_snc: "Estado del Sistema Nervioso (SNC)", desc_snc: "Nivel de fatiga del sistema central", c_history: "Registro de Ejecución",
-                ai_opt: "Parámetros sistémicos al 100%. Protocolo autorizado para máxima tensión estructural sin limitación.",
-                ai_fat: "Fatiga neurológica detectada. Disminuir carga absoluta en un 20% para permitir regeneración tisular.",
-                ai_warn: "Restricción activa en [X]. Redirigiendo vectores para evitar carga axial sobre la articulación afectada.",
-                snc_o: "ÓPTIMO", snc_f: "COMPROMETIDO"
+                nav_coach: "Modo Diagnóstico", nav_user: "Modo Ejecución", mod_exec: "Módulo de Ejecución",
+                lbl_target: "Target Anatómico", ex_squat: "Tren Inferior: Sentadilla Libre", ex_dl: "Tren Inferior: Peso Muerto", ex_bench: "Tren Superior: Press de Banca", ex_pull: "Tren Superior: Dominadas",
+                lbl_reps: "Reps Completadas", lbl_kg: "Carga Actual (Kg)", lbl_rpe: "Percepción de Esfuerzo (RPE)",
+                btn_log_set: "REGISTRAR SERIE", lbl_rest: "Fase de Recuperación", graph_overload: "Curva de Sobrecarga",
+                map_tissue: "Mapeo Tisular", map_live: "Telemetría en Vivo", diag_panel: "Panel de Control Global", btn_pdf: "Descargar PDF", 
+                c_vol: "Tonelaje Estructural Acumulado", desc_vol: "Carga total desplazada en el ciclo", c_ses: "Sesiones Restantes (Suscripción)", c_history: "Registro en la Nube (Logs)",
+                sub_alert: "Suscripción Crítica", sub_desc: "Te restan <span id='alertSesiones' class='text-white font-bold text-sm'></span> sesiones de tu plan actual. Renueva para no perder tu data en la nube.", btn_renew: "Renovar con Apple Pay / Card"
             }
         };
 
@@ -337,136 +249,160 @@
             currLang = l;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('btn' + (l==='en'?'En':'Es') + 'Global').classList.add('active');
-            
             document.querySelectorAll('[data-i18n]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n')]) el.innerHTML = i18n[l][el.getAttribute('data-i18n')]; });
-            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n-placeholder')]) el.placeholder = i18n[l][el.getAttribute('data-i18n-placeholder')]; });
             document.getElementById('htmlTag').lang = l;
-            
-            // Update Toggle Button Text based on state
-            if(document.getElementById('vistaMacro').classList.contains('activa')) {
-                document.getElementById('btnVista').innerText = i18n[l].nav_user;
-            } else {
-                document.getElementById('btnVista').innerText = i18n[l].nav_coach;
-            }
-
-            if(db && db.nombre) renderAI(); 
+            actualizarGraficaProgreso(); // Refrescar gráfica
         }
 
-        // --- CYBER-ANATOMÍA SVGs (VISIBILIDAD MAXIMIZADA) ---
-        const pathMale = `
-            <g class="avatar-mesh">
-                <polygon points="85,30 115,30 120,60 100,75 80,60"/>
-                <polygon id="sensor-pecho" class="sensor-node optimal" points="70,80 130,80 140,120 100,140 60,120"/>
-                <polygon id="sensor-espalda" class="sensor-node optimal" points="60,120 100,140 140,120 125,190 100,200 75,190"/>
-                <polygon id="sensor-brazo1" class="sensor-node optimal" points="70,80 40,100 30,160 50,160 60,120"/>
-                <polygon id="sensor-brazo2" class="sensor-node optimal" points="130,80 160,100 170,160 150,160 140,120"/>
-                <polygon class="sensor-node optimal" points="30,160 20,230 40,230 50,160"/>
-                <polygon class="sensor-node optimal" points="170,160 180,230 160,230 150,160"/>
-                <polygon id="sensor-piernas1" class="sensor-node optimal" points="75,190 100,200 85,280 55,280"/>
-                <polygon id="sensor-piernas2" class="sensor-node optimal" points="100,200 125,190 145,280 115,280"/>
-                <polygon class="sensor-node optimal" points="55,280 85,280 75,370 60,370"/>
-                <polygon class="sensor-node optimal" points="115,280 145,280 140,370 125,370"/>
-            </g>
-        `;
-        const pathFemale = `
-            <g class="avatar-mesh">
-                <polygon points="88,35 112,35 115,60 100,75 85,60"/>
-                <polygon id="sensor-pecho" class="sensor-node optimal" points="75,80 125,80 130,115 100,130 70,115"/>
-                <polygon id="sensor-espalda" class="sensor-node optimal" points="70,115 100,130 130,115 115,170 100,180 85,170"/>
-                <polygon class="sensor-node optimal" points="85,170 100,180 115,170 135,210 100,220 65,210"/>
-                <polygon id="sensor-brazo1" class="sensor-node optimal" points="75,80 50,105 45,155 60,155 70,115"/>
-                <polygon id="sensor-brazo2" class="sensor-node optimal" points="125,80 150,105 155,155 140,155 130,115"/>
-                <polygon class="sensor-node optimal" points="45,155 35,220 50,220 60,155"/>
-                <polygon class="sensor-node optimal" points="155,155 165,220 150,220 140,155"/>
-                <polygon id="sensor-piernas1" class="sensor-node optimal" points="65,210 100,220 85,290 55,290"/>
-                <polygon id="sensor-piernas2" class="sensor-node optimal" points="100,220 135,210 145,290 115,290"/>
-                <polygon class="sensor-node optimal" points="55,290 85,290 75,370 60,370"/>
-                <polygon class="sensor-node optimal" points="115,290 145,290 140,370 125,370"/>
-            </g>
-        `;
-
-        let db = JSON.parse(localStorage.getItem('vanguardia_apex_v2')) || null;
+        // SIMULACIÓN DE BASE DE DATOS (MOCK CLOUD)
+        let db = JSON.parse(localStorage.getItem('vanguardia_saas_db')) || {
+            nombre: 'Juan Gabriel', peso: 85.0, imc: 24.5, restantes: 12, currentSet: 1,
+            historial: [
+                { ts: new Date().getTime() - 864000000, fecha: "10/04", ej: "Sentadilla Libre", carga: 80, reps: 8, rm1: 101 },
+                { ts: new Date().getTime() - 432000000, fecha: "15/04", ej: "Sentadilla Libre", carga: 85, reps: 8, rm1: 107 },
+                { ts: new Date().getTime() - 100000, fecha: "20/04", ej: "Sentadilla Libre", carga: 90, reps: 6, rm1: 108 }
+            ]
+        };
 
         document.addEventListener("DOMContentLoaded", () => {
             setLang('es');
-            if (!db) { document.getElementById('clinicalOnboarding').style.display = 'flex'; document.getElementById('btnEnGlobal').parentElement.style.display = 'flex'; } 
-            else { document.getElementById('btnEnGlobal').parentElement.style.display = 'none'; initApp(); }
+            initApp();
         });
 
-        // --- WIZARD Y CÁLCULOS ---
-        function calcularIMCOnboarding() {
-            let h = parseFloat(document.getElementById('obHeight').value) / 100;
-            let w = parseFloat(document.getElementById('obWeight').value);
-            if(h > 0 && w > 0) { document.getElementById('obIMC').innerText = (w / (h * h)).toFixed(1); }
+        function editWeight() {
+            let nuevoPeso = prompt("Actualizar Peso Base (Kg):", db.peso);
+            if(nuevoPeso && !isNaN(nuevoPeso)) {
+                db.peso = parseFloat(nuevoPeso);
+                document.getElementById('userIMC').innerText = (db.peso / 2.89).toFixed(1); // Mock IMC calc
+                saveCloud();
+            }
         }
 
-        function nextStep(s) {
-            if(s===2 && !document.getElementById('obName').value) return;
-            if(s===3 && (!document.getElementById('obHeight').value || !document.getElementById('obWeight').value)) return;
-            document.querySelectorAll('.step-module').forEach(el => el.classList.remove('active'));
-            document.getElementById('step'+s).classList.add('active');
+        function saveCloud() {
+            localStorage.setItem('vanguardia_saas_db', JSON.stringify(db));
+            // Aquí iría: cloudDB.collection('usuarios').doc(db.nombre).set(db);
         }
 
-        function finishOnboarding() {
-            let h = parseFloat(document.getElementById('obHeight').value) / 100;
-            let w = parseFloat(document.getElementById('obWeight').value);
-            let imc = (w / (h * h)).toFixed(1);
-
-            db = {
-                nombre: document.getElementById('obName').value || 'Subject-01',
-                sexo: document.getElementById('obSex').value, edad: document.getElementById('obAge').value || 25,
-                peso: w, altura: h*100, imc: imc, dolor: document.getElementById('obPain').value, historial: []
-            };
-            localStorage.setItem('vanguardia_apex_v2', JSON.stringify(db));
-            document.getElementById('clinicalOnboarding').style.display = 'none';
-            document.getElementById('btnEnGlobal').parentElement.style.display = 'none'; // Hide floating lang once in app
-            initApp();
-        }
-
-        // --- CORE APP ---
         function initApp() {
-            document.getElementById('mainContent').style.display = 'block';
             document.getElementById('userName').innerText = db.nombre;
             document.getElementById('userIMC').innerText = db.imc;
+            document.getElementById('currentSetDisplay').innerText = db.currentSet;
             
-            document.getElementById('avatarSVG').innerHTML = db.sexo === 'F' ? pathFemale : pathMale;
-            renderAI(); actualizarMapaDeCalor();
-        }
+            // LÓGICA DE COMMERCE (STRIPE PAYWALL)
+            if(db.restantes <= 2) {
+                document.getElementById('paywallBanner').classList.remove('hidden');
+                // IMPORTANTE: Aquí pegas el Payment Link que generas en tu cuenta de Stripe
+                document.getElementById('paywallBanner').querySelector('a').href = "https://buy.stripe.com/test_XXXXXXXXX"; 
+                document.getElementById('alertSesiones').innerText = db.restantes;
+            }
 
-        function renderAI() {
-            let msg = i18n[currLang].ai_opt;
-            let fatigaTotal = 0; const ahora = new Date().getTime();
-            db.historial.forEach(s => { if (ahora - s.ts < 48 * 3600 * 1000) fatigaTotal += (s.rpe * s.series); });
-
-            if(fatigaTotal > 50) msg = i18n[currLang].ai_fat;
-            else if(db.dolor !== 'Ninguno') msg = i18n[currLang].ai_warn.replace('[X]', db.dolor);
-
-            document.getElementById('aiMessage').innerText = msg;
-            document.getElementById('statsSNC').innerText = fatigaTotal > 50 ? i18n[currLang].snc_f : i18n[currLang].snc_o;
-            document.getElementById('statsSNC').className = fatigaTotal > 50 ? "text-xl tech-mono text-red-500 uppercase tracking-widest mt-2" : "text-xl tech-mono text-purple-400 uppercase tracking-widest mt-2";
-        }
-
-        function calcularTUT() {
-            const exc = parseFloat(document.getElementById('cadExc').value) || 0; const iso = parseFloat(document.getElementById('cadIso').value) || 0; const con = parseFloat(document.getElementById('cadCon').value) || 0; const reps = parseInt(document.getElementById('reps').value) || 0;
-            document.getElementById('tutDisplay').innerText = `${(exc + iso + con) * reps}s`;
+            actualizarMapaDeCalor();
+            actualizarGraficaProgreso();
         }
 
         function actualizarRPE(v) {
             document.getElementById('rpeVal').innerText = `${parseFloat(v).toFixed(1)} / 10.0`; 
-            const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c'; document.getElementById('rpeVal').style.color = c;
+            const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c';
+            document.getElementById('rpeVal').style.color = c;
         }
 
-        // --- CÁMARA ---
-        let streamActivo = null;
-        function toggleCamera() {
-            const vBox = document.getElementById('videoContainer'); const video = document.getElementById('cameraFeed');
-            if (vBox.classList.contains('hidden')) {
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
-                        streamActivo = stream; video.srcObject = stream; vBox.classList.remove('hidden');
-                    }).catch(err => alert("Permiso de cámara denegado."));
+        // --- SUBMIT SERIE X SERIE ---
+        let restInt;
+        document.getElementById('formVanguardia').onsubmit = function(e) {
+            e.preventDefault(); 
+            const carga = parseFloat(document.getElementById('carga').value); 
+            const reps = parseInt(document.getElementById('reps').value); 
+            const rpe = parseFloat(document.getElementById('rpe').value); 
+            const dom = document.getElementById('dominioSelector').value;
+            const targetSets = parseInt(document.getElementById('targetSets').value);
+            const ts = new Date().getTime(); 
+            let rm1 = (carga * (1 + (reps / 30))).toFixed(1);
+
+            // Guardar esta serie en la "Nube"
+            db.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }), ej: dom, carga, reps, series: 1, rpe, rm1 });
+            
+            // Lógica de avance de sets
+            if(db.currentSet < targetSets) {
+                db.currentSet++;
+            } else {
+                // Termina el ejercicio
+                db.currentSet = 1;
+                db.restantes--; // Descuenta sesión de la suscripción
+                alert("Ejercicio completado. Datos sincronizados a la nube.");
+                if(db.restantes <= 2) location.reload(); // Mostrar paywall si aplica
+            }
+            
+            document.getElementById('currentSetDisplay').innerText = db.currentSet;
+            saveCloud();
+            actualizarMapaDeCalor();
+            actualizarGraficaProgreso();
+
+            // Activar temporizador de descanso
+            let t = rpe >= 8 ? 90 : 60; 
+            document.getElementById('btnSubmit').classList.add('hidden'); 
+            document.getElementById('restTimerBox').classList.remove('hidden');
+            
+            clearInterval(restInt);
+            restInt = setInterval(() => { 
+                t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; 
+                if(t <= 0) { 
+                    clearInterval(restInt); 
+                    document.getElementById('restTimerBox').classList.add('hidden'); 
+                    document.getElementById('btnSubmit').classList.remove('hidden'); 
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]); // Alerta de fin de descanso
+                } 
+            }, 1000);
+        };
+
+        // --- GRÁFICA DE SOBRECARGA PROGRESIVA ---
+        let overloadChartInst;
+        function actualizarGraficaProgreso() {
+            const ctx = document.getElementById('overloadChart'); if(!ctx) return;
+            const ejActual = document.getElementById('dominioSelector').value;
+            
+            // Filtrar historial de la nube por ejercicio seleccionado
+            const historialEj = db.historial.filter(s => s.ej === ejActual);
+            
+            // Agrupar por fechas para evitar puntos sobrepuestos (tomar el RM máximo del día)
+            let datosGrafica = [];
+            let etiquetas = [];
+            historialEj.forEach(s => {
+                if(!etiquetas.includes(s.fecha)) {
+                    etiquetas.push(s.fecha);
+                    datosGrafica.push(s.rm1);
+                } else {
+                    // Si ya existe la fecha, actualizar si el rm1 es mayor
+                    let idx = etiquetas.indexOf(s.fecha);
+                    if(s.rm1 > datosGrafica[idx]) datosGrafica[idx] = s.rm1;
                 }
-            } else { if(streamActivo) { streamActivo.getTracks().forEach(track => track.stop()); } video.srcObject = null; vBox.classList.add('hidden'); }
+            });
+
+            if(overloadChartInst) overloadChartInst.destroy();
+            
+            overloadChartInst = new Chart(ctx.getContext('2d'), { 
+                type: 'line', 
+                data: { 
+                    labels: etiquetas, 
+                    datasets: [{ 
+                        label: '1RM Estimado (kg)', 
+                        data: datosGrafica, 
+                        borderColor: '#b026ff', 
+                        backgroundColor: 'rgba(176, 38, 255, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff',
+                        fill: true,
+                        tension: 0.3
+                    }] 
+                }, 
+                options: { 
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { 
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } }, 
+                        x: { grid: { display: false }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } } 
+                    },
+                    plugins: { legend: { display: false } }
+                } 
+            });
         }
 
         // --- MAPA DE CALOR ---
@@ -475,44 +411,20 @@
             h.forEach(s => {
                 if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
                     let imp = parseFloat(s.rpe) * parseInt(s.series);
-                    if(s.ej.includes("Pectoral") || s.ej.includes("Deltoides")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
-                    if(s.ej.includes("Dorsal")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
-                    if(s.ej.includes("Cuádriceps") || s.ej.includes("Isquios")) { fatiga.piernas += imp; }
-                    if(s.ej.includes("Bíceps") || s.ej.includes("Tríceps") || s.ej.includes("Brazos")) { fatiga.brazos += imp; }
+                    if(s.ej.includes("Sentadilla") || s.ej.includes("Muerto")) { fatiga.piernas += imp; }
+                    if(s.ej.includes("Press de Banca")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
+                    if(s.ej.includes("Dominadas")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
                 }
             });
             
             const aplicar = (id, f) => { 
                 let el = document.getElementById(id); if(!el) return; 
-                if(f > 20) el.className.baseVal = "sensor-node fatigued"; else el.className.baseVal = "sensor-node optimal"; 
+                if(f > 10) el.className.baseVal = "sensor-node fatigued"; else el.className.baseVal = "sensor-node optimal"; 
             };
             aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda); aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos); aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas);
         }
 
-        // --- SUBMIT ---
-        let restInt;
-        document.getElementById('formVanguardia').onsubmit = function(e) {
-            e.preventDefault(); 
-            const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const rpe = parseFloat(document.getElementById('rpe').value); const dom = document.getElementById('dominioSelector').value;
-            const ts = new Date().getTime(); 
-
-            db.historial.push({ ts: ts, fecha: new Date().toLocaleDateString(), ej: dom, carga, reps, series, rpe });
-            localStorage.setItem('vanguardia_apex_v2', JSON.stringify(db));
-
-            // Metabólico
-            const ton = carga * reps * series;
-            document.getElementById('metAgua').innerText = ((ton / 1000) * 120).toFixed(0); 
-            document.getElementById('metCarbs').innerText = ((ton / 1000) * 4).toFixed(0);
-            document.getElementById('recetaMetabolica').classList.remove('hidden'); document.getElementById('recetaMetabolica').classList.add('flex');
-
-            actualizarMapaDeCalor(); renderAI();
-
-            // Descanso
-            let t = rpe >= 8 ? 90 : 60; document.getElementById('btnSubmit').classList.add('hidden'); document.getElementById('restTimerBox').classList.remove('hidden');
-            restInt = setInterval(() => { t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; if(t <= 0) { clearInterval(restInt); document.getElementById('restTimerBox').classList.add('hidden'); document.getElementById('btnSubmit').classList.remove('hidden'); } }, 1000);
-        };
-
-        // --- COACH MODE / EXPORT ---
+        // --- COACH MODE ---
         function toggleVista() { 
             document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa'); 
             if(document.getElementById('vistaMacro').classList.contains('activa')) { 
@@ -524,19 +436,15 @@
         function renderCoachMode() {
             let vol = 0; db.historial.forEach(s => vol += (s.carga * s.reps * s.series));
             document.getElementById('statsVol').innerHTML = `${vol.toLocaleString()} <span class="text-sm text-gray-600">kg</span>`;
+            document.getElementById('statsSes').innerText = db.restantes;
+            
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
-            [...db.historial].reverse().slice(0, 30).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-2"><span class="text-cyan-400">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps)</span></div>`);
-        }
-
-        function enviarWhatsApp() {
-            let vol = 0; db.historial.forEach(s => vol += (s.carga * s.reps * s.series));
-            const msg = `*VANGUARDIA ANALYTICS*%0A*ID Cliente:* ${db.nombre}%0A*IMC:* ${db.imc}%0A*Tonelaje Acumulado:* ${vol}kg%0A*Estado SNC:* ${document.getElementById('statsSNC').innerText}%0A_Reporte generado automáticamente por Vanguardia Elite._`;
-            window.open(`https://wa.me/?text=${msg}`, '_blank');
+            [...db.historial].reverse().slice(0, 30).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-2"><span class="text-cyan-400">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps) [RPE: ${s.rpe}]</span></div>`);
         }
 
         function generarReportePDF() { 
             const element = document.getElementById('pdfExportArea');
-            const opt = { margin: 1, filename: `Vanguardia_Report_${db.nombre}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+            const opt = { margin: 1, filename: `Vanguardia_Cloud_Report_${db.nombre}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#030508' }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save();
         }
     </script>
