@@ -1,7 +1,305 @@
-<div class="mt-16 pt-8 border-t border-[var(--cyan-neon)]/20 flex flex-col items-center justify-center pb-8 w-full">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguardia | Centro de Gestión Elite</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#050b14">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { 
+            --cyan-neon: #00f0ff; 
+            --purple-neon: #b026ff; 
+            --green-neon: #39ff14; 
+            --red-neon: #ff003c;
+            --bg-dark: #050b14;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #e2e8f0; overflow-x: hidden; margin: 0; }
+        
+        .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 50% 120%, rgba(176, 38, 255, 0.1) 0%, transparent 50%); opacity: 1; pointer-events: none; z-index: -1; }
+        .glass-card { background: rgba(5, 11, 20, 0.6); border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.05); backdrop-filter: blur(15px); }
+        
+        #modalPreVuelo, #modalPerfiles { background: rgba(5, 11, 20, 0.95); backdrop-filter: blur(20px); display: none; }
+        .vista { display: none; animation: fadeIn 0.4s ease forwards; }
+        .vista.activa { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .supp-check { appearance: none; width: 18px; height: 18px; border: 1px solid var(--cyan-neon); border-radius: 3px; background: rgba(0, 240, 255, 0.1); cursor: pointer; transition: all 0.3s; }
+        .supp-check:checked { background: var(--green-neon); border-color: var(--green-neon); box-shadow: 0 0 15px var(--green-neon); }
+
+        #authGateway { position: fixed; inset: 0; background: radial-gradient(circle at center, #0a1128 0%, #000000 100%); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .auth-door-open { animation: doorOpen 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
+        @keyframes doorOpen { 0% { transform: scale(1); opacity: 1; filter: brightness(1); } 100% { transform: scale(1.5); opacity: 0; filter: brightness(2); visibility: hidden; } }
+
+        .fingerprint-btn { width: 120px; height: 140px; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 20px; transition: all 0.3s; border: 1px solid rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1); }
+        .fingerprint-icon { width: 90px; height: 110px; fill: rgba(0, 240, 255, 0.3); transition: fill 0.3s, filter 0.3s; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-neon), 0 0 40px var(--cyan-neon); opacity: 0; border-radius: 5px; }
+        
+        .scanning .fingerprint-btn { border-color: var(--cyan-neon); box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.3), 0 0 30px rgba(0, 240, 255, 0.2); }
+        .scanning .fingerprint-icon { fill: var(--cyan-neon); filter: drop-shadow(0 0 10px var(--cyan-neon)); }
+        .scanning .scan-line { opacity: 1; animation: scanAnim 1.2s ease-in-out infinite alternate; }
+        @keyframes scanAnim { 0% { top: 5%; } 100% { top: 95%; } }
+
+        .auth-pin { letter-spacing: 0.6em; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 1.8rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--cyan-neon); outline: none; transition: all 0.3s; padding: 10px; text-shadow: 0 0 5px var(--cyan-neon); }
+        .btn-tech { background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.2)); border: 1px solid var(--cyan-neon); color: var(--cyan-neon); box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); transition: all 0.3s; }
+        .btn-tech:hover { background: var(--cyan-neon); color: #000; box-shadow: 0 0 20px var(--cyan-neon); }
+        .btn-tech-purple { background: linear-gradient(45deg, rgba(176, 38, 255, 0.1), rgba(176, 38, 255, 0.2)); border: 1px solid var(--purple-neon); color: #e9d5ff; box-shadow: 0 0 10px rgba(176, 38, 255, 0.1); }
+        .btn-tech-purple:hover { background: var(--purple-neon); color: #fff; box-shadow: 0 0 20px var(--purple-neon); }
+        .text-tech { font-family: 'Share Tech Mono', monospace; }
+    </style>
+</head>
+<body class="min-h-screen pb-10">
+
+    <button id="btnInstallPWA" class="hidden fixed top-4 right-4 btn-tech text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full z-[10001]">Instalar App</button>
+
+    <div id="onboardingScreen" class="fixed inset-0 bg-[#050b14] z-[10000] flex flex-col items-center justify-center p-8 transition-opacity duration-800">
+        <h1 class="text-4xl font-black text-white tracking-[0.3em] uppercase mb-4 text-center" style="font-family: 'Cinzel', serif; text-shadow: 0 0 20px rgba(255,255,255,0.5);">Vanguardia</h1>
+        <p class="text-xs text-[#00f0ff] uppercase tracking-[0.2em] mb-12 text-center text-tech drop-shadow-[0_0_5px_#00f0ff]">Ingeniería Biomecánica & Biohacking</p>
+        
+        <div class="space-y-6 w-full max-w-sm mb-12">
+            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--cyan-neon)]">
+                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">1. Hipertrofia Clínica</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">Dosificación exacta de tensión mecánica para crecimiento celular.</p>
+            </div>
+            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--purple-neon)]">
+                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">2. Neuro-Recuperación</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">Telemetría del SNC para evitar sobreentrenamiento.</p>
+            </div>
+            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--green-neon)]">
+                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">3. Optimización Química</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed">Prescripciones hídricas y de nutrientes para regeneración.</p>
+            </div>
+        </div>
+        <button onclick="cerrarOnboarding()" class="px-10 py-4 btn-tech font-black uppercase tracking-widest text-[10px] rounded-full">Acceder al Servidor</button>
+    </div>
+
+    <div id="authGateway">
+        <h1 class="text-3xl font-black text-white tracking-[0.3em] uppercase mb-2" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
+        <p class="text-[10px] text-[var(--cyan-neon)] uppercase tracking-[0.3em] mb-12 text-tech">Protocolo de Seguridad</p>
+        
+        <div class="mb-10 w-full px-12 max-w-xs">
+            <input type="password" id="pinAcceso" maxlength="4" placeholder="••••" class="auth-pin w-full">
+            <p class="text-[8px] text-center text-gray-500 uppercase mt-3 tracking-widest">Ingrese Código de Autenticación</p>
+        </div>
+
+        <div id="biometricSensor" class="fingerprint-btn" onmousedown="iniciarEscaneo()" onmouseup="detenerEscaneo()" onmouseleave="detenerEscaneo()" ontouchstart="iniciarEscaneo()" ontouchend="detenerEscaneo()">
+            <svg viewBox="0 0 24 24" class="fingerprint-icon">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4h-2zm0 6h2v2h-2z" fill="inherit"/>
+                <path d="M12 4.5c-4.14 0-7.5 3.36-7.5 7.5 0 1.34.35 2.6 1 3.73l1.24-1.24c-.46-.77-.74-1.66-.74-2.49 0-2.76 2.24-5 5-5s5 2.24 5 5c0 .83-.28 1.72-.74 2.49l1.24 1.24c.65-1.13 1-2.39 1-3.73 0-4.14-3.36-7.5-7.5-7.5zM6.5 12c0 2.21 1.34 4.13 3.25 5.09l1.1-1.66C9.53 14.77 8.5 13.5 8.5 12c0-1.93 1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5c0 1.5-1.03 2.77-2.35 3.43l1.1 1.66C16.16 16.13 17.5 14.21 17.5 12c0-3.04-2.46-5.5-5.5-5.5S6.5 8.96 6.5 12z" fill="inherit"/>
+            </svg>
+            <div class="scan-line"></div>
+        </div>
+        <p class="text-[9px] text-[var(--cyan-neon)] uppercase tracking-widest mt-6 animate-pulse text-tech" id="textoSensor">Esperando Huella Digital...</p>
+    </div>
+
+    <div id="mainContent" style="display: none;">
+        <div id="ambient" class="ambient-bg"></div>
+
+        <nav class="p-4 flex justify-between items-center border-b border-[var(--cyan-neon)]/20 relative z-10 bg-black/80 backdrop-blur-xl sticky top-0">
+            <div class="text-lg font-black tracking-[0.2em] uppercase flex items-center gap-3" style="font-family: 'Cinzel', serif;">
+                Vanguardia.
+                <button onclick="abrirModalPerfiles()" class="text-[8px] border border-[var(--cyan-neon)]/30 text-[var(--cyan-neon)] bg-[var(--cyan-neon)]/10 px-3 py-1 rounded uppercase tracking-widest">
+                    <span id="nombreAtletaNav">Cliente</span>
+                </button>
+            </div>
+            <div id="badgeSesiones" class="text-[9px] px-3 py-1 rounded border border-[var(--green-neon)]/50 text-[var(--green-neon)] bg-[var(--green-neon)]/10 font-bold uppercase tracking-widest">
+                Sesiones: 0
+            </div>
+            <button onclick="toggleVista()" id="btnVista" class="text-[9px] btn-tech font-bold uppercase px-4 py-2 rounded tracking-widest">Expediente</button>
+        </nav>
+
+        <main id="reportContent" class="max-w-7xl mx-auto p-4 space-y-6">
+            <div id="vistaMicro" class="vista activa space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+                    <div class="lg:col-span-6 glass-card p-6 rounded-2xl relative">
+                        <form id="formVanguardia" class="space-y-5">
+                            <div class="border border-[var(--cyan-neon)]/20 p-4 rounded-xl bg-[#0a1128]/50">
+                                <label class="text-[9px] font-bold uppercase tracking-widest text-[var(--cyan-neon)] block mb-3 text-tech">Mecánica de Impacto</label>
+                                <select id="dominioSelector" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-white text-xs outline-none focus:border-[var(--cyan-neon)]">
+                                    <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Piernas)</option>
+                                    <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Isquios)</option>
+                                    <option value="Empuje (Pecho, Hombros)">Empuje (Tren Superior)</option>
+                                    <option value="Tracción (Espalda, Bíceps)">Tracción (Tren Superior)</option>
+                                    <option value="Metabólico">Metabólico Sistémico</option>
+                                </select>
+                                <input type="text" id="ejercicioNombre" required placeholder="Nombre del movimiento..." class="w-full bg-transparent border-b border-[var(--cyan-neon)]/30 p-3 text-white text-sm mt-3 outline-none">
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] text-gray-400 uppercase text-center block mb-1">Series</label><input type="number" id="series" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black"></div>
+                                <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] text-gray-400 uppercase text-center block mb-1">Reps</label><input type="number" id="reps" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black"></div>
+                                <div class="bg-[var(--cyan-neon)]/10 p-2 rounded border border-[var(--cyan-neon)]/30"><label class="text-[8px] text-[var(--cyan-neon)] uppercase text-center block mb-1">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent text-center text-[var(--cyan-neon)] font-black outline-none text-2xl drop-shadow-[0_0_5px_#00f0ff]"></div>
+                            </div>
+
+                            <div class="pt-5 border-t border-white/10">
+                                <label class="text-[9px] font-bold text-gray-400 uppercase flex justify-between tracking-widest text-tech"><span>Nivel de Esfuerzo (RPE)</span><span id="rpeVal" class="text-[#4ade80] font-black">5/10</span></label>
+                                <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none mt-4" oninput="actualizarRPE(this.value)">
+                            </div>
+                            
+                            <div class="relative mt-8">
+                                <button type="submit" id="btnSubmit" class="w-full py-5 btn-tech font-black uppercase tracking-[0.2em] text-[11px] rounded">Registrar Impacto</button>
+                                <div id="restTimerBox" class="hidden w-full py-5 bg-[#0a1128] border border-[var(--cyan-neon)] text-[var(--cyan-neon)] font-black uppercase text-center text-lg rounded">⏳ DESCANSANDO: <span id="restTimerDisplay">0s</span></div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-6 flex flex-col gap-6">
+                        <div class="glass-card p-6 rounded-2xl h-80 flex flex-col items-center">
+                            <h3 class="text-[9px] text-[var(--cyan-neon)] font-bold uppercase tracking-[0.3em] mb-4 text-tech">Radar Biomecánico</h3>
+                            <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl flex-grow border-l-4 border-l-[var(--green-neon)]" id="insightBox">
+                            <h2 class="text-[9px] font-bold text-white uppercase mb-3 border-b border-white/10 pb-2 tracking-widest text-tech">Diagnóstico del Servidor</h2>
+                            <div id="bioInsight" class="text-xs font-bold text-[var(--green-neon)] leading-relaxed">Esperando datos...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="vistaMacro" class="vista space-y-6">
+                <div class="flex gap-2 border-b border-[var(--cyan-neon)]/30 pb-4 mb-4">
+                    <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-5 py-3 text-[9px] uppercase font-bold btn-tech rounded">Expediente Cliente</button>
+                    <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-5 py-3 text-[9px] uppercase font-bold border border-white/20 text-gray-400 rounded">Gestión Global</button>
+                </div>
+                <div id="macroIndividual" class="space-y-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-2xl font-black text-white uppercase tracking-widest" style="font-family: 'Cinzel', serif;">Auditoría Estructural</h1>
+                        <button onclick="generarReportePDF()" class="bg-white text-black text-[9px] font-bold px-4 py-2 rounded uppercase tracking-widest">PDF</button>
+                    </div>
+                    <div class="glass-card p-6 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
+                    <div id="resumenBio" class="glass-card p-6 rounded-2xl text-xs text-white space-y-2 uppercase leading-relaxed"></div>
+                    <div id="listaMacro" class="glass-card p-6 rounded-2xl text-[10px] text-gray-300 space-y-3 h-40 overflow-y-auto"></div>
+                </div>
+                <div id="macroGlobal" class="space-y-6 hidden"><div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div></div>
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-white/10 flex flex-col items-center justify-center pb-8 w-full">
                 <span class="text-[9px] text-gray-500 uppercase tracking-[0.5em] mb-2 text-tech">Engineered By</span>
                 
-                <img src="firma%20juan%20gabriel.jpg" alt="Firma Juan Gabriel" style="height: 100px; filter: invert(1) contrast(1.5) drop-shadow(0 0 5px rgba(255,255,255,0.5)); mix-blend-mode: screen; opacity: 0.9; margin-bottom: -15px; pointer-events: none;">
+                <img src="/public/firma%20juan%20gabriel.jpg" alt="Firma Juan Gabriel" style="height: 100px; filter: invert(1) contrast(1.5); mix-blend-mode: screen; opacity: 0.9; margin-bottom: -15px; pointer-events: none;" onerror="this.src='/firma%20juan%20gabriel.jpg'">
                 
                 <span class="text-sm font-black text-white tracking-[0.2em] uppercase z-10" style="font-family: 'Cinzel', serif;">Juan Gabriel Lopez</span>
             </div>
+        </main>
+
+        <div id="modalPerfiles" class="fixed inset-0 z-[300] items-center justify-center p-6 flex">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl">
+                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--cyan-neon)] mb-6 text-center text-tech">SUSCRIPCIONES</h2>
+                <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-[var(--cyan-neon)] outline-none mb-6"></select>
+                <input type="text" id="nuevoNombre" placeholder="Nuevo Cliente" class="w-full bg-black/50 border border-white/20 rounded p-3 text-white mb-3 text-center outline-none">
+                <button onclick="crearPerfil()" class="w-full py-3 btn-tech font-bold uppercase text-[10px] rounded">Activar Contrato</button>
+                <button onclick="cerrarModalPerfiles()" class="w-full py-3 mt-4 text-gray-500 uppercase text-[9px]">Cerrar</button>
+            </div>
+        </div>
+
+        <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl">
+                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--purple-neon)] mb-6 text-center text-tech">TELEMETRÍA</h2>
+                <label class="text-[9px] text-gray-400 block mb-2 uppercase">Horas de Sueño</label>
+                <input type="number" id="inputSueño" value="7" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-[var(--cyan-neon)] text-2xl text-center font-black outline-none mb-6">
+                <label class="text-[9px] text-gray-400 block mb-2 uppercase">Estrés (1-10)</label>
+                <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-[var(--red-neon)] mb-8">
+                <button onclick="finalizarCheckIn()" class="w-full py-4 btn-tech-purple font-black uppercase text-[10px] rounded-xl">Cargar Sistema</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LOGICA ACCESO ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const onboarded = localStorage.getItem('vanguardia_v23_ready');
+            if(!onboarded) document.getElementById('onboardingScreen').style.display = 'flex';
+            else { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; }
+        });
+
+        function cerrarOnboarding() {
+            localStorage.setItem('vanguardia_v23_ready', 'true');
+            document.getElementById('onboardingScreen').style.opacity = '0';
+            setTimeout(() => { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; }, 800);
+        }
+
+        let scanTimer;
+        function iniciarEscaneo() {
+            if(document.getElementById('pinAcceso').value.length < 4) return alert("PIN Requerido");
+            document.getElementById('biometricSensor').classList.add('scanning');
+            document.getElementById('textoSensor').innerText = "ESCANER ADN ACTIVO...";
+            scanTimer = setTimeout(desbloquear, 2000);
+        }
+        function detenerEscaneo() { clearTimeout(scanTimer); document.getElementById('biometricSensor').classList.remove('scanning'); document.getElementById('textoSensor').innerText = "ESCANEO INTERRUMPIDO"; }
+        function desbloquear() {
+            document.getElementById('authGateway').classList.add('auth-door-open');
+            setTimeout(() => { 
+                document.getElementById('authGateway').style.display = 'none'; 
+                document.getElementById('mainContent').style.display = 'block'; 
+                initApp();
+            }, 800);
+        }
+
+        // --- LOGICA CORE ---
+        let db = JSON.parse(localStorage.getItem('vanguardia_v23_db')) || { perfilActivo: 'Cliente Elite', perfiles: { 'Cliente Elite': { sueno: 7, estres: 3, sesiones: 12, restantes: 12, historial: [] } } };
+
+        function initApp() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
+        function guardar() { localStorage.setItem('vanguardia_v23_db', JSON.stringify(db)); }
+        function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
+        function cerrarModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
+        function actualizarListaPerfiles() {
+            const s = document.getElementById('selectorPerfiles'); s.innerHTML = '';
+            for(let n in db.perfiles) s.innerHTML += `<option value="${n}">${n}</option>`;
+            s.value = db.perfilActivo;
+        }
+        function crearPerfil() {
+            const n = document.getElementById('nuevoNombre').value; if(!n) return;
+            db.perfiles[n] = { sueno: 7, estres: 3, sesiones: 12, restantes: 12, historial: [] };
+            db.perfilActivo = n; guardar(); actualizarListaPerfiles();
+        }
+        function cambiarPerfil() { db.perfilActivo = document.getElementById('selectorPerfiles').value; cargarPerfilActivo(); }
+        function cargarPerfilActivo() {
+            const p = db.perfiles[db.perfilActivo]; document.getElementById('nombreAtletaNav').innerText = db.perfilActivo;
+            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
+            renderRadar();
+        }
+        function finalizarCheckIn() {
+            db.perfiles[db.perfilActivo].sueno = document.getElementById('inputSueño').value;
+            document.getElementById('modalPreVuelo').style.display = 'none';
+        }
+        function actualizarRPE(v) {
+            document.getElementById('rpeVal').innerText = v + '/10';
+            const c = v < 5 ? '#4ade80' : v < 8 ? '#facc15' : '#ff003c';
+            document.getElementById('rpeVal').style.color = c;
+        }
+
+        document.getElementById('formVanguardia').onsubmit = (e) => {
+            e.preventDefault(); const p = db.perfiles[db.perfilActivo];
+            const c = document.getElementById('carga').value; const r = document.getElementById('reps').value;
+            const rm1 = (c * (1 + (r / 30))).toFixed(1);
+            if(p.restantes > 0) p.restantes--; document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
+            p.historial.push({ fecha: new Date().toLocaleDateString(), ej: document.getElementById('ejercicioNombre').value, carga: c, reps: r, rm1: rm1 });
+            guardar(); renderRadar();
+            alert("Sesión Computada Correctamente");
+        }
+
+        function renderRadar() {
+            const ctx = document.getElementById('radarChart'); if(!ctx) return;
+            new Chart(ctx, { type: 'radar', data: { labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'SNC', 'DISCIPLINA'], datasets: [{ data: [8, 7, 9, 6, 10], borderColor: '#00f0ff', backgroundColor: 'rgba(0, 240, 255, 0.2)' }] }, options: { scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
+        }
+
+        function toggleVista() {
+            document.getElementById('vistaMicro').classList.toggle('activa');
+            document.getElementById('vistaMacro').classList.toggle('activa');
+            if(document.getElementById('vistaMacro').classList.contains('activa')) renderMacro();
+        }
+        function renderMacro() {
+            const h = db.perfiles[db.perfilActivo].historial;
+            const ctx = document.getElementById('macroChart');
+            new Chart(ctx, { type: 'line', data: { labels: h.map(x=>x.fecha), datasets: [{ label: 'Fuerza', data: h.map(x=>x.rm1), borderColor: '#b026ff' }] }, options: { responsive: true, maintainAspectRatio: false } });
+            document.getElementById('listaMacro').innerHTML = h.reverse().map(x => `<div class="border-b border-white/10 pb-2">${x.fecha} - ${x.ej} (${x.carga}kg)</div>`).join('');
+        }
+    </script>
+</body>
+</html>
