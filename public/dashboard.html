@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Laboratorio de Rendimiento V17</title>
+    <title>Vanguardia | Laboratorio de Rendimiento</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
     
     <style>
         :root { --accent-color: #3b82f6; }
@@ -26,20 +26,19 @@
 
         .avatar-path { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.4); stroke-width: 2.5; }
         .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.15); }
-        
-        /* COLORES DEL MAPA DE CALOR */
         .sensor.fresco { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); opacity: 0.8; }
         .sensor.recuperando { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); opacity: 0.9; }
         .sensor.fatigado { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulse 2s infinite; opacity: 1; }
-        
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         
         .vista { display: none; animation: fadeIn 0.5s ease forwards; }
         .vista.activa { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .firma-autor { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 0.4em; color: rgba(255,255,255,0.3); text-transform: uppercase; text-align: center; margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px; }
-        .firma-autor span { color: #d4af37; font-weight: 600; filter: drop-shadow(0 0 5px rgba(212,175,55,0.3)); }
+        /* Estilo para la firma con CSS Magic */
+        .firma-container { display: flex; flex-direction: column; align-items: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+        .firma-img { height: 80px; filter: invert(1); mix-blend-mode: screen; opacity: 0.85; pointer-events: none; }
+        .firma-texto { font-size: 8px; letter-spacing: 0.4em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: -10px; }
     </style>
 </head>
 <body class="min-h-screen pb-10">
@@ -55,9 +54,8 @@
                     <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none text-center"></select>
                 </div>
                 <div class="pt-4 border-t border-white/10 text-center">
-                    <p class="text-[9px] text-gray-500 mb-2 uppercase tracking-widest">Crear Nuevo Perfil</p>
                     <input type="text" id="nuevoNombre" placeholder="Nombre del Atleta" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none mb-2">
-                    <button onclick="crearPerfil()" class="w-full py-3 bg-blue-900/40 text-blue-400 font-bold uppercase tracking-widest text-[10px] rounded hover:bg-blue-800/40 border border-blue-500/30">Registrar Usuario</button>
+                    <button onclick="crearPerfil()" class="w-full py-3 bg-blue-900/40 text-blue-400 font-bold uppercase tracking-widest text-[10px] rounded border border-blue-500/30">Registrar Usuario</button>
                 </div>
                 <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-2 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl">Acceder al Sistema</button>
             </div>
@@ -75,26 +73,13 @@
                 <div class="pt-4 border-t border-white/10">
                     <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Nivel de Estrés Diario (1 al 10)</label>
                     <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500 mt-2">
-                    <div class="flex justify-between text-[10px] text-blue-300 font-bold mt-1"><span>1 (Mínimo)</span><span>10 (Máximo)</span></div>
+                    <div class="flex justify-between text-[10px] text-blue-300 font-bold mt-1"><span>1</span><span>10</span></div>
                 </div>
+                
+                <button onclick="solicitarNotificaciones()" class="w-full py-2 text-[9px] text-gray-400 uppercase tracking-widest border border-gray-600 rounded">🔔 Activar Alertas de Descanso</button>
+
                 <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl">Calibrar Algoritmo</button>
             </div>
-        </div>
-    </div>
-
-    <div id="hudTension" class="fixed inset-4 rounded-3xl flex-col items-center justify-center text-center p-6">
-        <div class="text-[10px] text-blue-500 font-bold uppercase mb-4 recording-pulse tracking-widest">Monitoreo de Tiempo Bajo Tensión</div>
-        <div id="relojHUD" class="text-8xl font-black text-white mb-8 tracking-tighter">00<span class="text-blue-500">s</span></div>
-        <button onclick="detenerHUD()" class="px-12 py-6 bg-red-600 text-white font-black uppercase rounded-full">Finalizar Serie</button>
-    </div>
-
-    <div id="videoRecorder" class="fixed inset-4 rounded-3xl flex-col items-center justify-center p-6">
-        <video id="cameraFeed" autoplay playsinline muted class="w-full h-2/3 rounded-xl object-cover bg-black border border-white/10"></video>
-        <div class="mt-8 flex gap-6">
-            <button id="startRecBtn" onclick="toggleRecording()" class="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center">
-                <div id="recCircle" class="w-14 h-14 bg-red-600 rounded-full"></div>
-            </button>
-            <button onclick="closeVideoRecorder()" class="text-[10px] uppercase tracking-widest text-white border border-white/20 px-6 rounded-full">Cerrar</button>
         </div>
     </div>
 
@@ -112,6 +97,11 @@
 
         <div id="vistaMicro" class="vista activa space-y-6">
             
+            <div class="glass-card p-4 rounded-2xl border-l-4 border-l-blue-500" id="panelDirectriz">
+                <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase flex items-center gap-2">Recomendación del Sistema</h2>
+                <div id="textoDirectriz" class="text-xs text-gray-300 mt-2 italic">Analizando variables biométricas...</div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
                 <div class="lg:col-span-6 glass-card p-5 rounded-2xl relative" id="panelIngreso">
                     <form id="formVanguardia" class="space-y-4">
@@ -125,80 +115,67 @@
                             <label class="text-[10px] font-bold uppercase tracking-widest text-blue-400 block">Enfoque Biomecánico</label>
                             <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-1">
                                 <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Sentadilla, Prensa)</option>
-                                <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Peso Muerto, Isquios)</option>
+                                <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Peso Muerto)</option>
                                 <option value="Empuje (Pecho, Hombros)">Vector de Empuje (Pecho, Hombros)</option>
                                 <option value="Tracción (Espalda, Bíceps)">Vector de Tracción (Espalda, Bíceps)</option>
                                 <option value="Metabólico / CrossFit">Estímulo Metabólico / Full Body</option>
                             </select>
-                            <input type="text" id="ejercicioNombre" onkeyup="buscarHistorialEjercicio()" required placeholder="Ej: Sentadilla con Barra..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
-                            
-                            <div id="sobrecargaReco" class="hidden mt-2 p-2 bg-purple-900/20 border border-purple-500/30 rounded text-[9px] text-purple-300">
-                                </div>
+                            <input type="text" id="ejercicioNombre" onkeyup="buscarHistorialEjercicio()" required placeholder="Especifica el ejercicio..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
+                            <div id="sobrecargaReco" class="hidden mt-2 p-2 bg-purple-900/20 border border-purple-500/30 rounded text-[9px] text-purple-300"></div>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <div><label class="text-[10px] font-bold text-white uppercase">Series Totales</label><input type="number" id="series" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
-                            <div><label class="text-[10px] font-bold text-white uppercase">Reps Completadas</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
+                            <div><label class="text-[10px] font-bold text-white uppercase">Repeticiones</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] font-bold text-white uppercase">Carga Exacta (Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
-                            <div class="relative">
+                        <div class="grid grid-cols-2 gap-4 relative">
+                            <div>
+                                <label class="text-[10px] font-bold text-white uppercase">Carga (Kg)</label>
+                                <input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl">
+                                <button type="button" onclick="calcularAproximacion()" class="w-full text-[8px] bg-gray-800 text-white mt-1 py-1 rounded uppercase">Pre-activación</button>
+                            </div>
+                            <div>
                                 <label class="text-[10px] font-bold text-white uppercase">TUT (Segundos)</label>
                                 <input type="number" id="tut" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl">
-                                <div class="absolute top-0 right-0 flex gap-1">
-                                    <button type="button" onclick="iniciarHUD()" class="bg-blue-600 text-[8px] p-1 rounded uppercase font-bold">Monitor</button>
-                                    <button type="button" onclick="openVideoRecorder()" class="bg-purple-600 text-[8px] p-1 rounded uppercase font-bold">Cámara</button>
-                                </div>
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-white/10">
+                        <div id="panelAproximacion" class="hidden bg-black border border-white/10 p-3 rounded-lg text-center">
+                            <p class="text-[9px] text-gray-400 uppercase tracking-widest font-bold mb-2">Protocolo de Calentamiento</p>
+                            <div id="textoAproximacion" class="text-[10px] text-white space-y-1"></div>
+                        </div>
+
+                        <div class="pt-2 border-t border-white/10">
                             <label class="text-[10px] font-bold text-red-400 uppercase flex justify-between"><span>Percepción de Esfuerzo (RPE)</span><span id="rpeVal">5/10</span></label>
                             <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none mt-2 accent-red-500">
                         </div>
                         
                         <div class="relative mt-6">
-                            <button id="btnSubmit" type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded shadow-[0_0_15px_rgba(255,255,255,0.2)] hover:bg-gray-200">Registrar Variables</button>
+                            <button id="btnSubmit" type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-gray-200">Registrar Variables</button>
                             <div id="restTimerBox" class="hidden w-full py-4 bg-black border border-blue-500 text-blue-400 font-black uppercase tracking-widest text-center text-lg rounded flex items-center justify-center gap-2">
                                 <span class="animate-pulse">⏳</span> RECUPERACIÓN: <span id="restTimerDisplay">0s</span>
                                 <button type="button" onclick="saltarDescanso()" class="absolute right-2 text-[8px] text-gray-500 border border-gray-600 px-2 py-1 rounded">Saltar</button>
                             </div>
                         </div>
-
                     </form>
                 </div>
 
                 <div class="lg:col-span-6 flex flex-col gap-6">
                     <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-56 relative overflow-hidden">
-                        
-                        <div class="absolute top-2 left-2 flex flex-col gap-1 text-[7px] text-gray-400 uppercase tracking-widest font-bold">
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-blue-500"></span> Fresco / Listo</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-purple-500"></span> En Recuperación</span>
-                            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Fatigado (Cuidado)</span>
-                        </div>
-
                         <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100">
                             <path class="avatar-path" d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z"/>
                             <path class="avatar-path" d="M70,75 L130,75 L145,150 L55,150 Z"/>
                             <path class="avatar-path" d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240"/>
                             <path class="avatar-path" d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380"/>
-                            
-                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor fresco"/>
-                            <circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor fresco"/>
-                            <circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor fresco"/>
-                            <circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor fresco"/>
-                            <circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor fresco"/>
-                            <circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor fresco"/>
-                            <circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor fresco"/>
-                            <circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor fresco"/>
+                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor fresco"/><circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor fresco"/><circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor fresco"/><circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor fresco"/><circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor fresco"/><circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor fresco"/><circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor fresco"/><circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor fresco"/>
                         </svg>
                     </div>
 
                     <div class="glass-card p-5 rounded-2xl flex-grow flex flex-col justify-between">
                         <div>
                             <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico de Impacto</h2>
-                            <div id="bioInsight" class="text-sm font-light text-gray-300 leading-relaxed">El Mapa de Calor indica tus músculos descansados. Inicia tu sesión.</div>
+                            <div id="bioInsight" class="text-sm font-light text-gray-300 leading-relaxed">El mapa indica la disponibilidad muscular. Inicie su sesión.</div>
                         </div>
                         <div id="motor1RM" class="hidden mt-4 p-3 border border-yellow-500/30 bg-yellow-900/10 rounded-lg text-center">
                             <p class="text-[8px] text-yellow-500 uppercase tracking-widest font-bold">Potencia Máxima Estimada (1RM)</p>
@@ -213,27 +190,34 @@
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h1 class="text-2xl font-black text-white uppercase tracking-widest">Análisis de Progreso</h1>
-                    <p class="text-[10px] text-gray-500 uppercase tracking-widest" id="tituloReporte">Auditoría del Usuario</p>
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest" id="tituloReporte">Auditoría General</p>
                 </div>
                 <button onclick="generarReportePDF()" class="bg-white text-black text-[10px] font-bold px-4 py-2 rounded uppercase tracking-tighter">📄 Exportar Informe (PDF)</button>
             </div>
+
+            <div class="glass-card p-4 rounded-2xl mb-4 border-l-4 border-l-purple-500 flex justify-between items-center">
+                <div>
+                    <h3 class="text-[10px] text-gray-400 uppercase tracking-widest">Volumen Acumulado (Tonelaje)</h3>
+                    <p class="text-xs text-gray-500">Series x Reps x Carga</p>
+                </div>
+                <div class="text-2xl font-black text-white"><span id="tonelajeTotal">0</span> <span class="text-sm text-purple-400">Kg</span></div>
+            </div>
+
             <div class="glass-card p-4 rounded-2xl h-80 relative" id="chartToPdf"><canvas id="macroChart"></canvas></div>
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-blue-400 uppercase font-bold mb-4">Perfil Actual</h3><div id="resumenBio" class="text-xs text-gray-400 space-y-2 uppercase tracking-tighter"></div></div>
                 <div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-purple-400 uppercase font-bold mb-4">Registro Histórico</h3><div id="listaMacro" class="text-[10px] text-gray-500 space-y-2 h-40 overflow-y-auto"></div></div>
             </div>
-            <div class="flex justify-end gap-4 mt-4">
-                <button onclick="extraerDatos('csv')" class="text-[10px] uppercase tracking-widest text-green-400 border border-green-500/30 px-4 py-2 rounded">Descargar Hoja de Cálculo</button>
-            </div>
         </div>
         
-        <div class="firma-autor">
-            Engineered <span>By Juan Gabriel Lopez</span>
+        <div class="firma-container">
+            <span class="firma-texto">Engineered By</span>
+            <img src="firma juan gabriel.jpg" alt="Firma Autor" class="firma-img" onerror="this.style.display='none';">
         </div>
     </main>
 
     <script>
-        // --- EVENTOS HÁPTICOS ---
         const AudioContext = window.AudioContext || window.webkitAudioContext; let audioCtx;
         const InterfazSensorial = {
             init: function() { if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); },
@@ -243,170 +227,117 @@
             completado: function() { this.init(); this.vibrar([50, 100, 50, 100, 300]); }
         };
 
-        // --- SISTEMA DE GESTIÓN DE USUARIOS ---
-        let db = JSON.parse(localStorage.getItem('vanguardia_v17')) || {
-            perfilActivo: 'Atleta Principal',
-            perfiles: { 'Atleta Principal': { edad: 30, peso: 75, sueno: 7, estres: 3, historial: [] } }
-        };
+        let db = JSON.parse(localStorage.getItem('vanguardia_v18')) || { perfilActivo: 'Usuario Principal', perfiles: { 'Usuario Principal': { edad: 30, peso: 75, sueno: 7, estres: 3, historial: [] } } };
 
         function initMultiTenant() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
-        function actualizarListaPerfiles() {
-            const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = '';
-            for (const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; }
-            selector.value = db.perfilActivo;
-        }
-        function crearPerfil() {
-            const n = document.getElementById('nuevoNombre').value.trim(); if(!n || db.perfiles[n]) return alert("Nombre inválido.");
-            db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, historial: [] }; db.perfilActivo = n;
-            guardarDB(); actualizarListaPerfiles(); document.getElementById('nuevoNombre').value = ''; InterfazSensorial.tick();
-        }
+        function actualizarListaPerfiles() { const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = ''; for (const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; } selector.value = db.perfilActivo; }
+        function crearPerfil() { const n = document.getElementById('nuevoNombre').value.trim(); if(!n || db.perfiles[n]) return alert("Nombre inválido."); db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, historial: [] }; db.perfilActivo = n; guardarDB(); actualizarListaPerfiles(); document.getElementById('nuevoNombre').value = ''; InterfazSensorial.tick(); }
         function cambiarPerfil() { db.perfilActivo = document.getElementById('selectorPerfiles').value; guardarDB(); InterfazSensorial.tick(); }
-        function cargarPerfilActivo() {
-            const p = db.perfiles[db.perfilActivo];
-            document.getElementById('nombreAtletaNav').innerText = db.perfilActivo;
-            document.getElementById('tituloReporte').innerText = `Auditoría: ${db.perfilActivo}`;
-            document.getElementById('bioEdad').value = p.edad; document.getElementById('bioPeso').value = p.peso;
-            document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres;
-        }
+        function cargarPerfilActivo() { const p = db.perfiles[db.perfilActivo]; document.getElementById('nombreAtletaNav').innerText = db.perfilActivo; document.getElementById('tituloReporte').innerText = `Auditoría: ${db.perfilActivo}`; document.getElementById('bioEdad').value = p.edad; document.getElementById('bioPeso').value = p.peso; document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres; actualizarMapaDeCalor(); }
         function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
         function cerrarModalPerfiles() { cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
-        function guardarDB() { localStorage.setItem('vanguardia_v17', JSON.stringify(db)); actualizarMapaDeCalor(); }
+        function guardarDB() { localStorage.setItem('vanguardia_v18', JSON.stringify(db)); actualizarMapaDeCalor(); }
 
-        // --- PRE-VUELO ---
+        function solicitarNotificaciones() {
+            if ("Notification" in window) {
+                Notification.requestPermission().then(perm => {
+                    if(perm === "granted") alert("Notificaciones activadas con éxito.");
+                });
+            }
+        }
+
         function finalizarCheckIn() {
             InterfazSensorial.init(); const p = db.perfiles[db.perfilActivo];
             p.sueno = document.getElementById('inputSueño').value || 7; p.estres = document.getElementById('inputEstres').value || 3;
             guardarDB(); document.getElementById('modalPreVuelo').style.display = 'none';
+            evaluarEstado();
         }
 
-        // --- 1. MOTOR DE SOBRECARGA INTELIGENTE ---
+        function evaluarEstado() {
+            const p = db.perfiles[db.perfilActivo]; const panel = document.getElementById('panelDirectriz');
+            let readiness = 100 - ((7 - p.sueno) * 15) - ((p.estres - 3) * 10);
+            if(readiness < 60) { panel.classList.replace('border-l-blue-500', 'border-l-red-500'); document.getElementById('textoDirectriz').innerHTML = `Recuperación Baja (${readiness}%). Priorice la técnica hoy.`; } 
+            else { panel.classList.replace('border-l-red-500', 'border-l-blue-500'); document.getElementById('textoDirectriz').innerHTML = `Capacidad Óptima (${readiness}%). Sistema listo.`; }
+        }
+
+        // MOTOR DE APROXIMACIÓN (CALENTAMIENTO)
+        function calcularAproximacion() {
+            let carga = parseFloat(document.getElementById('carga').value);
+            if(!carga || carga <= 0) return alert("Por favor, ingresa el peso objetivo primero.");
+            let w1 = (carga * 0.5).toFixed(1); let w2 = (carga * 0.7).toFixed(1); let w3 = (carga * 0.85).toFixed(1);
+            document.getElementById('textoAproximacion').innerHTML = `Serie 1: 10 reps con <strong class="text-blue-400">${w1}kg</strong><br>Serie 2: 5 reps con <strong class="text-purple-400">${w2}kg</strong><br>Serie 3: 2 reps con <strong class="text-red-400">${w3}kg</strong>`;
+            document.getElementById('panelAproximacion').classList.remove('hidden');
+            InterfazSensorial.tick();
+        }
+
         function buscarHistorialEjercicio() {
-            const ejActual = document.getElementById('ejercicioNombre').value.trim().toLowerCase();
-            const box = document.getElementById('sobrecargaReco');
+            const ejActual = document.getElementById('ejercicioNombre').value.trim().toLowerCase(); const box = document.getElementById('sobrecargaReco');
             if (ejActual.length < 3) { box.classList.add('hidden'); return; }
-            
-            const h = db.perfiles[db.perfilActivo].historial;
-            const ultimo = [...h].reverse().find(s => s.ej.toLowerCase() === ejActual);
-            
-            if (ultimo) {
-                const metaPeso = (parseFloat(ultimo.carga) + 2.5).toFixed(1);
-                const metaReps = parseInt(ultimo.reps) + 1;
-                box.innerHTML = `<strong>MEMORIA BIOMECÁNICA:</strong> Tu último registro fue <span class="text-white font-bold">${ultimo.carga}kg x ${ultimo.reps} reps</span>. <br>Para generar adaptación hoy, apunta a <span class="text-green-400 font-bold">${metaPeso}kg</span> o <span class="text-green-400 font-bold">${metaReps} repeticiones</span>.`;
-                box.classList.remove('hidden');
-            } else {
-                box.classList.add('hidden');
-            }
+            const h = db.perfiles[db.perfilActivo].historial; const ultimo = [...h].reverse().find(s => s.ej.toLowerCase() === ejActual);
+            if (ultimo) { const metaPeso = (parseFloat(ultimo.carga) + 2.5).toFixed(1); const metaReps = parseInt(ultimo.reps) + 1;
+                box.innerHTML = `<strong>MEMORIA:</strong> Último registro: <span class="text-white">${ultimo.carga}kg x ${ultimo.reps} reps</span>. <br>Meta de adaptación: <span class="text-green-400">${metaPeso}kg</span> o <span class="text-green-400">${metaReps} reps</span>.`; box.classList.remove('hidden');
+            } else { box.classList.add('hidden'); }
         }
 
-        // --- 2. MAPA DE CALOR ANATÓMICO ---
         function actualizarMapaDeCalor() {
-            const h = db.perfiles[db.perfilActivo].historial;
-            const ahora = new Date().getTime();
-            let fatiga = { pecho: 0, espalda: 0, piernas: 0, brazos: 0 };
-
-            // Analizar impacto de las últimas 48 horas
+            const h = db.perfiles[db.perfilActivo].historial; const ahora = new Date().getTime(); let fatiga = { pecho: 0, espalda: 0, piernas: 0, brazos: 0 };
             h.forEach(s => {
                 if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
-                    let impacto = parseFloat(s.rpe) * parseInt(s.series); // Volumen x Intensidad
+                    let impacto = parseFloat(s.rpe) * parseInt(s.series);
                     if(s.dominio.includes("Empuje")) { fatiga.pecho += impacto; fatiga.brazos += impacto*0.5; }
                     if(s.dominio.includes("Tracción")) { fatiga.espalda += impacto; fatiga.brazos += impacto*0.5; }
                     if(s.dominio.includes("Piernas")) { fatiga.piernas += impacto; }
                     if(s.dominio.includes("Metabólico")) { fatiga.pecho += impacto*0.3; fatiga.espalda += impacto*0.3; fatiga.piernas += impacto*0.3; }
                 }
             });
-
-            const aplicar = (id, f) => {
-                let el = document.getElementById(id); if(!el) return;
-                el.className.baseVal = "sensor"; // Reset
-                if(f > 30) el.classList.add('fatigado');
-                else if(f > 10) el.classList.add('recuperando');
-                else el.classList.add('fresco');
-            };
-
-            aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda);
-            aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos);
-            aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas);
-            aplicar('sensor-cadenaPost1', fatiga.piernas); aplicar('sensor-cadenaPost2', fatiga.piernas);
+            const aplicar = (id, f) => { let el = document.getElementById(id); if(!el) return; el.className.baseVal = "sensor"; if(f > 30) el.classList.add('fatigado'); else if(f > 10) el.classList.add('recuperando'); else el.classList.add('fresco'); };
+            aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda); aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos); aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas); aplicar('sensor-cadenaPost1', fatiga.piernas); aplicar('sensor-cadenaPost2', fatiga.piernas);
         }
 
-        // --- 3. TEMPORIZADOR DE DESCANSO INTER-SERIES ---
         let restInt;
         function iniciarDescansoLogico(rpe) {
-            let tiempo = 60; // Base
-            if (rpe >= 9) tiempo = 180; // Fallo absoluto = 3 minutos
-            else if (rpe >= 7) tiempo = 120; // Hipertrofia = 2 minutos
-            
+            let tiempo = 60; if (rpe >= 9) tiempo = 180; else if (rpe >= 7) tiempo = 120;
             document.getElementById('btnSubmit').classList.add('hidden');
-            const box = document.getElementById('restTimerBox');
-            const display = document.getElementById('restTimerDisplay');
-            box.classList.remove('hidden');
+            const box = document.getElementById('restTimerBox'); const display = document.getElementById('restTimerDisplay');
+            box.classList.remove('hidden'); let t = tiempo; display.innerText = `${t}s`;
             
-            let t = tiempo;
-            display.innerText = `${t}s`;
             restInt = setInterval(() => {
                 t--; display.innerText = `${t}s`;
-                if(t <= 0) { saltarDescanso(); InterfazSensorial.completado(); }
+                if(t <= 0) { 
+                    saltarDescanso(); InterfazSensorial.completado();
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        new Notification("Vanguardia", { body: "Recuperación completa. Inicie la siguiente serie." });
+                    }
+                }
             }, 1000);
         }
 
-        function saltarDescanso() {
-            clearInterval(restInt);
-            document.getElementById('restTimerBox').classList.add('hidden');
-            document.getElementById('btnSubmit').classList.remove('hidden');
-        }
+        function saltarDescanso() { clearInterval(restInt); document.getElementById('restTimerBox').classList.add('hidden'); document.getElementById('btnSubmit').classList.remove('hidden'); }
 
-        // --- MONITOR DE TENSIÓN Y VIDEO ---
-        let timerHUD; let s=0;
-        function iniciarHUD() { document.getElementById('hudTension').style.display='flex'; s=0; timerHUD = setInterval(() => { s++; document.getElementById('relojHUD').innerHTML = s+'s'; InterfazSensorial.tick(); }, 1000); }
-        function detenerHUD() { clearInterval(timerHUD); document.getElementById('tut').value = s; document.getElementById('hudTension').style.display='none'; }
-        
-        let mediaRec; let recChunks = []; const vidEl = document.getElementById('cameraFeed');
-        async function openVideoRecorder() { try { const str = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }); vidEl.srcObject = str; document.getElementById('videoRecorder').style.display = 'flex'; } catch (err) { alert("Cámara requerida."); } }
-        function closeVideoRecorder() { const str = vidEl.srcObject; if (str) str.getTracks().forEach(t => t.stop()); document.getElementById('videoRecorder').style.display = 'none'; }
-        function toggleRecording() { if (!mediaRec || mediaRec.state === 'inactive') { recChunks = []; mediaRec = new MediaRecorder(vidEl.srcObject); mediaRec.ondataavailable = e => { if(e.data.size>0) recChunks.push(e.data); }; mediaRec.start(); document.getElementById('recCircle').classList.add('rounded-sm'); } else { mediaRec.stop(); document.getElementById('recCircle').classList.remove('rounded-sm'); setTimeout(closeVideoRecorder, 500); } }
-
-        // --- LÓGICA DE PROCESAMIENTO PRINCIPAL ---
         document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + '/10'; InterfazSensorial.tick(); };
 
         document.getElementById('formVanguardia').onsubmit = function(e) {
-            e.preventDefault();
-            const p = db.perfiles[db.perfilActivo];
-            p.edad = document.getElementById('bioEdad').value;
-            p.peso = document.getElementById('bioPeso').value;
-
-            const carga = parseFloat(document.getElementById('carga').value);
-            const reps = parseInt(document.getElementById('reps').value);
-            const series = parseInt(document.getElementById('series').value);
-            const tut = parseFloat(document.getElementById('tut').value);
-            const rpe = parseFloat(document.getElementById('rpe').value);
-            const ejDom = document.getElementById('dominioSelector').value;
-            const ejNom = document.getElementById('ejercicioNombre').value;
+            e.preventDefault(); const p = db.perfiles[db.perfilActivo];
+            p.edad = document.getElementById('bioEdad').value; p.peso = document.getElementById('bioPeso').value;
+            const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const tut = parseFloat(document.getElementById('tut').value); const rpe = parseFloat(document.getElementById('rpe').value); const ejDom = document.getElementById('dominioSelector').value; const ejNom = document.getElementById('ejercicioNombre').value;
 
             const ts = new Date().getTime();
-            let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1);
-            const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
-            
-            let rm1 = 0;
-            if (reps > 0 && carga > 0 && rpe >= 7) {
-                rm1 = (carga * (1 + (reps / 30))).toFixed(1);
-                document.getElementById('motor1RM').classList.remove('hidden');
-                document.getElementById('valor1RM').innerHTML = `${rm1} <span class="text-sm font-light text-gray-400">Kg</span>`;
-            } else { document.getElementById('motor1RM').classList.add('hidden'); }
+            let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1); const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
+            let rm1 = 0; if (reps > 0 && carga > 0 && rpe >= 7) { rm1 = (carga * (1 + (reps / 30))).toFixed(1); document.getElementById('motor1RM').classList.remove('hidden'); document.getElementById('valor1RM').innerHTML = `${rm1} <span class="text-sm text-gray-400">Kg</span>`; } else { document.getElementById('motor1RM').classList.add('hidden'); }
 
             p.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), dominio: ejDom, ej: ejNom, carga, reps, series, rpe, ifi, rm1, riesgo });
-            guardarDB(); // Esto actualiza el Mapa de Calor
+            guardarDB();
 
             let diag = "";
-            if (riesgo < 5) diag = "Intensidad moderada. Excelente para fases de técnica.";
+            if (riesgo < 5) diag = "Intensidad moderada. Excelente técnica de aproximación.";
             else if (riesgo < 8) diag = "Sobrecarga progresiva óptima para hipertrofia.";
-            else { diag = "Límite estructural alcanzado. Considere reducir carga."; InterfazSensorial.alerta(); }
+            else { diag = "Protección Biomecánica: Límite estructural alcanzado. Reduzca la carga."; InterfazSensorial.alerta(); }
             document.getElementById('bioInsight').innerHTML = diag;
-
-            // Iniciar Reloj Metabólico
+            
+            document.getElementById('panelAproximacion').classList.add('hidden'); // Ocultar calentamiento
             iniciarDescansoLogico(rpe);
         };
 
-        // --- VISTAS Y REPORTES ---
         let macroChart;
         function toggleVista() {
             document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa');
@@ -416,12 +347,17 @@
 
         function renderChart() {
             const h = db.perfiles[db.perfilActivo].historial; const ctx = document.getElementById('macroChart').getContext('2d'); const dataSlice = h.slice(-15);
-            if(macroChart) macroChart.destroy(); Chart.defaults.color = '#6b7280';
-            macroChart = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'1RM Estimado', data:dataSlice.map(s => s.rm1), backgroundColor:'#3b82f6' }, { label:'RPE', type:'line', data:dataSlice.map(s => s.rpe), borderColor:'#ef4444' }] }, options: { responsive: true, maintainAspectRatio: false } });
             
-            // Llenar resumen
+            // Calculo de Tonelaje
+            let tonTotal = 0;
+            h.forEach(s => { if(s.carga && s.reps && s.series) tonTotal += (s.carga * s.reps * s.series); });
+            document.getElementById('tonelajeTotal').innerText = tonTotal.toLocaleString();
+
+            if(macroChart) macroChart.destroy(); Chart.defaults.color = '#6b7280';
+            macroChart = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'Proyección de Fuerza (Kg)', data:dataSlice.map(s => s.rm1), backgroundColor:'#3b82f6' }, { label:'Esfuerzo Perfilado (RPE)', type:'line', data:dataSlice.map(s => s.rpe), borderColor:'#ef4444' }] }, options: { responsive: true, maintainAspectRatio: false } });
+            
             let readiness = 100 - ((7 - db.perfiles[db.perfilActivo].sueno) * 15) - ((db.perfiles[db.perfilActivo].estres - 3) * 10);
-            document.getElementById('resumenBio').innerHTML = `Atleta: ${db.perfilActivo}<br>Recuperación SNC: ${readiness}%<br>Total Sesiones Guardadas: ${h.length}`;
+            document.getElementById('resumenBio').innerHTML = `Usuario: ${db.perfilActivo}<br>Recuperación SNC: ${readiness}%<br>Total Sesiones: ${h.length}`;
             
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
             [...h].reverse().slice(0, 10).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-1">${s.fecha} - <strong class="text-white">${s.ej}</strong><br>Carga: ${s.carga}kg x ${s.reps} reps | RPE: ${s.rpe}</div>`);
@@ -433,13 +369,6 @@
             html2pdf().set(opt).from(element).save();
         }
 
-        function extraerDatos() {
-            const h = db.perfiles[db.perfilActivo].historial; if(h.length === 0) return alert("No hay datos.");
-            let c = "Fecha,Ejercicio,Carga,Reps,RPE,1RM_Estimado\n"; h.forEach(s => c += `${s.fecha},${s.ej},${s.carga},${s.reps},${s.rpe},${s.rm1}\n`);
-            const a = document.createElement('a'); a.href = window.URL.createObjectURL(new Blob([c], { type: 'text/csv' })); a.download = `${db.perfilActivo}.csv`; a.click();
-        }
-
-        // Init
         initMultiTenant();
     </script>
 </body>
