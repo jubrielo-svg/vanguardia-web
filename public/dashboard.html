@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VULCANO OS | Centro de Rendimiento Global</title>
+    <title>VULCANO OS | Centro de Gestión Elite</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,19 +17,14 @@
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #f3f4f6; overflow-x: hidden; }
         .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 60%); opacity: 0.08; pointer-events: none; z-index: -1; transition: all 1s ease; }
         .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
-        
         #modalPreVuelo, #modalPerfiles { background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); display: none; }
-        
-        .avatar-path { fill: rgba(255,255,255,0.03); stroke: rgba(255,255,255,0.4); stroke-width: 2.5; }
-        .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.15); }
-        .sensor.fresco { fill: #3b82f6; filter: drop-shadow(0 0 10px #3b82f6); opacity: 0.8; }
-        .sensor.recuperando { fill: #a855f7; filter: drop-shadow(0 0 15px #a855f7); opacity: 0.9; }
-        .sensor.fatigado { fill: #ef4444; filter: drop-shadow(0 0 20px #ef4444); animation: pulse 2s infinite; opacity: 1; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
         .vista { display: none; animation: fadeIn 0.5s ease forwards; }
         .vista.activa { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Checkbox de Suplementación personalizado */
+        .supp-check { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; transition: all 0.3s; }
+        .supp-check:checked { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
     </style>
 </head>
 <body class="min-h-screen pb-10">
@@ -38,63 +33,55 @@
 
     <div id="modalPerfiles" class="fixed inset-0 z-[300] items-center justify-center p-6 flex">
         <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 overflow-y-auto max-h-[90vh]">
-            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Gestión de Clientes</h2>
+            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Gestión de Contratos</h2>
             <div class="space-y-4">
                 <div>
-                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-2 text-center">Cliente Activo</label>
+                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-2 text-center">Seleccionar Cliente</label>
                     <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none text-center"></select>
                 </div>
                 <div class="pt-4 border-t border-white/10 text-center space-y-3">
-                    <p class="text-[9px] text-gray-500 uppercase tracking-widest">Registrar Nuevo Contrato</p>
-                    <input type="text" id="nuevoNombre" placeholder="Nombre del Cliente" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none">
-                    
-                    <select id="nuevaFase" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-gray-300 text-xs outline-none focus:border-blue-500">
-                        <optgroup label="Estética y Composición">
-                            <option value="Hipertrofia Muscular">Hipertrofia Muscular (Volumen)</option>
-                            <option value="Oxidación de Grasa">Oxidación de Grasa (Definición)</option>
-                        </optgroup>
-                        <optgroup label="Rendimiento Deportivo">
-                            <option value="Fuerza Máxima">Fuerza Máxima (Neuromuscular)</option>
-                            <option value="Acondicionamiento Físico">Acondicionamiento Físico Base</option>
-                            <option value="Acondicionamiento Metabólico">Acondicionamiento Metabólico (HIIT/Cross)</option>
-                        </optgroup>
-                        <optgroup label="Servicios Clínicos Premium">
-                            <option value="Rehabilitación Biomecánica">Rehabilitación Biomecánica</option>
-                            <option value="Biohacking de Longevidad">Biohacking & Longevidad</option>
-                        </optgroup>
-                    </select>
-
-                    <button onclick="crearPerfil()" class="w-full py-3 bg-blue-900/40 text-blue-400 font-bold uppercase tracking-widest text-[10px] rounded border border-blue-500/30 hover:bg-blue-800/50 transition">Crear Expediente</button>
+                    <p class="text-[9px] text-gray-500 uppercase tracking-widest">Nueva Alta de Servicio</p>
+                    <input type="text" id="nuevoNombre" placeholder="Nombre Completo" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none">
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="nuevaFase" class="bg-black border border-white/10 rounded-lg p-2 text-[10px] text-gray-300 outline-none">
+                            <option value="Hipertrofia Muscular">Hipertrofia</option>
+                            <option value="Oxidación de Grasa">Grasa</option>
+                            <option value="Fuerza Máxima">Fuerza</option>
+                            <option value="Biohacking de Longevidad">Longevidad</option>
+                        </select>
+                        <input type="number" id="nuevasSesiones" placeholder="N° Sesiones" class="bg-black border border-white/10 rounded-lg p-2 text-[10px] text-center text-white outline-none">
+                    </div>
+                    <button onclick="crearPerfil()" class="w-full py-3 bg-blue-900/40 text-blue-400 font-bold uppercase tracking-widest text-[10px] rounded border border-blue-500/30 hover:bg-blue-800/50">Generar Contrato</button>
                 </div>
-                <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-2 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200 transition">Ingresar al Sistema</button>
+                <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-2 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200">Validar Acceso</button>
             </div>
         </div>
     </div>
 
     <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
         <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 overflow-y-auto max-h-[90vh]">
-            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Auditoría Diaria</h2>
+            <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Auditoría Biológica</h2>
             <div class="space-y-6">
                 <div>
                     <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Horas de Sueño</label>
-                    <input type="number" id="inputSueño" placeholder="Ej: 7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none">
+                    <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white text-xl outline-none">
                 </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Estrés Sistémico</label>
+                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500">
+                </div>
+                
                 <div class="pt-4 border-t border-white/10">
-                    <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Estrés Sistémico (1 al 10)</label>
-                    <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500 mt-2">
+                    <label class="text-[10px] font-bold uppercase text-purple-400 block mb-3 text-center">Matriz de Optimización Química</label>
+                    <div class="grid grid-cols-2 gap-3 text-[9px] uppercase tracking-tighter">
+                        <label class="flex items-center gap-2"><input type="checkbox" id="supp-creatina" class="supp-check"> Creatina (ATP)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="supp-omega" class="supp-check"> Omega 3 (SNC)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="supp-magnesio" class="supp-check"> Magnesio (GABA)</label>
+                        <label class="flex items-center gap-2"><input type="checkbox" id="supp-proteina" class="supp-check"> Proteína (mTOR)</label>
+                    </div>
                 </div>
 
-                <div class="pt-4 border-t border-white/10">
-                    <label class="text-[10px] font-bold uppercase text-red-400 block mb-3 text-center">Reporte de Molestia Articular</label>
-                    <select id="inputDolor" class="w-full bg-black border border-red-500/30 text-red-400 rounded-lg p-3 text-center text-xs outline-none">
-                        <option value="Ninguno">Sin dolencias (Estado Óptimo)</option>
-                        <option value="Hombros">Complejo Articular del Hombro</option>
-                        <option value="Lumbar">Región Lumbar / Sacro</option>
-                        <option value="Rodillas">Rodillas / Tendón Patelar</option>
-                    </select>
-                </div>
-
-                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200">Validar Biometría</button>
+                <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200">Guardar Biometría</button>
             </div>
         </div>
     </div>
@@ -102,105 +89,87 @@
     <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
         <div class="text-lg font-black tracking-tighter uppercase flex items-center gap-3">
             VULCANO OS.
-            <button onclick="abrirModalPerfiles()" class="text-[8px] border border-blue-500/50 text-blue-400 bg-blue-900/20 px-2 py-1 rounded uppercase flex items-center gap-1">
+            <button onclick="abrirModalPerfiles()" class="text-[8px] border border-blue-500/50 text-blue-400 bg-blue-900/20 px-2 py-1 rounded uppercase">
                 👤 <span id="nombreAtletaNav">Cliente</span>
             </button>
         </div>
-        <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase tracking-widest px-3 py-1 rounded hover:bg-gray-200">Panel de Auditoría</button>
+        <div id="badgeSesiones" class="text-[9px] px-3 py-1 rounded bg-green-900/20 border border-green-500/30 text-green-400 font-bold uppercase">
+            Sesiones: 0
+        </div>
+        <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase px-3 py-1 rounded">Expediente</button>
     </nav>
 
     <main id="reportContent" class="max-w-7xl mx-auto p-4 space-y-6">
 
         <div id="vistaMicro" class="vista activa space-y-6">
             
-            <div class="glass-card p-4 rounded-2xl border-l-4 border-l-blue-500 flex justify-between items-center" id="panelDirectriz">
-                <div class="w-2/3">
-                    <h2 class="text-[10px] font-bold tracking-[0.2em] text-white uppercase">Evaluación del Sistema</h2>
-                    <div id="textoDirectriz" class="text-[10px] text-gray-300 mt-1 italic leading-relaxed">Analizando...</div>
-                </div>
-                <div class="text-right w-1/3">
-                    <span id="faseActualBadge" class="text-[7px] bg-blue-900/40 text-blue-300 px-2 py-1 rounded uppercase tracking-widest border border-blue-500/30">Servicio</span>
-                </div>
+            <div id="alertaRenovacion" class="hidden glass-card p-3 rounded-xl border border-red-500/50 bg-red-900/10 flex justify-between items-center">
+                <p class="text-[9px] text-red-400 uppercase font-black tracking-widest">ALERTA: Contrato por expirar. Gestione renovación de sesiones.</p>
+                <button onclick="enviarWhatsAppRenovacion()" class="bg-red-600 text-white text-[8px] font-bold px-3 py-1 rounded">Cobrar vía WPP</button>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
                 <div class="lg:col-span-6 glass-card p-5 rounded-2xl relative" id="panelIngreso">
                     <form id="formVanguardia" class="space-y-4">
-                        
                         <div class="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-white/5">
-                            <div><label class="text-[8px] text-gray-500 uppercase">Edad Cliente</label><input type="number" id="bioEdad" class="w-full bg-black/50 border border-white/10 rounded p-2 text-white text-center text-xs"></div>
-                            <div><label class="text-[8px] text-gray-500 uppercase">Peso Corporal (Kg)</label><input type="number" id="bioPeso" class="w-full bg-black/50 border border-white/10 rounded p-2 text-blue-400 font-bold text-center text-xs"></div>
+                            <div><label class="text-[8px] text-gray-500 uppercase">Edad</label><input type="number" id="bioEdad" class="w-full bg-black border border-white/10 rounded p-1 text-white text-center text-xs"></div>
+                            <div><label class="text-[8px] text-gray-500 uppercase">Peso (Kg)</label><input type="number" id="bioPeso" class="w-full bg-black border border-white/10 rounded p-1 text-blue-400 font-bold text-center text-xs"></div>
                         </div>
 
                         <div class="bg-blue-900/10 border border-blue-500/20 p-3 rounded-lg relative">
                             <label class="text-[10px] font-bold uppercase tracking-widest text-blue-400 block mb-2">Selección Biomecánica</label>
                             <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none">
-                                <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Sentadilla, Prensa)</option>
-                                <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Peso Muerto)</option>
-                                <option value="Empuje (Pecho, Hombros)">Vector de Empuje (Pecho, Hombros)</option>
-                                <option value="Tracción (Espalda, Bíceps)">Vector de Tracción (Espalda, Bíceps)</option>
-                                <option value="Metabólico / CrossFit">Full Body / Acondicionamiento</option>
+                                <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Piernas)</option>
+                                <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Piernas/Isquios)</option>
+                                <option value="Empuje (Pecho, Hombros)">Empuje (Tren Superior)</option>
+                                <option value="Tracción (Espalda, Bíceps)">Tracción (Tren Superior)</option>
+                                <option value="Metabólico / CrossFit">Metabólico / Full Body</option>
                             </select>
-                            <input type="text" id="ejercicioNombre" required placeholder="Nombre específico del movimiento..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
+                            <input type="text" id="ejercicioNombre" onkeyup="buscarHistorialEjercicio()" required placeholder="Nombre del movimiento..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
+                            <div id="sobrecargaReco" class="hidden mt-2 p-2 bg-purple-900/20 border border-purple-500/30 rounded text-[9px] text-purple-300"></div>
                         </div>
 
                         <div class="grid grid-cols-3 gap-2">
                             <div><label class="text-[9px] font-bold text-white uppercase text-center block">Series</label><input type="number" id="series" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
                             <div><label class="text-[9px] font-bold text-white uppercase text-center block">Reps</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl" oninput="calcularTUT()"></div>
-                            <div><label class="text-[9px] font-bold text-white uppercase text-center block">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl text-blue-400"></div>
+                            <div><label class="text-[9px] font-bold text-white uppercase text-center block">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-blue-400 outline-none text-xl"></div>
                         </div>
 
                         <div class="pt-4 border-t border-white/10">
                             <div class="flex justify-between items-end mb-2">
                                 <label class="text-[10px] font-bold text-purple-400 uppercase tracking-widest block">Protocolo I.C.U. (Cadencia)</label>
-                                <span class="text-[9px] text-gray-500 uppercase">TUT Total: <strong id="tutDisplay" class="text-white">0s</strong></span>
+                                <span class="text-[9px] text-gray-500 uppercase">TUT: <strong id="tutDisplay" class="text-white">0s</strong></span>
                             </div>
                             <div class="grid grid-cols-3 gap-2">
-                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Excéntrica (Bajada)</label><input type="number" id="cadExc" value="2" class="w-full bg-black border border-white/10 rounded p-2 text-center text-white text-xs" oninput="calcularTUT()"></div>
-                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Isométrica (Pausa)</label><input type="number" id="cadIso" value="0" class="w-full bg-black border border-white/10 rounded p-2 text-center text-white text-xs" oninput="calcularTUT()"></div>
-                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Concéntrica (Subida)</label><input type="number" id="cadCon" value="1" class="w-full bg-black border border-white/10 rounded p-2 text-center text-white text-xs" oninput="calcularTUT()"></div>
+                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Excéntrica</label><input type="number" id="cadExc" value="2" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
+                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Pausa</label><input type="number" id="cadIso" value="0" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
+                                <div><label class="text-[7px] text-gray-400 uppercase text-center block">Concéntrica</label><input type="number" id="cadCon" value="1" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
                             </div>
                             <input type="hidden" id="tut" value="0">
                         </div>
 
                         <div class="pt-4 border-t border-white/10">
-                            <label class="text-[10px] font-bold text-red-400 uppercase flex justify-between"><span>Percepción de Esfuerzo (RPE)</span><span id="rpeVal">5/10</span></label>
+                            <label class="text-[10px] font-bold text-red-400 uppercase flex justify-between"><span>Esfuerzo (RPE)</span><span id="rpeVal">5/10</span></label>
                             <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none mt-2 accent-red-500">
                         </div>
                         
                         <div class="relative mt-6">
-                            <button id="btnSubmit" type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-gray-200 transition">Computar Impacto</button>
-                            <div id="restTimerBox" class="hidden w-full py-4 bg-black border border-blue-500 text-blue-400 font-black uppercase tracking-widest text-center text-lg rounded flex items-center justify-center gap-2">
-                                <span class="animate-pulse">⏳</span> RECUPERACIÓN: <span id="restTimerDisplay">0s</span>
-                                <button type="button" onclick="saltarDescanso()" class="absolute right-2 text-[8px] text-gray-500 border border-gray-600 px-2 py-1 rounded">Saltar</button>
-                            </div>
+                            <button id="btnSubmit" type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-blue-50 transition">Computar Impacto</button>
+                            <div id="restTimerBox" class="hidden w-full py-4 bg-black border border-blue-500 text-blue-400 font-black uppercase tracking-widest text-center text-lg rounded">⏳ RECUPERACIÓN: <span id="restTimerDisplay">0s</span></div>
                         </div>
                     </form>
                 </div>
 
                 <div class="lg:col-span-6 flex flex-col gap-6">
-                    <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-56 relative overflow-hidden">
-                        <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100">
-                            <path class="avatar-path" d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z"/>
-                            <path class="avatar-path" d="M70,75 L130,75 L145,150 L55,150 Z"/>
-                            <path class="avatar-path" d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240"/>
-                            <path class="avatar-path" d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380"/>
-                            <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor fresco"/><circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor fresco"/><circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor fresco"/><circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor fresco"/><circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor fresco"/><circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor fresco"/><circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor fresco"/><circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor fresco"/>
-                        </svg>
+                    <div class="glass-card p-5 rounded-2xl h-80 relative flex flex-col items-center">
+                        <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Vulcano Radar 360°</h3>
+                        <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
                     </div>
 
                     <div class="glass-card p-5 rounded-2xl flex-grow flex flex-col justify-between">
                         <div>
-                            <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico Biomecánico</h2>
-                            <div id="bioInsight" class="text-xs font-light text-gray-300 leading-relaxed">El mapa indica la disponibilidad articular. Inicie protocolo.</div>
-                        </div>
-                        
-                        <div id="recetaMetabolica" class="hidden mt-4 p-3 border border-green-500/30 bg-green-900/10 rounded-lg">
-                            <p class="text-[8px] text-green-400 uppercase tracking-widest font-bold border-b border-green-500/20 pb-1 mb-2">Prescripción de Recuperación (Biohacking)</p>
-                            <div class="grid grid-cols-2 gap-2 text-center">
-                                <div><p class="text-lg font-black text-white" id="metAgua">0<span class="text-[10px] text-gray-400"> ml</span></p><p class="text-[7px] text-gray-500 uppercase">Hidratación Intra</p></div>
-                                <div><p class="text-lg font-black text-white" id="metCarbs">0<span class="text-[10px] text-gray-400"> g</span></p><p class="text-[7px] text-gray-500 uppercase">Carbohidratos Post</p></div>
-                            </div>
+                            <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico de la Sesión</h2>
+                            <div id="bioInsight" class="text-xs font-light text-gray-300 leading-relaxed italic">Esperando variables biomecánicas...</div>
                         </div>
                     </div>
                 </div>
@@ -209,75 +178,45 @@
 
         <div id="vistaMacro" class="vista space-y-6">
             <div class="flex gap-2 border-b border-white/10 pb-4 mb-4">
-                <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-4 py-2 text-[10px] uppercase font-bold tracking-widest bg-blue-600 text-white rounded">Expediente Cliente</button>
-                <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-4 py-2 text-[10px] uppercase font-bold tracking-widest border border-white/20 text-gray-400 rounded hover:bg-white/5">CRM Global</button>
+                <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-4 py-2 text-[10px] uppercase font-bold bg-blue-600 text-white rounded">Expediente Cliente</button>
+                <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-4 py-2 text-[10px] uppercase font-bold border border-white/20 text-gray-400 rounded">Gestor CRM</button>
             </div>
 
-            <div id="macroIndividual" class="space-y-6 block">
+            <div id="macroIndividual" class="space-y-6">
                 <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h1 class="text-2xl font-black text-white uppercase tracking-widest">Auditoría de Rendimiento</h1>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest" id="tituloReporte">Cliente Activo</p>
-                    </div>
-                    <div class="flex gap-2">
-                        <button onclick="enviarWhatsApp()" class="bg-[#25D366] text-white text-[10px] font-bold px-3 py-2 rounded uppercase tracking-tighter shadow-lg shadow-green-900/50">Enviar Reporte WPP</button>
-                        <button onclick="generarReportePDF()" class="bg-white text-black text-[10px] font-bold px-3 py-2 rounded uppercase tracking-tighter">Exportar PDF</button>
-                    </div>
+                    <div><h1 class="text-2xl font-black text-white uppercase tracking-widest">Auditoría del Cliente</h1></div>
+                    <div class="flex gap-2"><button onclick="enviarWhatsApp()" class="bg-[#25D366] text-white text-[10px] font-bold px-3 py-2 rounded uppercase">Reporte Diario</button><button onclick="generarReportePDF()" class="bg-white text-black text-[10px] font-bold px-3 py-2 rounded uppercase">PDF</button></div>
                 </div>
-
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-l-purple-500 flex justify-between items-center">
-                    <div>
-                        <h3 class="text-[10px] text-gray-400 uppercase tracking-widest">Tonelaje Acumulado</h3>
-                        <p class="text-xs text-gray-500">Volumen del Contrato</p>
-                    </div>
-                    <div class="text-2xl font-black text-white"><span id="tonelajeTotal">0</span> <span class="text-sm text-purple-400">Kg</span></div>
-                </div>
-
-                <div class="glass-card p-4 rounded-2xl h-80 relative" id="chartToPdf"><canvas id="macroChart"></canvas></div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-blue-400 uppercase font-bold mb-4">Estado Biológico</h3><div id="resumenBio" class="text-xs text-gray-400 space-y-2 uppercase tracking-tighter"></div></div>
-                    <div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-purple-400 uppercase font-bold mb-4">Registro Histórico</h3><div id="listaMacro" class="text-[10px] text-gray-500 space-y-2 h-40 overflow-y-auto pr-2"></div></div>
-                </div>
+                <div class="glass-card p-4 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-blue-400 uppercase font-bold mb-4">Estado Biológico</h3><div id="resumenBio" class="text-xs text-gray-400 space-y-2 uppercase tracking-tighter leading-relaxed"></div></div><div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-purple-400 uppercase font-bold mb-4">Bitácora de Sesiones</h3><div id="listaMacro" class="text-[10px] text-gray-500 space-y-2 h-40 overflow-y-auto"></div></div></div>
             </div>
 
-            <div id="macroGlobal" class="space-y-6 hidden">
-                <div class="flex justify-between items-end mb-6">
-                    <div>
-                        <h1 class="text-2xl font-black text-white uppercase tracking-widest">Gestor de Contratos</h1>
-                        <p class="text-[10px] text-gray-500 uppercase tracking-widest">Todos los Clientes Activos</p>
-                    </div>
-                </div>
-                <div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-            </div>
+            <div id="macroGlobal" class="space-y-6 hidden"><div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div></div>
         </div>
         
         <div class="mt-12 pt-8 border-t border-white/5 flex flex-col items-center justify-center pb-8 w-full">
             <span class="text-[9px] text-gray-500 uppercase tracking-[0.5em] mb-2" style="font-family: 'Inter', sans-serif;">Engineered By</span>
             <span class="text-lg font-black text-[#d4af37] tracking-[0.2em] uppercase" style="font-family: 'Cinzel', serif;">Juan Gabriel Lopez</span>
         </div>
-
     </main>
 
     <script>
-        const AudioContext = window.AudioContext || window.webkitAudioContext; let audioCtx;
         const InterfazSensorial = {
-            init: function() { if (!audioCtx) audioCtx = new AudioContext(); if (audioCtx.state === 'suspended') audioCtx.resume(); },
-            vibrar: function(p) { if (navigator.vibrate) navigator.vibrate(p); },
-            tick: function() { this.init(); this.vibrar(15); },
-            alerta: function() { this.init(); this.vibrar([100, 50, 200]); }
+            init: function() { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
+            vibrar: function(p) { if(navigator.vibrate) navigator.vibrate(p); },
+            tick: function() { this.vibrar(15); },
+            alerta: function() { this.vibrar([100, 50, 200]); }
         };
 
-        let db = JSON.parse(localStorage.getItem('vanguardia_v21')) || { perfilActivo: 'Cliente Elite', perfiles: { 'Cliente Elite': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', historial: [] } } };
+        let db = JSON.parse(localStorage.getItem('vanguardia_v22')) || { perfilActivo: 'Cliente Base', perfiles: { 'Cliente Base': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', sesiones: 12, restantes: 12, suplementos: [], historial: [] } } };
 
         function initMultiTenant() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
-        
-        function actualizarListaPerfiles() { const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = ''; for (const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; } selector.value = db.perfilActivo; }
+        function actualizarListaPerfiles() { const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = ''; for(const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; } selector.value = db.perfilActivo; }
         
         function crearPerfil() { 
-            const n = document.getElementById('nuevoNombre').value.trim(); const f = document.getElementById('nuevaFase').value;
-            if(!n || db.perfiles[n]) return alert("Nombre inválido o cliente existente."); 
-            db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, fase: f, dolor: 'Ninguno', historial: [] }; 
+            const n = document.getElementById('nuevoNombre').value.trim(); const f = document.getElementById('nuevaFase').value; const s = parseInt(document.getElementById('nuevasSesiones').value) || 12;
+            if(!n || db.perfiles[n]) return alert("Nombre inválido."); 
+            db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, fase: f, dolor: 'Ninguno', sesiones: s, restantes: s, suplementos: [], historial: [] }; 
             db.perfilActivo = n; guardarDB(); actualizarListaPerfiles(); document.getElementById('nuevoNombre').value = ''; InterfazSensorial.tick(); 
         }
         
@@ -285,173 +224,159 @@
         
         function cargarPerfilActivo() { 
             const p = db.perfiles[db.perfilActivo]; 
-            if(!p.fase) p.fase = 'Hipertrofia Muscular'; if(!p.dolor) p.dolor = 'Ninguno';
             document.getElementById('nombreAtletaNav').innerText = db.perfilActivo; 
-            document.getElementById('tituloReporte').innerText = `Expediente: ${db.perfilActivo}`; 
-            document.getElementById('faseActualBadge').innerText = `CONTRATO: ${p.fase}`;
+            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes || 0}`;
             document.getElementById('bioEdad').value = p.edad; document.getElementById('bioPeso').value = p.peso; 
-            document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres; document.getElementById('inputDolor').value = p.dolor;
-            actualizarMapaDeCalor(); calcularTUT();
+            document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres;
+            if(p.restantes < 3) document.getElementById('alertaRenovacion').classList.remove('hidden'); else document.getElementById('alertaRenovacion').classList.add('hidden');
+            renderRadar();
         }
         
         function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
         function cerrarModalPerfiles() { cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
-        function guardarDB() { localStorage.setItem('vanguardia_v21', JSON.stringify(db)); actualizarMapaDeCalor(); }
+        function guardarDB() { localStorage.setItem('vanguardia_v22', JSON.stringify(db)); }
 
         function finalizarCheckIn() {
             InterfazSensorial.init(); const p = db.perfiles[db.perfilActivo];
-            p.sueno = document.getElementById('inputSueño').value || 7; p.estres = document.getElementById('inputEstres').value || 3; p.dolor = document.getElementById('inputDolor').value;
-            guardarDB(); document.getElementById('modalPreVuelo').style.display = 'none'; evaluarEstado();
+            p.sueno = document.getElementById('inputSueño').value || 7; p.estres = document.getElementById('inputEstres').value || 3;
+            p.suplementos = [
+                document.getElementById('supp-creatina').checked, document.getElementById('supp-omega').checked,
+                document.getElementById('supp-magnesio').checked, document.getElementById('supp-proteina').checked
+            ];
+            guardarDB(); document.getElementById('modalPreVuelo').style.display = 'none'; renderRadar();
         }
 
-        function evaluarEstado() {
-            const p = db.perfiles[db.perfilActivo]; const panel = document.getElementById('panelDirectriz');
-            let readiness = 100 - ((7 - p.sueno) * 15) - ((p.estres - 3) * 10);
-            let extraMsg = p.dolor !== 'Ninguno' ? `<br><span class="text-red-400 font-bold mt-1 block">ALERTA CLÍNICA: Modificar vectores de carga para ${p.dolor}.</span>` : "";
-            
-            if(readiness < 60) { panel.classList.replace('border-l-blue-500', 'border-l-red-500'); document.getElementById('textoDirectriz').innerHTML = `Estado Biológico Comprometido (${readiness}%). Reducir volumen.${extraMsg}`; } 
-            else { panel.classList.replace('border-l-red-500', 'border-l-blue-500'); document.getElementById('textoDirectriz').innerHTML = `Sistema Nervioso Óptimo (${readiness}%). Autorizado para máxima intensidad.${extraMsg}`; }
-        }
-
-        // CÁLCULO DE TUT POR PROTOCOLO I.C.U.
         function calcularTUT() {
-            const exc = parseFloat(document.getElementById('cadExc').value) || 0;
-            const iso = parseFloat(document.getElementById('cadIso').value) || 0;
-            const con = parseFloat(document.getElementById('cadCon').value) || 0;
-            const reps = parseInt(document.getElementById('reps').value) || 0;
-            const tutObj = (exc + iso + con) * reps;
-            document.getElementById('tutDisplay').innerText = `${tutObj}s`;
-            document.getElementById('tut').value = tutObj;
+            const exc = parseFloat(document.getElementById('cadExc').value) || 0; const iso = parseFloat(document.getElementById('cadIso').value) || 0; const con = parseFloat(document.getElementById('cadCon').value) || 0;
+            const reps = parseInt(document.getElementById('reps').value) || 0; const total = (exc + iso + con) * reps;
+            document.getElementById('tutDisplay').innerText = `${total}s`; document.getElementById('tut').value = total;
         }
 
-        function actualizarMapaDeCalor() {
-            const h = db.perfiles[db.perfilActivo].historial; const ahora = new Date().getTime(); let fatiga = { pecho: 0, espalda: 0, piernas: 0, brazos: 0 };
-            h.forEach(s => {
-                if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
-                    let impacto = parseFloat(s.rpe) * parseInt(s.series);
-                    if(s.dominio.includes("Empuje")) { fatiga.pecho += impacto; fatiga.brazos += impacto*0.5; }
-                    if(s.dominio.includes("Tracción")) { fatiga.espalda += impacto; fatiga.brazos += impacto*0.5; }
-                    if(s.dominio.includes("Piernas")) { fatiga.piernas += impacto; }
-                    if(s.dominio.includes("Metabólico")) { fatiga.pecho += impacto*0.3; fatiga.espalda += impacto*0.3; fatiga.piernas += impacto*0.3; }
-                }
-            });
-            const aplicar = (id, f) => { let el = document.getElementById(id); if(!el) return; el.className.baseVal = "sensor"; if(f > 30) el.classList.add('fatigado'); else if(f > 10) el.classList.add('recuperando'); else el.classList.add('fresco'); };
-            aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda); aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos); aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas); aplicar('sensor-cadenaPost1', fatiga.piernas); aplicar('sensor-cadenaPost2', fatiga.piernas);
+        function buscarHistorialEjercicio() {
+            const ejActual = document.getElementById('ejercicioNombre').value.trim().toLowerCase(); const box = document.getElementById('sobrecargaReco');
+            if(ejActual.length < 3) { box.classList.add('hidden'); return; }
+            const ultimo = [...db.perfiles[db.perfilActivo].historial].reverse().find(s => s.ej.toLowerCase() === ejActual);
+            if(ultimo) { box.innerHTML = `<strong>MEMORIA:</strong> Último registro ${ultimo.carga}kg. Apunta a <span class="text-green-400">${(parseFloat(ultimo.carga)+2.5)}kg</span> para adaptación.`; box.classList.remove('hidden'); } else box.classList.add('hidden');
         }
 
         let restInt;
         function iniciarDescansoLogico(rpe) {
-            const p = db.perfiles[db.perfilActivo];
-            let tiempo = 90; 
-            if(p.fase.includes('Fuerza')) tiempo = 180; 
-            if(p.fase.includes('Metabólico') || p.fase.includes('Oxidación')) tiempo = 60; 
-            if(p.fase.includes('Longevidad')) tiempo = 120;
-            if (rpe >= 9 && !p.fase.includes('Metabólico')) tiempo += 60; 
-
+            let t = rpe >= 8 ? 120 : 60;
             document.getElementById('btnSubmit').classList.add('hidden');
-            const box = document.getElementById('restTimerBox'); const display = document.getElementById('restTimerDisplay');
-            box.classList.remove('hidden'); let t = tiempo; display.innerText = `${t}s`;
-            restInt = setInterval(() => { t--; display.innerText = `${t}s`; if(t <= 0) { saltarDescanso(); InterfazSensorial.alerta(); } }, 1000);
+            const box = document.getElementById('restTimerBox'); box.classList.remove('hidden');
+            restInt = setInterval(() => { t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; if(t <= 0) saltarDescanso(); }, 1000);
         }
-
         function saltarDescanso() { clearInterval(restInt); document.getElementById('restTimerBox').classList.add('hidden'); document.getElementById('btnSubmit').classList.remove('hidden'); }
 
         document.getElementById('rpe').oninput = function() { document.getElementById('rpeVal').innerText = this.value + '/10'; InterfazSensorial.tick(); };
 
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault(); const p = db.perfiles[db.perfilActivo];
-            p.edad = document.getElementById('bioEdad').value; p.peso = document.getElementById('bioPeso').value;
-            const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const tut = parseFloat(document.getElementById('tut').value); const rpe = parseFloat(document.getElementById('rpe').value); const ejDom = document.getElementById('dominioSelector').value; const ejNom = document.getElementById('ejercicioNombre').value;
-
+            const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const tut = parseFloat(document.getElementById('tut').value); const rpe = parseFloat(document.getElementById('rpe').value);
             const ts = new Date().getTime();
-            let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1); 
-            
-            if(p.dolor === 'Rodillas' && ejDom.includes('Piernas')) riesgo = (parseFloat(riesgo) * 1.5).toFixed(1);
-            if(p.dolor === 'Lumbar' && ejDom.includes('Traseras')) riesgo = (parseFloat(riesgo) * 1.5).toFixed(1);
-            if(p.dolor === 'Hombros' && ejDom.includes('Empuje')) riesgo = (parseFloat(riesgo) * 1.5).toFixed(1);
+            let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1);
+            let rm1 = (carga * (1 + (reps / 30))).toFixed(1);
 
-            const ifi = ((carga / 100) * (tut / 50)).toFixed(2);
-            let rm1 = 0; if (reps > 0 && carga > 0 && rpe >= 7) { rm1 = (carga * (1 + (reps / 30))).toFixed(1); }
+            // DESCUENTO DE SESIÓN (Logica comercial)
+            if(p.restantes > 0) p.restantes--;
+            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
 
-            p.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), dominio: ejDom, ej: ejNom, carga, reps, series, rpe, ifi, rm1, riesgo });
+            p.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), ej: document.getElementById('ejercicioNombre').value, carga, reps, rpe, rm1, riesgo, dominio: document.getElementById('dominioSelector').value });
             guardarDB();
 
-            let diag = ""; 
-            if (riesgo < 5) diag = "Intensidad base. Adecuado para técnica o calentamiento."; 
-            else if (riesgo < 8) diag = "Sobrecarga progresiva óptima registrada."; 
-            else { diag = "ADVERTENCIA: Límite estructural superado. Riesgo de daño tisular."; InterfazSensorial.alerta(); }
-            document.getElementById('bioInsight').innerHTML = diag;
-
-            // INTELIGENCIA METABÓLICA
-            const tonelajeSerie = carga * reps * series;
-            const aguaNecesaria = ((tonelajeSerie / 1000) * 150).toFixed(0); // Fórmula biohacking demo
-            const carbsNecesarios = ((tonelajeSerie / 1000) * 8).toFixed(1);
-            
-            document.getElementById('metAgua').innerHTML = `${aguaNecesaria}<span class="text-[10px] text-gray-400"> ml</span>`;
-            document.getElementById('metCarbs').innerHTML = `${carbsNecesarios}<span class="text-[10px] text-gray-400"> g</span>`;
-            document.getElementById('recetaMetabolica').classList.remove('hidden');
-
-            iniciarDescansoLogico(rpe);
+            document.getElementById('bioInsight').innerHTML = riesgo > 8 ? "RIESGO ELEVADO. El sistema nervioso central requiere descanso inmediato." : "Dosis mecánica óptima procesada.";
+            iniciarDescansoLogico(rpe); renderRadar();
         };
 
+        // MOTOR VISUAL RADAR 360
+        let radarInst;
+        function renderRadar() {
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            const p = db.perfiles[db.perfilActivo];
+            const h = p.historial;
+            
+            // Calculos dinámicos para el radar (Escala 1-10)
+            let fuer = h.length > 0 ? Math.min(10, h[h.length-1].rm1 / 15) : 0;
+            let vol = h.length > 0 ? Math.min(10, h.length / 5) : 0;
+            let reco = Math.min(10, p.sueno * 1.2);
+            let adh = p.suplementos ? p.suplementos.filter(x => x).length * 2.5 : 0;
+            let disc = p.estres < 5 ? 9 : 5;
+
+            if(radarInst) radarInst.destroy();
+            radarInst = new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'ADHERENCIA', 'DISCIPLINA'],
+                    datasets: [{
+                        data: [fuer, vol, reco, adh, disc],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3b82f6',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: { 
+                    scales: { r: { min: 0, max: 10, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.1)' } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        let macroChart;
+        function toggleVista() {
+            document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa');
+            if(document.getElementById('vistaMacro').classList.contains('activa')) { document.getElementById('btnVista').innerText = "Panel Control"; switchMacroTab('individual'); } 
+            else { document.getElementById('btnVista').innerText = "Expediente"; renderRadar(); }
+        }
+
         function switchMacroTab(tab) {
-            InterfazSensorial.tick();
             if(tab === 'individual') {
                 document.getElementById('macroIndividual').classList.remove('hidden'); document.getElementById('macroGlobal').classList.add('hidden');
-                document.getElementById('tabIndiv').classList.replace('bg-transparent', 'bg-blue-600'); document.getElementById('tabIndiv').classList.replace('text-gray-400', 'text-white');
-                document.getElementById('tabGlobal').classList.replace('bg-blue-600', 'bg-transparent'); document.getElementById('tabGlobal').classList.replace('text-white', 'text-gray-400');
                 renderChart();
             } else {
                 document.getElementById('macroIndividual').classList.add('hidden'); document.getElementById('macroGlobal').classList.remove('hidden');
-                document.getElementById('tabGlobal').classList.replace('bg-transparent', 'bg-blue-600'); document.getElementById('tabGlobal').classList.replace('text-white', 'text-gray-400');
-                document.getElementById('tabIndiv').classList.replace('bg-blue-600', 'bg-transparent'); document.getElementById('tabIndiv').classList.replace('text-white', 'text-gray-400');
                 renderizarVisionGlobal();
             }
         }
 
-        function toggleVista() {
-            document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa');
-            const btn = document.getElementById('btnVista');
-            if(document.getElementById('vistaMacro').classList.contains('activa')) { btn.innerText = "Panel de Operación"; switchMacroTab('individual'); } 
-            else { btn.innerText = "Panel de Auditoría"; actualizarMapaDeCalor(); }
-        }
-
         function renderChart() {
-            const h = db.perfiles[db.perfilActivo].historial; const ctx = document.getElementById('macroChart').getContext('2d'); const dataSlice = h.slice(-15);
-            let tonTotal = 0; h.forEach(s => { if(s.carga && s.reps && s.series) tonTotal += (s.carga * s.reps * s.series); });
-            document.getElementById('tonelajeTotal').innerText = tonTotal.toLocaleString();
-            let readiness = 100 - ((7 - db.perfiles[db.perfilActivo].sueno) * 15) - ((db.perfiles[db.perfilActivo].estres - 3) * 10);
-            document.getElementById('resumenBio').innerHTML = `Contrato: <strong class="text-white">${db.perfiles[db.perfilActivo].fase}</strong><br>Estado SNC: <span class="text-blue-400">${readiness}%</span><br>Alerta Clínica: ${db.perfiles[db.perfilActivo].dolor}`;
+            const h = db.perfiles[db.perfilActivo].historial; const ctx = document.getElementById('macroChart').getContext('2d'); const dataSlice = h.slice(-10);
+            if(macroChart) macroChart.destroy();
+            macroChart = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'Proyección Fuerza', data:dataSlice.map(s => s.rm1), backgroundColor:'#3b82f6' }] }, options: { responsive: true, maintainAspectRatio: false } });
+            document.getElementById('resumenBio').innerHTML = `Contrato: ${db.perfiles[db.perfilActivo].fase}<br>Sesiones Restantes: ${db.perfiles[db.perfilActivo].restantes}<br>Calidad Sueño: ${db.perfiles[db.perfilActivo].sueno}h`;
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
-            [...h].reverse().slice(0, 10).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-1">${s.fecha} - <strong class="text-white">${s.ej}</strong><br>Carga: ${s.carga}kg x ${s.reps} reps | RPE: ${s.rpe}</div>`);
+            [...h].reverse().slice(0, 10).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-1">${s.fecha} - ${s.ej} (${s.carga}kg)</div>`);
         }
 
         function renderizarVisionGlobal() {
             const grid = document.getElementById('gridAtletasGlobal'); grid.innerHTML = "";
-            for (const nombre in db.perfiles) {
-                const p = db.perfiles[nombre]; let readiness = 100 - ((7 - p.sueno) * 15) - ((p.estres - 3) * 10); let tonTotal = 0; p.historial.forEach(s => { if(s.carga && s.reps && s.series) tonTotal += (s.carga * s.reps * s.series); });
-                let colorColor = readiness < 60 ? 'text-red-500' : 'text-blue-400';
-                grid.innerHTML += `<div class="glass-card p-5 rounded-2xl flex flex-col justify-between"><div><h3 class="text-xs font-black text-white uppercase tracking-widest mb-1">${nombre}</h3><p class="text-[8px] text-blue-400 font-bold uppercase tracking-widest border-b border-white/10 pb-2 mb-2">${p.fase}</p></div><div class="grid grid-cols-2 gap-2 mt-2"><div><p class="text-[8px] text-gray-500 uppercase">Estado</p><p class="text-lg font-black ${colorColor}">${readiness}%</p></div><div><p class="text-[8px] text-gray-500 uppercase">Volumen</p><p class="text-lg font-black text-white">${tonTotal.toLocaleString()} <span class="text-[10px] font-normal text-gray-500">kg</span></p></div></div></div>`;
+            for(const n in db.perfiles) {
+                const p = db.perfiles[n];
+                grid.innerHTML += `<div class="glass-card p-5 rounded-2xl">
+                    <h3 class="text-xs font-black text-white uppercase mb-1">${n}</h3>
+                    <p class="text-[8px] text-blue-400 mb-2 uppercase">${p.fase}</p>
+                    <div class="flex justify-between border-t border-white/5 pt-2">
+                        <span class="text-[8px] text-gray-500 uppercase">Restantes:</span>
+                        <span class="text-[10px] font-bold ${p.restantes < 3 ? 'text-red-500' : 'text-green-400'}">${p.restantes} / ${p.sesiones}</span>
+                    </div>
+                </div>`;
             }
         }
 
-        // TELEMETRÍA FLASH (WHATSAPP)
         function enviarWhatsApp() {
             const p = db.perfiles[db.perfilActivo];
-            let readiness = 100 - ((7 - p.sueno) * 15) - ((p.estres - 3) * 10);
-            let tonTotal = 0; p.historial.forEach(s => { if(s.carga && s.reps && s.series) tonTotal += (s.carga * s.reps * s.series); });
-            
-            const texto = `*REPORTE VULCANO OS | Cliente: ${db.perfilActivo}*%0A%0A` +
-                          `📊 *Servicio Activo:* ${p.fase}%0A` +
-                          `🔋 *Estado del Sistema Nervioso:* ${readiness}%25%0A` +
-                          `⚠️ *Alerta Articular:* ${p.dolor}%0A` +
-                          `🏋️ *Volumen Acumulado (Tonelaje):* ${tonTotal.toLocaleString()} Kg%0A%0A` +
-                          `_Reporte generado por Inteligencia Biomecánica._`;
-                          
-            window.open(`https://wa.me/?text=${texto}`, "_blank");
+            const text = `*VULCANO OS | Reporte de Sesión*%0A*Cliente:* ${db.perfilActivo}%0A*Restantes:* ${p.restantes} sesiones.%0A*Estado SNC:* ${p.sueno}h sueño.%0A_Fuerza hoy optimizada._`;
+            window.open(`https://wa.me/?text=${text}`, "_blank");
         }
 
-        function generarReportePDF() { const element = document.getElementById('reportContent'); html2pdf().set({ margin: 0.5, filename: `Auditoria_${db.perfilActivo}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, backgroundColor: '#030303' }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } }).from(element).save(); }
+        function enviarWhatsAppRenovacion() {
+            const p = db.perfiles[db.perfilActivo];
+            const text = `*VULCANO OS | Gestión de Contratos*%0AEstimado ${db.perfilActivo}, le informamos que le restan *${p.restantes}* sesiones de su plan de ${p.fase}. Por favor, gestione su renovación para mantener la continuidad biomecánica.`;
+            window.open(`https://wa.me/?text=${text}`, "_blank");
+        }
+
+        function generarReportePDF() { html2pdf().from(document.getElementById('reportContent')).save(); }
+        
         initMultiTenant();
     </script>
 </body>
