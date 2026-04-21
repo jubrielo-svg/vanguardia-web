@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Ecosistema de Rendimiento</title>
+    <title>Vanguardia | Centro de Gestión Elite</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,58 +13,60 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        :root { --accent-color: #3b82f6; --gold-accent: #d4af37; }
+        :root { --accent-color: #ffffff; }
         body { font-family: 'Inter', sans-serif; background-color: #030303; color: #f3f4f6; overflow-x: hidden; margin: 0; }
-        .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, var(--accent-color) 0%, transparent 60%); opacity: 0.08; pointer-events: none; z-index: -1; transition: all 1s ease; }
-        .glass-card { background: rgba(10, 10, 10, 0.7); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); }
+        .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%); opacity: 1; pointer-events: none; z-index: -1; transition: all 1s ease; }
+        .glass-card { background: rgba(10, 10, 10, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(20px); }
         
         #modalPreVuelo, #modalPerfiles { background: rgba(0,0,0,0.95); backdrop-filter: blur(20px); display: none; }
         .vista { display: none; animation: fadeIn 0.5s ease forwards; }
         .vista.activa { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .supp-check { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; transition: all 0.3s; }
-        .supp-check:checked { background: var(--gold-accent); border-color: var(--gold-accent); box-shadow: 0 0 10px var(--gold-accent); }
+        .supp-check { appearance: none; width: 16px; height: 16px; border: 1px solid rgba(255,255,255,0.3); border-radius: 4px; background: rgba(255,255,255,0.05); cursor: pointer; transition: all 0.3s; }
+        .supp-check:checked { background: #ffffff; border-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.5); }
 
-        /* ONBOARDING SCREEN */
-        #onboardingScreen { position: fixed; inset: 0; background: #000; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; transition: opacity 0.8s ease; }
-        
         /* PASARELA BIOMÉTRICA */
         #authGateway { position: fixed; inset: 0; background: #000; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.8s ease; }
         .fingerprint-btn { width: 100px; height: 120px; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 20px; transition: all 0.3s; }
-        .fingerprint-icon { width: 80px; height: 100px; fill: rgba(255,255,255,0.1); transition: fill 0.3s, filter 0.3s; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--gold-accent); box-shadow: 0 0 15px var(--gold-accent); opacity: 0; }
-        .scanning .fingerprint-icon { fill: var(--gold-accent); filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.6)); }
+        .fingerprint-icon { width: 80px; height: 100px; fill: rgba(255,255,255,0.2); transition: fill 0.3s, filter 0.3s; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #ffffff; box-shadow: 0 0 15px #ffffff; opacity: 0; }
+        .scanning .fingerprint-icon { fill: #ffffff; filter: drop-shadow(0 0 15px rgba(255,255,255, 0.8)); }
         .scanning .scan-line { opacity: 1; animation: scanAnim 1.5s linear infinite; }
         @keyframes scanAnim { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
         .auth-pin { letter-spacing: 0.5em; text-align: center; font-family: 'Courier New', monospace; font-size: 1.5rem; background: transparent; border: none; border-bottom: 2px solid rgba(255,255,255,0.2); color: white; outline: none; transition: border-color 0.3s; }
-        .auth-pin:focus { border-color: var(--gold-accent); }
+        .auth-pin:focus { border-color: #ffffff; }
+        
+        /* MAPA DE CALOR MINIMALISTA */
+        .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.05); }
+        .sensor.fresco { fill: rgba(255,255,255,1); filter: drop-shadow(0 0 8px rgba(255,255,255,0.8)); }
+        .sensor.recuperando { fill: rgba(255,255,255,0.4); }
+        .sensor.fatigado { fill: rgba(50,50,50,0.8); border: 1px solid #fff; }
     </style>
 </head>
 <body class="min-h-screen pb-10">
 
-    <button id="btnInstallPWA" class="hidden fixed top-4 right-4 bg-[#d4af37] text-black text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full z-[10001] shadow-[0_0_15px_rgba(212,175,55,0.4)]">Instalar App</button>
+    <button id="btnInstallPWA" class="hidden fixed top-4 right-4 bg-white text-black text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full z-[10001] shadow-[0_0_15px_rgba(255,255,255,0.3)]">Instalar App</button>
 
-    <div id="onboardingScreen">
-        <h1 class="text-4xl font-black text-[#d4af37] tracking-[0.3em] uppercase mb-4 text-center" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
+    <div id="onboardingScreen" class="fixed inset-0 bg-black z-[10000] flex flex-col items-center justify-center p-8 transition-opacity duration-800">
+        <h1 class="text-4xl font-black text-white tracking-[0.3em] uppercase mb-4 text-center" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
         <p class="text-xs text-gray-400 uppercase tracking-[0.2em] mb-12 text-center">Ingeniería Biomecánica & Biohacking</p>
         
         <div class="space-y-6 w-full max-w-sm mb-12">
-            <div class="glass-card p-4 rounded-xl border-l-2 border-l-[#d4af37]">
+            <div class="glass-card p-5 rounded-xl border-l-2 border-l-white">
                 <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">1. Hipertrofia Clínica</h3>
                 <p class="text-[9px] text-gray-400 leading-relaxed">Dosificación exacta de tensión mecánica para crecimiento celular sin daño articular.</p>
             </div>
-            <div class="glass-card p-4 rounded-xl border-l-2 border-l-blue-500">
+            <div class="glass-card p-5 rounded-xl border-l-2 border-l-gray-400">
                 <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">2. Neuro-Recuperación</h3>
                 <p class="text-[9px] text-gray-400 leading-relaxed">Telemetría del Sistema Nervioso Central para evitar el sobreentrenamiento.</p>
             </div>
-            <div class="glass-card p-4 rounded-xl border-l-2 border-l-purple-500">
+            <div class="glass-card p-5 rounded-xl border-l-2 border-l-gray-600">
                 <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">3. Optimización Química</h3>
                 <p class="text-[9px] text-gray-400 leading-relaxed">Prescripciones hídricas y de micronutrientes para regeneración acelerada.</p>
             </div>
         </div>
-
-        <button onclick="cerrarOnboarding()" class="px-10 py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-gray-200 transition">Acceder a la Bóveda</button>
+        <button onclick="cerrarOnboarding()" class="px-10 py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-full hover:bg-gray-300 transition shadow-[0_0_20px_rgba(255,255,255,0.2)]">Acceder a la Bóveda</button>
     </div>
 
     <div id="authGateway">
@@ -72,7 +74,7 @@
         <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-12">Autenticación Requerida</p>
         <div class="mb-10 w-full px-12">
             <input type="password" id="pinAcceso" maxlength="4" placeholder="••••" class="auth-pin w-full pb-2">
-            <p class="text-[8px] text-center text-gray-600 uppercase mt-2">Ingrese Código PIN</p>
+            <p class="text-[8px] text-center text-gray-500 uppercase mt-2">Ingrese Código PIN</p>
         </div>
         <div id="biometricSensor" class="fingerprint-btn" onmousedown="iniciarEscaneo()" onmouseup="detenerEscaneo()" onmouseleave="detenerEscaneo()" ontouchstart="iniciarEscaneo()" ontouchend="detenerEscaneo()">
             <svg viewBox="0 0 24 24" class="fingerprint-icon">
@@ -88,17 +90,16 @@
         <div id="ambient" class="ambient-bg"></div>
 
         <div id="modalPerfiles" class="fixed inset-0 z-[300] items-center justify-center p-6 flex">
-            <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 overflow-y-auto max-h-[90vh]">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-white/20 overflow-y-auto max-h-[90vh]">
                 <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Gestión de Contratos</h2>
                 <div class="space-y-4">
                     <div>
-                        <label class="text-[10px] font-bold uppercase text-blue-400 block mb-2 text-center">Seleccionar Cliente</label>
-                        <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none text-center"></select>
+                        <label class="text-[10px] font-bold uppercase text-gray-400 block mb-2 text-center">Seleccionar Cliente</label>
+                        <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-transparent border-b border-white/20 p-3 text-white text-sm outline-none text-center"></select>
                     </div>
-                    <div class="pt-4 border-t border-white/10 text-center space-y-3">
+                    <div class="pt-6 border-t border-white/10 text-center space-y-4">
                         <p class="text-[9px] text-gray-500 uppercase tracking-widest">Nueva Alta de Servicio</p>
                         <input type="text" id="nuevoNombre" placeholder="Nombre Completo" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white outline-none">
-                        
                         <div class="grid grid-cols-2 gap-2">
                             <select id="nuevaFase" class="bg-black border border-white/10 rounded-lg p-2 text-[10px] text-gray-300 outline-none">
                                 <option value="Hipertrofia Muscular">Hipertrofia</option>
@@ -108,126 +109,121 @@
                             </select>
                             <input type="number" id="nuevasSesiones" placeholder="N° Sesiones" class="bg-black border border-white/10 rounded-lg p-2 text-[10px] text-center text-white outline-none">
                         </div>
-                        <input type="number" id="nuevoPrecio" placeholder="Valor del Contrato ($)" class="w-full bg-black border border-[#d4af37]/30 rounded-lg p-3 text-center text-[#d4af37] outline-none">
-                        
-                        <button onclick="crearPerfil()" class="w-full py-3 bg-blue-900/40 text-blue-400 font-bold uppercase tracking-widest text-[10px] rounded border border-blue-500/30 hover:bg-blue-800/50">Generar Contrato</button>
+                        <button onclick="crearPerfil()" class="w-full py-3 bg-white text-black font-bold uppercase tracking-widest text-[10px] rounded hover:bg-gray-300 transition">Generar Contrato</button>
                     </div>
-                    <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-2 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200">Validar Acceso</button>
+                    <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-4 bg-transparent border border-white/30 text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white/5">Validar Acceso</button>
                 </div>
             </div>
         </div>
 
         <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
-            <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-blue-500/30 overflow-y-auto max-h-[90vh]">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl border border-white/20 overflow-y-auto max-h-[90vh]">
                 <h2 class="text-xs font-black tracking-[0.4em] uppercase text-white mb-6 text-center">Auditoría Biológica</h2>
                 <div class="space-y-6">
                     <div>
-                        <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Horas de Sueño</label>
-                        <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black border border-white/10 rounded-lg p-3 text-center text-white text-xl outline-none">
+                        <label class="text-[10px] font-bold uppercase text-gray-400 block mb-2 text-center">Horas de Sueño</label>
+                        <input type="number" id="inputSueño" placeholder="7" class="w-full bg-transparent border-b border-white/20 p-2 text-center text-white text-2xl outline-none">
                     </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase text-blue-400 block mb-1 text-center">Estrés Sistémico</label>
-                        <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-blue-500">
+                    <div class="pt-4">
+                        <label class="text-[10px] font-bold uppercase text-gray-400 block mb-2 text-center">Estrés Sistémico</label>
+                        <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-white">
                     </div>
-                    
-                    <div class="pt-4 border-t border-white/10">
-                        <label class="text-[10px] font-bold uppercase text-[#d4af37] block mb-3 text-center">Matriz Química Diaria</label>
-                        <div class="grid grid-cols-2 gap-3 text-[9px] uppercase tracking-tighter">
+                    <div class="pt-6 border-t border-white/10">
+                        <label class="text-[10px] font-bold uppercase text-white block mb-4 text-center tracking-widest">Optimización Química Diaria</label>
+                        <div class="grid grid-cols-2 gap-4 text-[9px] uppercase tracking-tighter text-gray-300">
                             <label class="flex items-center gap-2"><input type="checkbox" id="supp-creatina" class="supp-check"> Creatina (ATP)</label>
                             <label class="flex items-center gap-2"><input type="checkbox" id="supp-omega" class="supp-check"> Omega 3 (SNC)</label>
                             <label class="flex items-center gap-2"><input type="checkbox" id="supp-magnesio" class="supp-check"> Magnesio (GABA)</label>
                             <label class="flex items-center gap-2"><input type="checkbox" id="supp-proteina" class="supp-check"> Proteína (mTOR)</label>
                         </div>
                     </div>
-
-                    <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-200">Guardar Biometría</button>
+                    <button onclick="finalizarCheckIn()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-gray-300 transition shadow-[0_0_15px_rgba(255,255,255,0.2)]">Guardar Biometría</button>
                 </div>
             </div>
         </div>
 
-        <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
+        <nav class="p-4 flex justify-between items-center border-b border-white/10 relative z-10 bg-black/60 backdrop-blur-xl sticky top-0">
             <div class="text-lg font-black tracking-tighter uppercase flex items-center gap-3">
                 VANGUARDIA.
-                <button onclick="abrirModalPerfiles()" class="text-[8px] border border-blue-500/50 text-blue-400 bg-blue-900/20 px-2 py-1 rounded uppercase">
-                    👤 <span id="nombreAtletaNav">Cliente</span>
+                <button onclick="abrirModalPerfiles()" class="text-[8px] border border-white/30 text-white bg-transparent px-3 py-1 rounded uppercase tracking-widest hover:bg-white/5">
+                    <span id="nombreAtletaNav">Cliente</span>
                 </button>
             </div>
-            <div id="badgeSesiones" class="text-[9px] px-3 py-1 rounded bg-green-900/20 border border-green-500/30 text-green-400 font-bold uppercase">
+            <div id="badgeSesiones" class="text-[9px] px-3 py-1 rounded border border-white/20 text-white font-bold uppercase tracking-widest">
                 Sesiones: 0
             </div>
-            <button onclick="toggleVista()" id="btnVista" class="text-[10px] bg-white text-black font-bold uppercase px-3 py-1 rounded">Expediente</button>
+            <button onclick="toggleVista()" id="btnVista" class="text-[9px] bg-white text-black font-bold uppercase px-4 py-2 rounded tracking-widest">Expediente</button>
         </nav>
 
         <main id="reportContent" class="max-w-7xl mx-auto p-4 space-y-6">
             <div id="vistaMicro" class="vista activa space-y-6">
                 
-                <div id="alertaRenovacion" class="hidden glass-card p-3 rounded-xl border border-red-500/50 bg-red-900/10 flex justify-between items-center">
-                    <p class="text-[9px] text-red-400 uppercase font-black tracking-widest">ALERTA: Contrato por expirar.</p>
-                    <button onclick="enviarWhatsAppRenovacion()" class="bg-red-600 text-white text-[8px] font-bold px-3 py-1 rounded">Cobrar vía WPP</button>
+                <div id="alertaRenovacion" class="hidden glass-card p-4 rounded-xl border border-white/40 flex justify-between items-center">
+                    <p class="text-[9px] text-white uppercase font-black tracking-widest">Contrato por expirar.</p>
+                    <button onclick="enviarWhatsAppRenovacion()" class="bg-white text-black text-[8px] font-bold px-4 py-2 rounded uppercase tracking-widest">Notificar</button>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
-                    <div class="lg:col-span-6 glass-card p-5 rounded-2xl relative" id="panelIngreso">
-                        <form id="formVanguardia" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-3 mb-4 pb-4 border-b border-white/5">
-                                <div><label class="text-[8px] text-gray-500 uppercase">Edad</label><input type="number" id="bioEdad" class="w-full bg-black border border-white/10 rounded p-1 text-white text-center text-xs"></div>
-                                <div><label class="text-[8px] text-gray-500 uppercase">Peso Corporal</label><input type="number" id="bioPeso" class="w-full bg-black border border-white/10 rounded p-1 text-blue-400 font-bold text-center text-xs"></div>
+                    <div class="lg:col-span-6 glass-card p-6 rounded-2xl relative" id="panelIngreso">
+                        <form id="formVanguardia" class="space-y-5">
+                            <div class="grid grid-cols-2 gap-4 mb-4 pb-4 border-b border-white/10">
+                                <div><label class="text-[8px] text-gray-500 uppercase tracking-widest">Edad</label><input type="number" id="bioEdad" class="w-full bg-transparent border-b border-white/20 p-2 text-white text-center text-sm outline-none"></div>
+                                <div><label class="text-[8px] text-gray-500 uppercase tracking-widest">Peso (Kg)</label><input type="number" id="bioPeso" class="w-full bg-transparent border-b border-white/20 p-2 text-white font-bold text-center text-sm outline-none"></div>
                             </div>
 
-                            <div class="bg-blue-900/10 border border-blue-500/20 p-3 rounded-lg relative">
-                                <label class="text-[10px] font-bold uppercase tracking-widest text-blue-400 block mb-2">Mecánica Aplicada</label>
-                                <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm outline-none">
+                            <div class="border border-white/10 p-4 rounded-xl relative bg-black/30">
+                                <label class="text-[9px] font-bold uppercase tracking-widest text-gray-300 block mb-3">Mecánica Aplicada</label>
+                                <select id="dominioSelector" class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-xs outline-none tracking-wide">
                                     <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Piernas)</option>
                                     <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Isquios)</option>
                                     <option value="Empuje (Pecho, Hombros)">Empuje (Tren Superior)</option>
                                     <option value="Tracción (Espalda, Bíceps)">Tracción (Tren Superior)</option>
                                     <option value="Metabólico / CrossFit">Metabólico / Full Body</option>
                                 </select>
-                                <input type="text" id="ejercicioNombre" onkeyup="buscarHistorialEjercicio()" required placeholder="Nombre del movimiento..." class="w-full bg-black border border-white/20 rounded-lg p-3 text-white text-sm mt-2 outline-none">
-                                <div id="sobrecargaReco" class="hidden mt-2 p-2 bg-purple-900/20 border border-purple-500/30 rounded text-[9px] text-purple-300"></div>
+                                <input type="text" id="ejercicioNombre" onkeyup="buscarHistorialEjercicio()" required placeholder="Nombre del movimiento..." class="w-full bg-transparent border-b border-white/20 p-3 text-white text-sm mt-3 outline-none">
+                                <div id="sobrecargaReco" class="hidden mt-3 p-3 bg-white/5 border border-white/20 rounded text-[9px] text-white"></div>
                             </div>
 
-                            <div class="grid grid-cols-3 gap-2">
-                                <div><label class="text-[9px] font-bold text-white uppercase text-center block">Series</label><input type="number" id="series" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl"></div>
-                                <div><label class="text-[9px] font-bold text-white uppercase text-center block">Reps</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-white outline-none text-xl" oninput="calcularTUT()"></div>
-                                <div><label class="text-[9px] font-bold text-white uppercase text-center block">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/20 py-2 text-center text-blue-400 outline-none text-xl"></div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div><label class="text-[8px] font-bold text-gray-400 uppercase text-center block tracking-widest">Series</label><input type="number" id="series" required class="w-full bg-transparent border-b border-white/40 py-2 text-center text-white outline-none text-2xl"></div>
+                                <div><label class="text-[8px] font-bold text-gray-400 uppercase text-center block tracking-widest">Reps</label><input type="number" id="reps" required class="w-full bg-transparent border-b border-white/40 py-2 text-center text-white outline-none text-2xl" oninput="calcularTUT()"></div>
+                                <div><label class="text-[8px] font-bold text-gray-400 uppercase text-center block tracking-widest">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent border-b border-white/80 py-2 text-center text-white font-black outline-none text-2xl"></div>
                             </div>
 
-                            <div class="pt-4 border-t border-white/10">
-                                <div class="flex justify-between items-end mb-2">
-                                    <label class="text-[10px] font-bold text-purple-400 uppercase tracking-widest block">Protocolo I.C.U.</label>
-                                    <span class="text-[9px] text-gray-500 uppercase">TUT: <strong id="tutDisplay" class="text-white">0s</strong></span>
+                            <div class="pt-5 border-t border-white/10">
+                                <div class="flex justify-between items-end mb-3">
+                                    <label class="text-[9px] font-bold text-white uppercase tracking-widest block">Protocolo I.C.U.</label>
+                                    <span class="text-[8px] text-gray-500 uppercase tracking-widest">TUT: <strong id="tutDisplay" class="text-white text-xs">0s</strong></span>
                                 </div>
-                                <div class="grid grid-cols-3 gap-2">
-                                    <div><label class="text-[7px] text-gray-400 uppercase text-center block">Excéntrica</label><input type="number" id="cadExc" value="2" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
-                                    <div><label class="text-[7px] text-gray-400 uppercase text-center block">Pausa</label><input type="number" id="cadIso" value="0" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
-                                    <div><label class="text-[7px] text-gray-400 uppercase text-center block">Concéntrica</label><input type="number" id="cadCon" value="1" class="w-full bg-black border border-white/10 rounded p-1 text-center text-white text-xs" oninput="calcularTUT()"></div>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div><label class="text-[7px] text-gray-500 uppercase text-center block">Excéntrica</label><input type="number" id="cadExc" value="2" class="w-full bg-transparent border border-white/20 rounded p-2 text-center text-white text-sm outline-none" oninput="calcularTUT()"></div>
+                                    <div><label class="text-[7px] text-gray-500 uppercase text-center block">Pausa</label><input type="number" id="cadIso" value="0" class="w-full bg-transparent border border-white/20 rounded p-2 text-center text-white text-sm outline-none" oninput="calcularTUT()"></div>
+                                    <div><label class="text-[7px] text-gray-500 uppercase text-center block">Concéntrica</label><input type="number" id="cadCon" value="1" class="w-full bg-transparent border border-white/20 rounded p-2 text-center text-white text-sm outline-none" oninput="calcularTUT()"></div>
                                 </div>
                                 <input type="hidden" id="tut" value="0">
                             </div>
 
-                            <div class="pt-4 border-t border-white/10">
-                                <label class="text-[10px] font-bold text-red-400 uppercase flex justify-between"><span>Esfuerzo (RPE)</span><span id="rpeVal">5/10</span></label>
-                                <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-2 bg-gray-800 rounded-lg appearance-none mt-2 accent-red-500">
+                            <div class="pt-5 border-t border-white/10">
+                                <label class="text-[9px] font-bold text-gray-400 uppercase flex justify-between tracking-widest"><span>Esfuerzo (RPE)</span><span id="rpeVal" class="text-white">5/10</span></label>
+                                <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none mt-3 accent-white">
                             </div>
                             
-                            <div class="relative mt-6">
-                                <button id="btnSubmit" type="submit" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-blue-50 transition">Computar Impacto</button>
-                                <div id="restTimerBox" class="hidden w-full py-4 bg-black border border-blue-500 text-blue-400 font-black uppercase tracking-widest text-center text-lg rounded">⏳ RECUPERACIÓN: <span id="restTimerDisplay">0s</span></div>
+                            <div class="relative mt-8">
+                                <button id="btnSubmit" type="submit" class="w-full py-5 bg-white text-black font-black uppercase tracking-widest text-[10px] rounded hover:bg-gray-300 transition shadow-[0_0_20px_rgba(255,255,255,0.15)]">Computar Impacto</button>
+                                <div id="restTimerBox" class="hidden w-full py-5 bg-transparent border border-white text-white font-black uppercase tracking-widest text-center text-lg rounded">⏳ RECUPERACIÓN: <span id="restTimerDisplay">0s</span></div>
                             </div>
                         </form>
                     </div>
 
                     <div class="lg:col-span-6 flex flex-col gap-6">
-                        <div class="glass-card p-5 rounded-2xl h-80 relative flex flex-col items-center">
-                            <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Vanguardia Radar 360°</h3>
+                        <div class="glass-card p-6 rounded-2xl h-80 relative flex flex-col items-center">
+                            <h3 class="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-4">Radar de Rendimiento</h3>
                             <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
                         </div>
-
-                        <div class="glass-card p-5 rounded-2xl flex-grow flex flex-col justify-between">
+                        <div class="glass-card p-6 rounded-2xl flex-grow flex flex-col justify-between">
                             <div>
-                                <h2 class="text-[10px] font-bold text-gray-500 uppercase mb-3 border-b border-white/5 pb-2">Diagnóstico de la Sesión</h2>
-                                <div id="bioInsight" class="text-xs font-light text-gray-300 leading-relaxed italic">Esperando variables biomecánicas...</div>
+                                <h2 class="text-[9px] font-bold text-gray-400 uppercase mb-3 border-b border-white/10 pb-2 tracking-widest">Diagnóstico Clínico</h2>
+                                <div id="bioInsight" class="text-xs font-light text-white leading-relaxed tracking-wide">Esperando datos estructurales...</div>
                             </div>
                         </div>
                     </div>
@@ -236,164 +232,95 @@
 
             <div id="vistaMacro" class="vista space-y-6">
                 <div class="flex gap-2 border-b border-white/10 pb-4 mb-4">
-                    <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-4 py-2 text-[10px] uppercase font-bold bg-blue-600 text-white rounded">Expediente Cliente</button>
-                    <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-4 py-2 text-[10px] uppercase font-bold border border-white/20 text-gray-400 rounded">Gestor Financiero</button>
+                    <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-5 py-3 text-[9px] uppercase font-bold tracking-widest bg-white text-black rounded">Expediente Cliente</button>
+                    <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-5 py-3 text-[9px] uppercase font-bold tracking-widest border border-white/20 text-gray-400 rounded hover:bg-white/5">Gestión Global</button>
                 </div>
 
                 <div id="macroIndividual" class="space-y-6">
                     <div class="flex justify-between items-center mb-6">
-                        <div><h1 class="text-2xl font-black text-white uppercase tracking-widest">Auditoría del Cliente</h1></div>
-                        <div class="flex gap-2"><button onclick="enviarWhatsApp()" class="bg-[#25D366] text-white text-[10px] font-bold px-3 py-2 rounded uppercase">Reporte Diario</button><button onclick="generarReportePDF()" class="bg-white text-black text-[10px] font-bold px-3 py-2 rounded uppercase">PDF</button></div>
+                        <div><h1 class="text-2xl font-black text-white uppercase tracking-widest">Auditoría Estructural</h1></div>
+                        <div class="flex gap-3"><button onclick="enviarWhatsApp()" class="bg-transparent border border-white/50 text-white hover:bg-white hover:text-black transition text-[9px] font-bold px-4 py-2 rounded uppercase tracking-widest">Reporte Diario</button><button onclick="generarReportePDF()" class="bg-white text-black text-[9px] font-bold px-4 py-2 rounded uppercase tracking-widest">Exportar PDF</button></div>
                     </div>
-                    <div class="glass-card p-4 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6"><div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-blue-400 uppercase font-bold mb-4">Estado Biológico</h3><div id="resumenBio" class="text-xs text-gray-400 space-y-2 uppercase tracking-tighter leading-relaxed"></div></div><div class="glass-card p-5 rounded-2xl"><h3 class="text-[10px] text-purple-400 uppercase font-bold mb-4">Bitácora de Sesiones</h3><div id="listaMacro" class="text-[10px] text-gray-500 space-y-2 h-40 overflow-y-auto"></div></div></div>
+                    <div class="glass-card p-6 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-2xl"><h3 class="text-[9px] text-gray-400 uppercase font-bold mb-4 tracking-widest">Estado Biológico</h3><div id="resumenBio" class="text-xs text-white space-y-3 uppercase tracking-wider leading-relaxed"></div></div>
+                        <div class="glass-card p-6 rounded-2xl"><h3 class="text-[9px] text-gray-400 uppercase font-bold mb-4 tracking-widest">Bitácora de Sesiones</h3><div id="listaMacro" class="text-[10px] text-gray-300 space-y-3 h-40 overflow-y-auto pr-2 tracking-wide"></div></div>
+                    </div>
                 </div>
 
-                <div id="macroGlobal" class="space-y-6 hidden">
-                    
-                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-[#d4af37] flex justify-between items-center mb-6">
-                        <div>
-                            <h3 class="text-[10px] text-[#d4af37] uppercase tracking-widest font-bold">Ingreso Mensual Recurrente (MRR)</h3>
-                            <p class="text-xs text-gray-500">Volumen de Facturación Global</p>
-                        </div>
-                        <div class="text-3xl font-black text-white">$<span id="mrrTotal">0</span></div>
-                    </div>
-
-                    <div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
-                </div>
+                <div id="macroGlobal" class="space-y-6 hidden"><div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div></div>
             </div>
             
-            <div class="mt-12 pt-8 border-t border-white/5 flex flex-col items-center justify-center pb-8 w-full">
+            <div class="mt-16 pt-8 border-t border-white/10 flex flex-col items-center justify-center pb-8 w-full">
                 <span class="text-[9px] text-gray-500 uppercase tracking-[0.5em] mb-2" style="font-family: 'Inter', sans-serif;">Engineered By</span>
-                <span class="text-lg font-black text-[#d4af37] tracking-[0.2em] uppercase" style="font-family: 'Cinzel', serif;">Juan Gabriel Lopez</span>
+                <span class="text-lg font-black text-white tracking-[0.2em] uppercase" style="font-family: 'Cinzel', serif;">Juan Gabriel Lopez</span>
             </div>
         </main>
     </div>
 
     <script>
-        // --- REGISTRO PWA (SERVICE WORKER) ---
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Registrado')).catch(err => console.log('SW Falló', err));
-            });
-        }
+        if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(r=>console.log('SW Ok')).catch(e=>console.log('SW Err', e)); }); }
+        let deferredPrompt; window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('btnInstallPWA').classList.remove('hidden'); });
+        document.getElementById('btnInstallPWA').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') document.getElementById('btnInstallPWA').classList.add('hidden'); deferredPrompt = null; } });
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            document.getElementById('btnInstallPWA').classList.remove('hidden');
-        });
-
-        document.getElementById('btnInstallPWA').addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') document.getElementById('btnInstallPWA').classList.add('hidden');
-                deferredPrompt = null;
-            }
-        });
-
-        // --- NAVEGACIÓN ONBOARDING -> PASARELA -> APP ---
         document.addEventListener("DOMContentLoaded", () => {
-            const hasOnboarded = localStorage.getItem('vanguardia_onboarded');
-            if (!hasOnboarded) {
-                document.getElementById('onboardingScreen').style.display = 'flex';
-            } else {
-                document.getElementById('onboardingScreen').style.display = 'none';
-                document.getElementById('authGateway').style.display = 'flex';
-            }
+            const hasOnboarded = localStorage.getItem('vanguardia_onboarded_v2');
+            if (!hasOnboarded) { document.getElementById('onboardingScreen').style.display = 'flex'; } 
+            else { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; }
         });
 
         function cerrarOnboarding() {
-            localStorage.setItem('vanguardia_onboarded', 'true');
+            localStorage.setItem('vanguardia_onboarded_v2', 'true');
             document.getElementById('onboardingScreen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('onboardingScreen').style.display = 'none';
-                document.getElementById('authGateway').style.display = 'flex';
-                document.getElementById('authGateway').style.opacity = '1';
-            }, 800);
+            setTimeout(() => { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; document.getElementById('authGateway').style.opacity = '1'; }, 800);
         }
 
-        // --- PASARELA BIOMÉTRICA ---
         let scanTimer; let hapticInterval;
         function iniciarEscaneo() {
-            const pin = document.getElementById('pinAcceso').value;
-            if (pin.length < 4) return alert("Ingrese su PIN de 4 dígitos.");
-            
-            document.getElementById('biometricSensor').classList.add('scanning');
-            document.getElementById('textoSensor').innerText = "Verificando Identidad...";
-            document.getElementById('textoSensor').classList.replace('text-gray-500', 'text-[#d4af37]');
-
+            const pin = document.getElementById('pinAcceso').value; if (pin.length < 4) return alert("Ingrese PIN de 4 dígitos.");
+            document.getElementById('biometricSensor').classList.add('scanning'); document.getElementById('textoSensor').innerText = "Verificando Identidad..."; document.getElementById('textoSensor').classList.replace('text-gray-500', 'text-white');
             if (navigator.vibrate) hapticInterval = setInterval(() => { navigator.vibrate(50); }, 150);
-
             scanTimer = setTimeout(() => { desbloquearSistema(); }, 2000);
         }
 
         function detenerEscaneo() {
             clearTimeout(scanTimer); clearInterval(hapticInterval);
-            document.getElementById('biometricSensor').classList.remove('scanning');
-            document.getElementById('textoSensor').innerText = "Escaneo Abortado.";
-            document.getElementById('textoSensor').classList.replace('text-[#d4af37]', 'text-red-500');
+            document.getElementById('biometricSensor').classList.remove('scanning'); document.getElementById('textoSensor').innerText = "Escaneo Abortado."; document.getElementById('textoSensor').classList.replace('text-white', 'text-gray-500');
         }
 
         function desbloquearSistema() {
-            clearInterval(hapticInterval);
-            if (navigator.vibrate) navigator.vibrate([100, 50, 200]); 
-            
+            clearInterval(hapticInterval); if (navigator.vibrate) navigator.vibrate([100, 50, 200]); 
             document.getElementById('textoSensor').innerText = "ACCESO CONCEDIDO";
-            document.getElementById('textoSensor').classList.replace('text-red-500', 'text-green-400');
-            document.getElementById('textoSensor').classList.replace('text-[#d4af37]', 'text-green-400');
-            
-            setTimeout(() => {
-                document.getElementById('authGateway').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('authGateway').style.display = 'none';
-                    document.getElementById('mainContent').style.display = 'block';
-                    initMultiTenant(); 
-                }, 800);
-            }, 500);
+            setTimeout(() => { document.getElementById('authGateway').style.opacity = '0'; setTimeout(() => { document.getElementById('authGateway').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; initMultiTenant(); }, 800); }, 500);
         }
 
-        // --- LÓGICA DEL SISTEMA Y FINANZAS ---
-        const InterfazSensorial = {
-            init: function() { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
-            vibrar: function(p) { if(navigator.vibrate) navigator.vibrate(p); },
-            tick: function() { this.vibrar(15); }
-        };
+        const InterfazSensorial = { init: function() { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }, vibrar: function(p) { if(navigator.vibrate) navigator.vibrate(p); }, tick: function() { this.vibrar(15); } };
 
-        let db = JSON.parse(localStorage.getItem('vanguardia_v23')) || { perfilActivo: 'Cliente Base', perfiles: { 'Cliente Base': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', sesiones: 12, restantes: 12, precio: 150, suplementos: [], historial: [] } } };
+        let db = JSON.parse(localStorage.getItem('vanguardia_db_final')) || { perfilActivo: 'Cliente Elite', perfiles: { 'Cliente Elite': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', sesiones: 12, restantes: 12, suplementos: [], historial: [] } } };
 
         function initMultiTenant() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
         function actualizarListaPerfiles() { const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = ''; for(const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; } selector.value = db.perfilActivo; }
         
         function crearPerfil() { 
-            const n = document.getElementById('nuevoNombre').value.trim(); const f = document.getElementById('nuevaFase').value; 
-            const s = parseInt(document.getElementById('nuevasSesiones').value) || 12;
-            const px = parseFloat(document.getElementById('nuevoPrecio').value) || 0; // Captura de precio
-
+            const n = document.getElementById('nuevoNombre').value.trim(); const f = document.getElementById('nuevaFase').value; const s = parseInt(document.getElementById('nuevasSesiones').value) || 12;
             if(!n || db.perfiles[n]) return alert("Nombre inválido."); 
-            db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, fase: f, dolor: 'Ninguno', sesiones: s, restantes: s, precio: px, suplementos: [], historial: [] }; 
-            db.perfilActivo = n; guardarDB(); actualizarListaPerfiles(); 
-            document.getElementById('nuevoNombre').value = ''; document.getElementById('nuevoPrecio').value = ''; 
-            InterfazSensorial.tick(); 
+            db.perfiles[n] = { edad: 30, peso: 75, sueno: 7, estres: 3, fase: f, dolor: 'Ninguno', sesiones: s, restantes: s, suplementos: [], historial: [] }; 
+            db.perfilActivo = n; guardarDB(); actualizarListaPerfiles(); document.getElementById('nuevoNombre').value = ''; InterfazSensorial.tick(); 
         }
         
         function cambiarPerfil() { db.perfilActivo = document.getElementById('selectorPerfiles').value; guardarDB(); InterfazSensorial.tick(); }
         
         function cargarPerfilActivo() { 
             const p = db.perfiles[db.perfilActivo]; 
-            document.getElementById('nombreAtletaNav').innerText = db.perfilActivo; 
-            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes || 0}`;
-            document.getElementById('bioEdad').value = p.edad; document.getElementById('bioPeso').value = p.peso; 
-            document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres;
+            document.getElementById('nombreAtletaNav').innerText = db.perfilActivo; document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes || 0}`;
+            document.getElementById('bioEdad').value = p.edad; document.getElementById('bioPeso').value = p.peso; document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres;
             if(p.restantes < 3) document.getElementById('alertaRenovacion').classList.remove('hidden'); else document.getElementById('alertaRenovacion').classList.add('hidden');
             renderRadar();
         }
         
         function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
         function cerrarModalPerfiles() { cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
-        function guardarDB() { localStorage.setItem('vanguardia_v23', JSON.stringify(db)); }
+        function guardarDB() { localStorage.setItem('vanguardia_db_final', JSON.stringify(db)); }
 
         function finalizarCheckIn() {
             InterfazSensorial.init(); const p = db.perfiles[db.perfilActivo];
@@ -412,13 +339,12 @@
             const ejActual = document.getElementById('ejercicioNombre').value.trim().toLowerCase(); const box = document.getElementById('sobrecargaReco');
             if(ejActual.length < 3) { box.classList.add('hidden'); return; }
             const ultimo = [...db.perfiles[db.perfilActivo].historial].reverse().find(s => s.ej.toLowerCase() === ejActual);
-            if(ultimo) { box.innerHTML = `<strong>MEMORIA:</strong> Último registro ${ultimo.carga}kg. Apunta a <span class="text-green-400">${(parseFloat(ultimo.carga)+2.5)}kg</span> para adaptación.`; box.classList.remove('hidden'); } else box.classList.add('hidden');
+            if(ultimo) { box.innerHTML = `HISTORIAL: Último registro ${ultimo.carga}kg. Apunta a <strong class="text-white">${(parseFloat(ultimo.carga)+2.5)}kg</strong> para adaptación.`; box.classList.remove('hidden'); } else box.classList.add('hidden');
         }
 
         let restInt;
         function iniciarDescansoLogico(rpe) {
-            let t = rpe >= 8 ? 120 : 60;
-            document.getElementById('btnSubmit').classList.add('hidden');
+            let t = rpe >= 8 ? 120 : 60; document.getElementById('btnSubmit').classList.add('hidden');
             const box = document.getElementById('restTimerBox'); box.classList.remove('hidden');
             restInt = setInterval(() => { t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; if(t <= 0) saltarDescanso(); }, 1000);
         }
@@ -429,47 +355,33 @@
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault(); const p = db.perfiles[db.perfilActivo];
             const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const tut = parseFloat(document.getElementById('tut').value); const rpe = parseFloat(document.getElementById('rpe').value);
-            const ts = new Date().getTime();
-            let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1);
-            let rm1 = (carga * (1 + (reps / 30))).toFixed(1);
+            const ts = new Date().getTime(); let riesgo = (( (carga/(p.peso||70))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1); let rm1 = (carga * (1 + (reps / 30))).toFixed(1);
 
-            if(p.restantes > 0) p.restantes--;
-            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
-
+            if(p.restantes > 0) p.restantes--; document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
             p.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), ej: document.getElementById('ejercicioNombre').value, carga, reps, rpe, rm1, riesgo, dominio: document.getElementById('dominioSelector').value });
             guardarDB();
 
-            document.getElementById('bioInsight').innerHTML = riesgo > 8 ? "RIESGO ELEVADO. El sistema requiere descanso." : "Dosis mecánica óptima procesada.";
+            document.getElementById('bioInsight').innerHTML = riesgo > 8 ? "Tensión estructural máxima. El sistema requiere descanso programado." : "Dosis mecánica óptima procesada.";
             iniciarDescansoLogico(rpe); renderRadar();
         };
 
         let radarInst;
         function renderRadar() {
-            const ctx = document.getElementById('radarChart').getContext('2d');
-            const p = db.perfiles[db.perfilActivo]; const h = p.historial;
-            
-            let fuer = h.length > 0 ? Math.min(10, h[h.length-1].rm1 / 15) : 0;
-            let vol = h.length > 0 ? Math.min(10, h.length / 5) : 0;
-            let reco = Math.min(10, p.sueno * 1.2);
-            let adh = p.suplementos ? p.suplementos.filter(x => x).length * 2.5 : 0;
-            let disc = p.estres < 5 ? 9 : 5;
+            const ctx = document.getElementById('radarChart').getContext('2d'); const p = db.perfiles[db.perfilActivo]; const h = p.historial;
+            let fuer = h.length > 0 ? Math.min(10, h[h.length-1].rm1 / 15) : 0; let vol = h.length > 0 ? Math.min(10, h.length / 5) : 0; let reco = Math.min(10, p.sueno * 1.2); let adh = p.suplementos ? p.suplementos.filter(x => x).length * 2.5 : 0; let disc = p.estres < 5 ? 9 : 5;
 
             if(radarInst) radarInst.destroy();
             radarInst = new Chart(ctx, {
                 type: 'radar',
-                data: {
-                    labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'ADHERENCIA', 'DISCIPLINA'],
-                    datasets: [{ data: [fuer, vol, reco, adh, disc], backgroundColor: 'rgba(212, 175, 55, 0.2)', borderColor: '#d4af37', borderWidth: 2, pointBackgroundColor: '#fff' }]
-                },
-                options: { scales: { r: { min: 0, max: 10, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.1)' } } }, plugins: { legend: { display: false } } }
+                data: { labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'ADHERENCIA', 'DISCIPLINA'], datasets: [{ data: [fuer, vol, reco, adh, disc], backgroundColor: 'rgba(255, 255, 255, 0.1)', borderColor: '#ffffff', borderWidth: 1.5, pointBackgroundColor: '#fff' }] },
+                options: { scales: { r: { min: 0, max: 10, ticks: { display: false }, grid: { color: 'rgba(255,255,255,0.05)' }, angleLines: { color: 'rgba(255,255,255,0.1)' }, pointLabels: { color: 'rgba(255,255,255,0.5)', font: { size: 8, family: 'Inter' } } } }, plugins: { legend: { display: false } } }
             });
         }
 
         let macroChart;
         function toggleVista() {
             document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa');
-            if(document.getElementById('vistaMacro').classList.contains('activa')) { document.getElementById('btnVista').innerText = "Panel Control"; switchMacroTab('individual'); } 
-            else { document.getElementById('btnVista').innerText = "Expediente"; renderRadar(); }
+            if(document.getElementById('vistaMacro').classList.contains('activa')) { document.getElementById('btnVista').innerText = "Panel Control"; switchMacroTab('individual'); } else { document.getElementById('btnVista').innerText = "Expediente"; renderRadar(); }
         }
 
         function switchMacroTab(tab) {
@@ -480,37 +392,30 @@
         function renderChart() {
             const h = db.perfiles[db.perfilActivo].historial; const ctx = document.getElementById('macroChart').getContext('2d'); const dataSlice = h.slice(-10);
             if(macroChart) macroChart.destroy();
-            macroChart = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'Proyección Fuerza', data:dataSlice.map(s => s.rm1), backgroundColor:'#d4af37' }] }, options: { responsive: true, maintainAspectRatio: false } });
-            document.getElementById('resumenBio').innerHTML = `Contrato: ${db.perfiles[db.perfilActivo].fase}<br>Sesiones Restantes: ${db.perfiles[db.perfilActivo].restantes}<br>Calidad Sueño: ${db.perfiles[db.perfilActivo].sueno}h`;
+            macroChart = new Chart(ctx, { type: 'bar', data: { labels: dataSlice.map(s => s.fecha), datasets: [{ label:'Proyección Fuerza', data:dataSlice.map(s => s.rm1), backgroundColor:'#ffffff' }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } } } });
+            document.getElementById('resumenBio').innerHTML = `Contrato: <strong class="text-white">${db.perfiles[db.perfilActivo].fase}</strong><br>Sesiones Restantes: <strong class="text-white">${db.perfiles[db.perfilActivo].restantes}</strong><br>Calidad Sueño: <strong class="text-white">${db.perfiles[db.perfilActivo].sueno}h</strong>`;
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
-            [...h].reverse().slice(0, 10).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-1">${s.fecha} - ${s.ej} (${s.carga}kg)</div>`);
+            [...h].reverse().slice(0, 10).forEach(s => list.innerHTML += `<div class="border-b border-white/10 pb-2">${s.fecha} - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg)</span></div>`);
         }
 
         function renderizarVisionGlobal() {
             const grid = document.getElementById('gridAtletasGlobal'); grid.innerHTML = "";
-            let mrr = 0;
-
             for(const n in db.perfiles) {
                 const p = db.perfiles[n];
-                mrr += parseFloat(p.precio) || 0; // Sumar al MRR global
-
-                grid.innerHTML += `<div class="glass-card p-5 rounded-2xl">
-                    <h3 class="text-xs font-black text-white uppercase mb-1">${n}</h3>
-                    <p class="text-[8px] text-blue-400 mb-2 uppercase">${p.fase}</p>
-                    <div class="flex justify-between border-t border-white/5 pt-2">
-                        <span class="text-[8px] text-gray-500 uppercase">Restantes:</span>
-                        <span class="text-[10px] font-bold ${p.restantes < 3 ? 'text-red-500' : 'text-green-400'}">${p.restantes} / ${p.sesiones}</span>
+                grid.innerHTML += `<div class="glass-card p-6 rounded-2xl border border-white/10">
+                    <h3 class="text-sm font-black text-white uppercase mb-1">${n}</h3>
+                    <p class="text-[9px] text-gray-400 mb-3 uppercase tracking-widest">${p.fase}</p>
+                    <div class="flex justify-between border-t border-white/10 pt-3">
+                        <span class="text-[9px] text-gray-500 uppercase tracking-widest">Restantes:</span>
+                        <span class="text-[10px] font-bold ${p.restantes < 3 ? 'text-white bg-white/20 px-2 py-1 rounded' : 'text-white'}">${p.restantes} / ${p.sesiones}</span>
                     </div>
                 </div>`;
             }
-
-            document.getElementById('mrrTotal').innerText = mrr.toLocaleString();
         }
 
         function enviarWhatsApp() { const p = db.perfiles[db.perfilActivo]; const text = `*VANGUARDIA | Reporte de Sesión*%0A*Cliente:* ${db.perfilActivo}%0A*Restantes:* ${p.restantes} sesiones.%0A*Estado SNC:* ${p.sueno}h sueño.%0A_Fuerza hoy optimizada._`; window.open(`https://wa.me/?text=${text}`, "_blank"); }
         function enviarWhatsAppRenovacion() { const p = db.perfiles[db.perfilActivo]; const text = `*VANGUARDIA | Gestión de Contratos*%0AEstimado ${db.perfilActivo}, le informamos que le restan *${p.restantes}* sesiones de su plan de ${p.fase}. Por favor, gestione su renovación para mantener la continuidad biomecánica.`; window.open(`https://wa.me/?text=${text}`, "_blank"); }
         function generarReportePDF() { html2pdf().from(document.getElementById('reportContent')).save(); }
-        
     </script>
 </body>
 </html>
