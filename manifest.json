@@ -1,14 +1,14 @@
 {
-  "name": "Vanguardia Ecosistema",
+  "name": "Vanguardia Elite",
   "short_name": "Vanguardia",
-  "description": "Ecosistema Biomecánico y Prevención de Lesiones",
-  "start_url": "/login.html",
+  "start_url": "./dashboard.html",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
+  "description": "Ecosistema de Alto Rendimiento y Biohacking",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/864/864070.png",
+      "src": "https://cdn-icons-png.flaticon.com/512/114/114131.png",
       "sizes": "512x512",
       "type": "image/png"
     }

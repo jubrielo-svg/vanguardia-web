@@ -1,21 +1,7 @@
-const CACHE_NAME = 'vanguardia-cache-v1';
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/login.html',
-  '/dashboard.html'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
-  );
+self.addEventListener('install', (e) => {
+  console.log('[Vanguardia] Service Worker Instalado');
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
+self.addEventListener('fetch', (e) => {
+  // PWA básica (pasa las peticiones directo a la red)
 });
