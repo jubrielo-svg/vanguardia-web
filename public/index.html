@@ -20,6 +20,7 @@
         
         .vista { display: none; animation: fadeUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .vista.activa { display: block; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
         
         .btn-cyber { background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border: 1px solid var(--cyan); color: var(--cyan); font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; cursor: pointer; }
         .btn-cyber:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
@@ -49,7 +50,8 @@
         .lang-btn { background: transparent; border: none; color: #888; padding: 4px 12px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-family: 'Share Tech Mono', monospace; }
         .lang-btn.active { background: white; color: black; }
 
-        #clinicalOnboarding { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; overflow-y: auto; }
+        #splashScreen { position: fixed; inset: 0; background: var(--bg); z-index: 20000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; transition: opacity 0.8s ease; }
+        #clinicalOnboarding { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; overflow-y: auto; }
         .step-module { display: none; width: 100%; max-w: 450px; animation: fadeUp 0.5s; }
         .step-module.active { display: block; }
     </style>
@@ -58,10 +60,38 @@
 
     <div class="ambient-glow"></div>
 
-    <div class="fixed top-4 right-4 z-[10002]">
+    <div class="fixed top-4 right-4 z-[25000]">
         <div class="lang-switch">
             <button onclick="setLang('en')" id="btnEnGlobal" class="lang-btn active">EN</button>
             <button onclick="setLang('es')" id="btnEsGlobal" class="lang-btn">ES</button>
+        </div>
+    </div>
+
+    <div id="splashScreen">
+        <div class="ambient-glow"></div>
+        <h1 class="cinzel text-4xl text-white tracking-[0.4em] uppercase mb-2 drop-shadow-[0_0_15px_rgba(0,240,255,0.3)] text-center">Vanguardia</h1>
+        <p class="text-[10px] text-cyan-400 tech-mono tracking-[0.3em] uppercase mb-12 text-center" data-i18n="sp_sub">Ingeniería Biomecánica & Biohacking</p>
+
+        <div class="space-y-4 w-full max-w-sm mb-12">
+            <div class="glass-panel p-5 border-l-2 border-cyan-400 bg-black/40">
+                <h3 class="text-[11px] text-white uppercase font-bold tracking-widest mb-1 cinzel" data-i18n="sp_v1">1. Hipertrofia Clínica</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed tech-mono" data-i18n="sp_d1">Tensión mecánica exacta para crecimiento magro y estético.</p>
+            </div>
+            <div class="glass-panel p-5 border-l-2 border-purple-500 bg-black/40">
+                <h3 class="text-[11px] text-white uppercase font-bold tracking-widest mb-1 cinzel" data-i18n="sp_v2">2. Neuro-Recuperación</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed tech-mono" data-i18n="sp_d2">Auditoría del Sistema Nervioso Central para evitar sobreentrenamiento.</p>
+            </div>
+            <div class="glass-panel p-5 border-l-2 border-green-400 bg-black/40">
+                <h3 class="text-[11px] text-white uppercase font-bold tracking-widest mb-1 cinzel" data-i18n="sp_v3">3. Inteligencia Metabólica</h3>
+                <p class="text-[9px] text-gray-400 leading-relaxed tech-mono" data-i18n="sp_d3">Prescripción nutricional precisa según el desgaste tisular.</p>
+            </div>
+        </div>
+
+        <button onclick="startOnboarding()" class="w-full max-w-xs btn-cyber py-4 text-[12px] shadow-[0_0_20px_rgba(0,240,255,0.2)]" data-i18n="btn_enter">Acceder al Sistema</button>
+
+        <div class="absolute bottom-8 flex flex-col items-center opacity-60">
+            <span class="text-[7px] text-gray-500 uppercase tracking-[0.5em] mb-2 tech-mono">Engineered By</span>
+            <span class="text-sm text-white tracking-[0.3em] uppercase cinzel">Juan Gabriel Lopez</span>
         </div>
     </div>
 
@@ -110,7 +140,7 @@
                             <span id="obIMC" class="text-2xl tech-mono text-purple-400">00.0</span>
                             <span id="obStatus" class="text-[10px] uppercase font-bold text-gray-300 tech-mono bg-white/10 px-2 py-1 rounded">Esperando datos</span>
                         </div>
-                        <p id="obLevelText" class="text-[10px] text-cyan-200 mt-2 tech-mono leading-relaxed">Ingresa tu estatura y peso para calibrar el sistema.</p>
+                        <p id="obLevelText" class="text-[10px] text-cyan-200 mt-2 tech-mono leading-relaxed" data-i18n="diag_wait">Ingresa tu estatura y peso para calibrar el sistema.</p>
                     </div>
                 </div>
 
@@ -309,12 +339,12 @@
     </div>
 
     <script>
-        // MOTOR BILINGÜE
         const i18n = {
             en: {
+                sp_sub: "Biomechanical Engineering & Biohacking", sp_v1: "1. Clinical Hypertrophy", sp_d1: "Exact mechanical tension for lean and aesthetic growth.", sp_v2: "2. Neuro-Recovery", sp_d2: "Central Nervous System auditing to prevent overtraining.", sp_v3: "3. Metabolic Intelligence", sp_d3: "Precise nutritional prescription based on tissue wear.", btn_enter: "Enter System",
                 id_protocol: "BIOMETRIC PROFILE", lbl_name: "Subject Name", ph_name: "Client ID", lbl_sex: "Biological Sex", opt_m: "Male (M)", opt_f: "Female (F)", lbl_age: "Age",
                 lbl_height: "Height (cm)", lbl_weight: "Mass (Kg)", lbl_bmi: "Body Mass Index (BMI)", desc_bmi: "Weight to height ratio",
-                lbl_ai_diag: "AI Diagnosis", live_morph: "Live Morphology", path_protocol: "Injuries / Restrictions", 
+                lbl_ai_diag: "AI Diagnosis", diag_wait: "Enter your height and weight to calibrate the system.", live_morph: "Live Morphology", path_protocol: "Injuries / Restrictions", 
                 path_none: "Optimal Structural Integrity", path_knee: "Patellar Complex Pathology", path_back: "Lumbar / Lower Back Compression", path_shoul: "Rotator Cuff Deficit",
                 btn_continue: "Initialize Biometrics", btn_finish: "Sync and Enter Cloud", nav_coach: "Diagnostic Mode", nav_user: "Execution Mode",
                 ai_directive: "Ontological Directive", ai_load: "Calibrating telemetry...", mod_exec: "Training Laboratory", btn_cam: "Visual Technique Analyzer",
@@ -327,12 +357,14 @@
                 diag_panel: "Medical Panel & CRM", btn_pdf: "Download Clinical History (PDF)", 
                 c_vol: "Accumulated Structural Tonnage", c_ses: "Contract (Remaining Sessions)", c_history: "Cloud Log",
                 sub_alert: "Critical Subscription", sub_desc: "You have <span id='alertSesiones' class='text-white font-bold text-sm'></span> sessions left. Renew to not lose metric access.", btn_renew: "Renew Contract (Apple Pay / Card)",
-                lvl_beg: "Beginner", lvl_int: "Intermediate", lvl_adv: "Advanced", stat_under: "Underweight", stat_nor: "Athletic", stat_over: "Overweight", stat_obe: "Obesity"
+                lvl_beg: "Beginner", lvl_int: "Intermediate", lvl_adv: "Advanced", stat_under: "Underweight", stat_nor: "Athletic", stat_over: "Overweight", stat_obe: "Obesity",
+                ai_opt: "Systemic parameters at 100%. Protocol authorized for maximum structural tension without limitation.", ai_fat: "Neurological fatigue detected. Decrease absolute load by 20% to allow tissue regeneration.", ai_warn: "Restriction active in [X]. Redirecting vectors to avoid axial load on the affected joint.", snc_o: "OPTIMAL", snc_f: "COMPROMISED"
             },
             es: {
+                sp_sub: "Ingeniería Biomecánica & Biohacking", sp_v1: "1. Hipertrofia Clínica", sp_d1: "Tensión mecánica exacta para crecimiento magro y estético.", sp_v2: "2. Neuro-Recuperación", sp_d2: "Auditoría del Sistema Nervioso Central para evitar sobreentrenamiento.", sp_v3: "3. Inteligencia Metabólica", sp_d3: "Prescripción nutricional precisa según el desgaste tisular.", btn_enter: "Acceder al Sistema",
                 id_protocol: "PERFIL BIOMÉTRICO", lbl_name: "Nombre del Sujeto", ph_name: "ID Cliente", lbl_sex: "Sexo Biológico", opt_m: "Hombre (M)", opt_f: "Mujer (F)", lbl_age: "Edad",
                 lbl_height: "Estatura (cm)", lbl_weight: "Masa (Kg)", lbl_bmi: "Índice de Masa Corporal (IMC)", desc_bmi: "Relación peso/estatura",
-                lbl_ai_diag: "Diagnóstico IA (IMC)", live_morph: "Morfología en Vivo", path_protocol: "Lesiones / Restricciones", 
+                lbl_ai_diag: "Diagnóstico IA (IMC)", diag_wait: "Ingresa tu estatura y peso para calibrar el sistema.", live_morph: "Morfología en Vivo", path_protocol: "Lesiones / Restricciones", 
                 path_none: "Integridad Estructural Óptima", path_knee: "Patología en Complejo Patelar (Rodillas)", path_back: "Compresión Lumbar / Espalda Baja", path_shoul: "Déficit en Manguito Rotador (Hombros)",
                 btn_continue: "Inicializar Biometría", btn_finish: "Sincronizar y Entrar a la Nube", nav_coach: "Modo Diagnóstico", nav_user: "Modo Ejecución",
                 ai_directive: "Directriz Ontológica", ai_load: "Calibrando telemetría...", mod_exec: "Laboratorio de Entrenamiento", btn_cam: "Analizador de Técnica Visual",
@@ -345,7 +377,8 @@
                 diag_panel: "Panel Médico y CRM", btn_pdf: "Descargar Historial Clínico (PDF)", 
                 c_vol: "Tonelaje Estructural Acumulado", c_ses: "Contrato (Sesiones Restantes)", c_history: "Bitácora en la Nube",
                 sub_alert: "Suscripción Crítica", sub_desc: "Te restan <span id='alertSesiones' class='text-white font-bold text-sm'></span> sesiones de tu plan. Renueva para no perder acceso a tus métricas.", btn_renew: "Renovar Contrato (Apple Pay / Tarjeta)",
-                lvl_beg: "Principiante", lvl_int: "Intermedio", lvl_adv: "Avanzado", stat_under: "Bajo Peso", stat_nor: "Atlético", stat_over: "Sobrepeso", stat_obe: "Obesidad"
+                lvl_beg: "Principiante", lvl_int: "Intermedio", lvl_adv: "Avanzado", stat_under: "Bajo Peso", stat_nor: "Atlético", stat_over: "Sobrepeso", stat_obe: "Obesidad",
+                ai_opt: "Parámetros sistémicos al 100%. Protocolo autorizado para máxima tensión estructural sin limitación.", ai_fat: "Fatiga neurológica detectada. Disminuir carga absoluta en un 20% para permitir regeneración tisular.", ai_warn: "Restricción activa en [X]. Redirigiendo vectores para evitar carga axial sobre la articulación afectada.", snc_o: "ÓPTIMO", snc_f: "COMPROMETIDO"
             }
         };
 
@@ -357,7 +390,6 @@
             'Core': ['Plancha Abdominal', 'Crunch en Polea', 'Rueda Abdominal (Ab Wheel)', 'Sprints', 'Burpees']
         };
 
-        // --- PATHS BASES PARA EL AVATAR ---
         const pathMaleBase = `<polygon points="85,30 115,30 120,60 100,75 80,60"/><polygon id="sensor-pecho" class="sensor-node optimal" points="70,80 130,80 140,120 100,140 60,120"/><polygon id="sensor-espalda" class="sensor-node optimal" points="60,120 100,140 140,120 125,190 100,200 75,190"/><polygon id="sensor-brazo1" class="sensor-node optimal" points="70,80 40,100 30,160 50,160 60,120"/><polygon id="sensor-brazo2" class="sensor-node optimal" points="130,80 160,100 170,160 150,160 140,120"/><polygon class="sensor-node optimal" points="30,160 20,230 40,230 50,160"/><polygon class="sensor-node optimal" points="170,160 180,230 160,230 150,160"/><polygon id="sensor-piernas1" class="sensor-node optimal" points="75,190 100,200 85,280 55,280"/><polygon id="sensor-piernas2" class="sensor-node optimal" points="100,200 125,190 145,280 115,280"/><polygon class="sensor-node optimal" points="55,280 85,280 75,370 60,370"/><polygon class="sensor-node optimal" points="115,280 145,280 140,370 125,370"/>`;
         const pathFemaleBase = `<polygon points="88,35 112,35 115,60 100,75 85,60"/><polygon id="sensor-pecho" class="sensor-node optimal" points="75,80 125,80 130,115 100,130 70,115"/><polygon id="sensor-espalda" class="sensor-node optimal" points="70,115 100,130 130,115 115,170 100,180 85,170"/><polygon class="sensor-node optimal" points="85,170 100,180 115,170 135,210 100,220 65,210"/><polygon id="sensor-brazo1" class="sensor-node optimal" points="75,80 50,105 45,155 60,155 70,115"/><polygon id="sensor-brazo2" class="sensor-node optimal" points="125,80 150,105 155,155 140,155 130,115"/><polygon class="sensor-node optimal" points="45,155 35,220 50,220 60,155"/><polygon class="sensor-node optimal" points="155,155 165,220 150,220 140,155"/><polygon id="sensor-piernas1" class="sensor-node optimal" points="65,210 100,220 85,290 55,290"/><polygon id="sensor-piernas2" class="sensor-node optimal" points="100,220 135,210 145,290 115,290"/><polygon class="sensor-node optimal" points="55,290 85,290 75,370 60,370"/><polygon class="sensor-node optimal" points="115,290 145,290 140,370 125,370"/>`;
 
@@ -369,23 +401,33 @@
             document.querySelectorAll('[data-i18n]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n')]) el.innerHTML = i18n[l][el.getAttribute('data-i18n')]; });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n-placeholder')]) el.placeholder = i18n[l][el.getAttribute('data-i18n-placeholder')]; });
             document.getElementById('htmlTag').lang = l;
-            actualizarSugerenciasReales();
+            if(db) actualizarSugerenciasReales();
         }
 
-        let db = JSON.parse(localStorage.getItem('vanguardia_morph')) || null;
+        let db = JSON.parse(localStorage.getItem('vanguardia_apex_final')) || null;
 
         document.addEventListener("DOMContentLoaded", () => {
             setLang('es');
-            if (!db) { document.getElementById('clinicalOnboarding').style.display = 'flex'; actualizarMorfologia(); } 
-            else { initApp(); }
+            if (!db) { 
+                document.getElementById('splashScreen').style.display = 'flex'; 
+                actualizarMorfologia(); 
+            } else { 
+                document.getElementById('splashScreen').style.display = 'none'; 
+                document.getElementById('btnEnGlobal').parentElement.style.display = 'none';
+                initApp(); 
+            }
         });
 
-        // --- MOTOR MORFOLÓGICO Y PERFILAMIENTO (LA MAGIA) ---
-        function calcularIMC(peso, alturaCm) {
-            let h = alturaCm / 100;
-            if(h > 0 && peso > 0) return (peso / (h * h)).toFixed(1);
-            return 0;
+        // SPLASH TO ONBOARDING
+        function startOnboarding() {
+            document.getElementById('splashScreen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splashScreen').style.display = 'none';
+                document.getElementById('clinicalOnboarding').style.display = 'flex';
+            }, 800);
         }
+
+        function calcularIMC(peso, alturaCm) { let h = alturaCm / 100; if(h > 0 && peso > 0) return (peso / (h * h)).toFixed(1); return 0; }
 
         function obtenerPerfilamiento(imc, dolor) {
             let stat = "", lvl = "", diag = "";
@@ -394,7 +436,7 @@
             else if(imc >= 25 && imc < 30) { stat = i18n[currLang].stat_over; lvl = i18n[currLang].lvl_beg; diag = "Fase: Recomposición metabólica (Pérdida de tejido adiposo simultánea)."; }
             else if(imc >= 30) { stat = i18n[currLang].stat_obe; lvl = i18n[currLang].lvl_beg; diag = "Restricción de impacto alto requerida. Enfoque metabólico."; }
             
-            if(dolor && dolor !== "Ninguno") { diag += ` Alerta clínica en ${dolor} activa.`; lvl = i18n[currLang].lvl_beg; }
+            if(dolor && dolor !== "Ninguno") { diag += ` Alerta clínica activa.`; lvl = i18n[currLang].lvl_beg; }
             return { stat, lvl, diag };
         }
 
@@ -404,25 +446,15 @@
             let sex = document.getElementById('obSex').value || 'M';
             let imc = calcularIMC(w, h);
             
-            // UI Onboarding
             document.getElementById('obIMC').innerText = imc > 0 ? imc : "00.0";
             
             let perf = obtenerPerfilamiento(imc, document.getElementById('obPain') ? document.getElementById('obPain').value : null);
-            if(imc > 0) {
-                document.getElementById('obStatus').innerText = perf.stat;
-                document.getElementById('obLevelText').innerText = perf.diag;
-            }
+            if(imc > 0) { document.getElementById('obStatus').innerText = perf.stat; document.getElementById('obLevelText').innerText = perf.diag; }
 
-            // MAGIA: Escalado SVG (Widen or Slim down based on BMI)
             let scaleX = 1.0;
-            if(imc > 0) {
-                if(imc < 18.5) scaleX = 0.88; // Ectomorfo
-                else if(imc >= 25 && imc < 30) scaleX = 1.15; // Endomorfo leve
-                else if(imc >= 30) scaleX = 1.30; // Endomorfo severo
-            }
+            if(imc > 0) { if(imc < 18.5) scaleX = 0.88; else if(imc >= 25 && imc < 30) scaleX = 1.15; else if(imc >= 30) scaleX = 1.30; }
 
             let svgContent = `<g class="avatar-group" style="transform: scaleX(${scaleX});"><g class="avatar-mesh">${sex === 'F' ? pathFemaleBase : pathMaleBase}</g></g>`;
-            
             if(document.getElementById('obAvatar')) document.getElementById('obAvatar').innerHTML = svgContent;
             if(document.getElementById('mainAvatarSVG')) document.getElementById('mainAvatarSVG').innerHTML = svgContent;
         }
@@ -439,12 +471,12 @@
                 peso: w, altura: h, imc: imc, dolor: document.getElementById('obPain').value,
                 nivel: perf.lvl, restantes: 12, currentSet: 1, targetSets: 4, historial: []
             };
-            localStorage.setItem('vanguardia_morph', JSON.stringify(db));
+            localStorage.setItem('vanguardia_apex_final', JSON.stringify(db));
             document.getElementById('clinicalOnboarding').style.display = 'none';
+            document.getElementById('btnEnGlobal').parentElement.style.display = 'none';
             initApp();
         }
 
-        // --- CORE APP ---
         function initApp() {
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('userName').innerText = db.nombre;
@@ -453,14 +485,13 @@
             document.getElementById('currentSetDisplay').innerText = db.currentSet || 1;
             document.getElementById('targetSets').value = db.targetSets || 4;
             
-            // Paywall logic
             if(db.restantes <= 2) {
                 document.getElementById('paywallBanner').classList.remove('hidden');
                 document.getElementById('alertSesiones').innerText = db.restantes;
             }
 
             actualizarSugerenciasReales();
-            actualizarMorfologiaMain(); // Asegurar que el avatar de la main app tenga la morfología correcta
+            actualizarMorfologiaMain(); 
             actualizarMapaDeCalor();
             actualizarGraficaProgreso();
             renderAI();
@@ -468,10 +499,7 @@
 
         function actualizarMorfologiaMain() {
             let scaleX = 1.0;
-            if(db.imc < 18.5) scaleX = 0.88;
-            else if(db.imc >= 25 && db.imc < 30) scaleX = 1.15;
-            else if(db.imc >= 30) scaleX = 1.30;
-            
+            if(db.imc < 18.5) scaleX = 0.88; else if(db.imc >= 25 && db.imc < 30) scaleX = 1.15; else if(db.imc >= 30) scaleX = 1.30;
             let svgContent = `<g class="avatar-group" style="transform: scaleX(${scaleX});"><g class="avatar-mesh">${db.sexo === 'F' ? pathFemaleBase : pathMaleBase}</g></g>`;
             document.getElementById('mainAvatarSVG').innerHTML = svgContent;
         }
@@ -479,26 +507,28 @@
         function actualizarSugerenciasReales() {
             const dom = document.getElementById('grupoSelector').value;
             const caja = document.getElementById('sugerenciasCaja'); caja.innerHTML = '';
-            if(ejData[dom]) {
-                ejData[dom].forEach(ej => {
-                    caja.innerHTML += `<button type="button" class="ej-pill" onclick="seleccionarEjercicio('${ej}')">${ej}</button>`;
-                });
-            }
+            if(ejData[dom]) { ejData[dom].forEach(ej => { caja.innerHTML += `<button type="button" class="ej-pill" onclick="seleccionarEjercicio('${ej}')">${ej}</button>`; }); }
         }
         function seleccionarEjercicio(nombre) { document.getElementById('ejercicioNombre').value = nombre; actualizarGraficaProgreso(); }
 
         function renderAI() {
             let txt = document.getElementById('aiMessage');
             let perf = obtenerPerfilamiento(db.imc, db.dolor);
-            txt.innerHTML = `Nivel: <strong>${db.nivel}</strong>. <br>${perf.diag}`;
+            let msg = perf.diag;
+            
+            let fatigaTotal = 0; const ahora = new Date().getTime();
+            db.historial.forEach(s => { if (ahora - s.ts < 48 * 3600 * 1000) fatigaTotal += (s.rpe * s.series); });
+
+            if(fatigaTotal > 50) msg = i18n[currLang].ai_fat;
+            else if(db.dolor !== 'Ninguno') msg = i18n[currLang].ai_warn.replace('[X]', db.dolor);
+
+            txt.innerHTML = `Nivel: <strong>${db.nivel}</strong>. <br>${msg}`;
+            document.getElementById('statsSNC').innerText = fatigaTotal > 50 ? i18n[currLang].snc_f : i18n[currLang].snc_o;
+            document.getElementById('statsSNC').className = fatigaTotal > 50 ? "text-xl tech-mono text-red-500 uppercase tracking-widest mt-2" : "text-xl tech-mono text-purple-400 uppercase tracking-widest mt-2";
         }
 
-        function actualizarRPE(v) {
-            document.getElementById('rpeVal').innerText = `${parseFloat(v).toFixed(1)} / 10.0`; 
-            const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c'; document.getElementById('rpeVal').style.color = c;
-        }
+        function actualizarRPE(v) { document.getElementById('rpeVal').innerText = `${parseFloat(v).toFixed(1)} / 10.0`; const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c'; document.getElementById('rpeVal').style.color = c; }
 
-        // --- CÁMARA ---
         let streamActivo = null;
         function toggleCamera() {
             const vBox = document.getElementById('videoContainer'); const video = document.getElementById('cameraFeed');
@@ -511,7 +541,6 @@
             } else { if(streamActivo) { streamActivo.getTracks().forEach(track => track.stop()); } video.srcObject = null; vBox.classList.add('hidden'); }
         }
 
-        // --- SUBMIT SERIE X SERIE ---
         let restInt;
         document.getElementById('formVanguardia').onsubmit = function(e) {
             e.preventDefault(); 
@@ -523,27 +552,20 @@
 
             db.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }), ej: ejNombre, carga, reps, series: 1, rpe, rm1 });
             
-            // Advance sets
             db.currentSet = db.currentSet ? db.currentSet : 1;
-            if(db.currentSet < targetSets) {
-                db.currentSet++;
-            } else {
-                db.currentSet = 1; db.restantes--; alert("Protocolo Finalizado. Data sincronizada.");
-                if(db.restantes <= 2) location.reload();
-            }
+            if(db.currentSet < targetSets) { db.currentSet++; } else { db.currentSet = 1; db.restantes--; alert("Protocolo Finalizado. Data sincronizada."); if(db.restantes <= 2) location.reload(); }
             db.targetSets = targetSets;
             
             document.getElementById('currentSetDisplay').innerText = db.currentSet;
-            localStorage.setItem('vanguardia_morph', JSON.stringify(db));
+            localStorage.setItem('vanguardia_apex_final', JSON.stringify(db));
 
-            const ton = carga * reps; // Solo el tonelaje de esta serie
+            const ton = carga * reps;
             document.getElementById('metAgua').innerText = ((ton / 1000) * 120).toFixed(0); 
             document.getElementById('metCarbs').innerText = ((ton / 1000) * 4).toFixed(0);
             document.getElementById('recetaMetabolica').classList.remove('hidden'); document.getElementById('recetaMetabolica').classList.add('flex');
 
-            actualizarMapaDeCalor(); actualizarGraficaProgreso();
+            actualizarMapaDeCalor(); actualizarGraficaProgreso(); renderAI();
 
-            // Descanso
             let t = rpe >= 8 ? 90 : 60; 
             document.getElementById('btnSubmit').classList.add('hidden'); document.getElementById('restTimerBox').classList.remove('hidden'); document.getElementById('restTimerBox').classList.add('flex');
             clearInterval(restInt);
@@ -553,50 +575,37 @@
             }, 1000);
         };
 
-        // --- MAPA DE CALOR ---
         function actualizarMapaDeCalor() {
             const h = db.historial; const ahora = new Date().getTime(); let fatiga = { pecho: 0, espalda: 0, piernas: 0, brazos: 0 };
             h.forEach(s => {
                 if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
-                    let imp = parseFloat(s.rpe) * 1; // 1 serie a la vez
+                    let imp = parseFloat(s.rpe) * 1; 
                     let ej = s.ej.toLowerCase();
                     if(ej.includes("pecho") || ej.includes("banca") || ej.includes("press") || ej.includes("fondo")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
                     if(ej.includes("espalda") || ej.includes("dominada") || ej.includes("remo") || ej.includes("jalón")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
                     if(ej.includes("sentadilla") || ej.includes("muerto") || ej.includes("prensa") || ej.includes("hip thrust")) { fatiga.piernas += imp; }
-                    if(ej.includes("bíceps") || ej.includes("tríceps") || ej.includes("curl")) { fatiga.brazos += imp; }
+                    if(ej.includes("bíceps") || ej.includes("tríceps") || ej.includes("curl") || ej.includes("brazos")) { fatiga.brazos += imp; }
                 }
             });
-            
-            const aplicar = (id, f) => { 
-                let el = document.getElementById(id); if(!el) return; 
-                if(f > 15) el.className.baseVal = "sensor-node fatigued"; else el.className.baseVal = "sensor-node optimal"; 
-            };
+            const aplicar = (id, f) => { let el = document.getElementById(id); if(!el) return; if(f > 15) el.className.baseVal = "sensor-node fatigued"; else el.className.baseVal = "sensor-node optimal"; };
             aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda); aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos); aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas);
         }
 
-        // --- GRÁFICA ---
         let overloadChartInst;
         function actualizarGraficaProgreso() {
             const ctx = document.getElementById('overloadChart'); if(!ctx) return;
             const ejActual = document.getElementById('ejercicioNombre').value.trim();
             if(!ejActual) return;
-
             const historialEj = db.historial.filter(s => s.ej.toLowerCase() === ejActual.toLowerCase());
             let datosGrafica = []; let etiquetas = [];
             historialEj.forEach(s => {
                 if(!etiquetas.includes(s.fecha)) { etiquetas.push(s.fecha); datosGrafica.push(s.rm1); } 
                 else { let idx = etiquetas.indexOf(s.fecha); if(s.rm1 > datosGrafica[idx]) datosGrafica[idx] = s.rm1; }
             });
-
             if(overloadChartInst) overloadChartInst.destroy();
-            overloadChartInst = new Chart(ctx.getContext('2d'), { 
-                type: 'line', 
-                data: { labels: etiquetas.length > 0 ? etiquetas : ['-'], datasets: [{ label: '1RM', data: datosGrafica.length > 0 ? datosGrafica : [0], borderColor: '#b026ff', backgroundColor: 'rgba(176, 38, 255, 0.2)', borderWidth: 2, fill: true, tension: 0.3 }] }, 
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } }, x: { grid: { display: false }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } } }, plugins: { legend: { display: false } } } 
-            });
+            overloadChartInst = new Chart(ctx.getContext('2d'), { type: 'line', data: { labels: etiquetas.length > 0 ? etiquetas : ['-'], datasets: [{ label: '1RM', data: datosGrafica.length > 0 ? datosGrafica : [0], borderColor: '#b026ff', backgroundColor: 'rgba(176, 38, 255, 0.2)', borderWidth: 2, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } }, x: { grid: { display: false }, ticks: { color: '#888', font: {family: 'Share Tech Mono'} } } }, plugins: { legend: { display: false } } } });
         }
 
-        // --- COACH MODE ---
         function toggleVista() { 
             document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa'); 
             if(document.getElementById('vistaMacro').classList.contains('activa')) { document.getElementById('btnVista').innerText = i18n[currLang].nav_user; renderCoachMode(); } 
@@ -605,7 +614,7 @@
 
         function renderCoachMode() {
             let vol = 0; db.historial.forEach(s => vol += (s.carga * s.reps));
-            document.getElementById('statsVol').innerHTML = `${vol.toLocaleString()} <span class="text-sm text-gray-600">kg</span>`;
+            document.getElementById('statsVol').innerHTML = `${vol.toLocaleString()} <span class="text-sm text-gray-600 font-normal">kg levantados</span>`;
             document.getElementById('statsSes').innerText = db.restantes;
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
             [...db.historial].reverse().slice(0, 30).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-2"><span class="text-cyan-400">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps)</span></div>`);
