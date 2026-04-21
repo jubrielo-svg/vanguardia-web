@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VULCANO OS | Centro de Gestión Elite</title>
+    <title>Vanguardia | Centro de Gestión Elite</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#000000">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -43,7 +43,7 @@
 <body class="min-h-screen pb-10">
 
     <div id="authGateway" class="flex flex-col">
-        <h1 class="text-3xl font-black text-white tracking-[0.3em] uppercase mb-2" style="font-family: 'Cinzel', serif;">Vulcano OS</h1>
+        <h1 class="text-3xl font-black text-white tracking-[0.3em] uppercase mb-2" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
         <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-12">Acceso Restringido</p>
         
         <div class="mb-10 w-full px-12">
@@ -121,7 +121,7 @@
 
         <nav class="p-4 flex justify-between items-center border-b border-white/5 relative z-10 bg-black/50 backdrop-blur-md sticky top-0">
             <div class="text-lg font-black tracking-tighter uppercase flex items-center gap-3">
-                VULCANO OS.
+                VANGUARDIA.
                 <button onclick="abrirModalPerfiles()" class="text-[8px] border border-blue-500/50 text-blue-400 bg-blue-900/20 px-2 py-1 rounded uppercase">
                     👤 <span id="nombreAtletaNav">Cliente</span>
                 </button>
@@ -195,7 +195,7 @@
 
                     <div class="lg:col-span-6 flex flex-col gap-6">
                         <div class="glass-card p-5 rounded-2xl h-80 relative flex flex-col items-center">
-                            <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Vulcano Radar 360°</h3>
+                            <h3 class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-2">Vanguardia Radar 360°</h3>
                             <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
                         </div>
 
@@ -250,12 +250,10 @@
             document.getElementById('textoSensor').innerText = "Verificando Identidad...";
             document.getElementById('textoSensor').classList.replace('text-gray-500', 'text-[#d4af37]');
 
-            // Efecto Háptico Constante
             if (navigator.vibrate) {
                 hapticInterval = setInterval(() => { navigator.vibrate(50); }, 150);
             }
 
-            // Temporizador de desbloqueo (2 segundos)
             scanTimer = setTimeout(() => {
                 desbloquearSistema();
             }, 2000);
@@ -271,7 +269,7 @@
 
         function desbloquearSistema() {
             clearInterval(hapticInterval);
-            if (navigator.vibrate) navigator.vibrate([100, 50, 200]); // Vibración de éxito
+            if (navigator.vibrate) navigator.vibrate([100, 50, 200]); 
             
             document.getElementById('textoSensor').innerText = "ACCESO CONCEDIDO";
             document.getElementById('textoSensor').classList.replace('text-red-500', 'text-green-400');
@@ -282,12 +280,12 @@
                 setTimeout(() => {
                     document.getElementById('authGateway').style.display = 'none';
                     document.getElementById('mainContent').style.display = 'block';
-                    initMultiTenant(); // Iniciar la aplicación real
+                    initMultiTenant(); 
                 }, 800);
             }, 500);
         }
 
-        // --- 2. LÓGICA DEL SISTEMA (VULCANO OS V22) ---
+        // --- 2. LÓGICA DEL SISTEMA VANGUARDIA ---
         const InterfazSensorial = {
             init: function() { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); },
             vibrar: function(p) { if(navigator.vibrate) navigator.vibrate(p); },
@@ -295,7 +293,7 @@
             alerta: function() { this.vibrar([100, 50, 200]); }
         };
 
-        let db = JSON.parse(localStorage.getItem('vulcano_os_db')) || { perfilActivo: 'Cliente Base', perfiles: { 'Cliente Base': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', sesiones: 12, restantes: 12, suplementos: [], historial: [] } } };
+        let db = JSON.parse(localStorage.getItem('vanguardia_v22')) || { perfilActivo: 'Cliente Base', perfiles: { 'Cliente Base': { edad: 30, peso: 75, sueno: 7, estres: 3, fase: 'Hipertrofia Muscular', dolor: 'Ninguno', sesiones: 12, restantes: 12, suplementos: [], historial: [] } } };
 
         function initMultiTenant() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
         function actualizarListaPerfiles() { const selector = document.getElementById('selectorPerfiles'); selector.innerHTML = ''; for(const nombre in db.perfiles) { selector.innerHTML += `<option value="${nombre}">${nombre}</option>`; } selector.value = db.perfilActivo; }
@@ -321,7 +319,7 @@
         
         function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
         function cerrarModalPerfiles() { cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
-        function guardarDB() { localStorage.setItem('vulcano_os_db', JSON.stringify(db)); }
+        function guardarDB() { localStorage.setItem('vanguardia_v22', JSON.stringify(db)); }
 
         function finalizarCheckIn() {
             InterfazSensorial.init(); const p = db.perfiles[db.perfilActivo];
@@ -429,9 +427,20 @@
             }
         }
 
-        function enviarWhatsApp() { const p = db.perfiles[db.perfilActivo]; const text = `*VULCANO OS | Reporte de Sesión*%0A*Cliente:* ${db.perfilActivo}%0A*Restantes:* ${p.restantes} sesiones.%0A*Estado SNC:* ${p.sueno}h sueño.%0A_Fuerza hoy optimizada._`; window.open(`https://wa.me/?text=${text}`, "_blank"); }
-        function enviarWhatsAppRenovacion() { const p = db.perfiles[db.perfilActivo]; const text = `*VULCANO OS | Gestión de Contratos*%0AEstimado ${db.perfilActivo}, le informamos que le restan *${p.restantes}* sesiones de su plan de ${p.fase}. Por favor, gestione su renovación para mantener la continuidad biomecánica.`; window.open(`https://wa.me/?text=${text}`, "_blank"); }
+        function enviarWhatsApp() {
+            const p = db.perfiles[db.perfilActivo];
+            const text = `*VANGUARDIA | Reporte de Sesión*%0A*Cliente:* ${db.perfilActivo}%0A*Restantes:* ${p.restantes} sesiones.%0A*Estado SNC:* ${p.sueno}h sueño.%0A_Fuerza hoy optimizada._`;
+            window.open(`https://wa.me/?text=${text}`, "_blank");
+        }
+
+        function enviarWhatsAppRenovacion() {
+            const p = db.perfiles[db.perfilActivo];
+            const text = `*VANGUARDIA | Gestión de Contratos*%0AEstimado ${db.perfilActivo}, le informamos que le restan *${p.restantes}* sesiones de su plan de ${p.fase}. Por favor, gestione su renovación para mantener la continuidad biomecánica.`;
+            window.open(`https://wa.me/?text=${text}`, "_blank");
+        }
+
         function generarReportePDF() { html2pdf().from(document.getElementById('reportContent')).save(); }
+        
     </script>
 </body>
 </html>
