@@ -1,12 +1,17 @@
-"icons": [
-  {
-    "src": "/public/icon-192x192.png",
-    "sizes": "192x192",
-    "type": "image/png"
-  },
-  {
-    "src": "/public/icon-512x512.png",
-    "sizes": "512x512",
-    "type": "image/png"
-  }
-],
+{
+  "name": "Vanguardia Elite",
+  "short_name": "Vanguardia",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#050b14",
+  "theme_color": "#050b14",
+  "description": "Biomecánica de Élite y Biohacking",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
