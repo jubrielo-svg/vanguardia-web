@@ -8,38 +8,39 @@
     <meta name="theme-color" content="#030508">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;600;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
         :root { --cyan: #00f0ff; --purple: #b026ff; --green: #00ff88; --red: #ff003c; --bg: #030508; --surface: rgba(10, 15, 25, 0.85); }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: #e2e8f0; overflow-x: hidden; margin: 0; }
         
-        .ambient-glow { position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.05) 0%, transparent 70%), radial-gradient(circle at 50% 100%, rgba(176, 38, 255, 0.05) 0%, transparent 70%); opacity: 1; pointer-events: none; z-index: -1; }
+        .ambient-glow { position: fixed; inset: 0; background: radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.08) 0%, transparent 60%), radial-gradient(circle at 50% 100%, rgba(176, 38, 255, 0.08) 0%, transparent 60%); opacity: 1; pointer-events: none; z-index: -1; }
         .glass-panel { background: var(--surface); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); backdrop-filter: blur(20px); border-radius: 16px; }
         
         .vista { display: none; animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; } .vista.activa { display: block; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        .btn-cyber { background: linear-gradient(90deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.05)); border: 1px solid var(--cyan); color: var(--cyan); font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; cursor: pointer; }
+        .btn-cyber { background: linear-gradient(90deg, rgba(0, 240, 255, 0.15), rgba(0, 240, 255, 0.05)); border: 1px solid var(--cyan); color: var(--cyan); font-family: 'Share Tech Mono', monospace; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s; cursor: pointer; }
         .btn-cyber:hover { background: var(--cyan); color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
         
         .input-clinical { background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; padding: 12px; outline: none; transition: border 0.3s; font-family: 'Share Tech Mono', monospace; }
-        .input-clinical:focus { border-color: var(--cyan); box-shadow: inset 0 0 10px rgba(0,240,255,0.1); }
+        .input-clinical:focus { border-color: var(--cyan); box-shadow: inset 0 0 10px rgba(0,240,255,0.15); }
 
-        /* AVATAR BIOMECÁNICO ESTILIZADO */
-        .avatar-mesh { fill: rgba(0,240,255,0.01); stroke: rgba(255,255,255,0.15); stroke-width: 1; stroke-linejoin: round; transition: all 0.5s ease; }
-        .sensor-node { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); fill: rgba(255,255,255,0.05); stroke: rgba(255,255,255,0.2); stroke-width: 0.5; }
-        .sensor-node.optimal { fill: rgba(0, 240, 255, 0.6); filter: drop-shadow(0 0 8px var(--cyan)); }
-        .sensor-node.fatigued { fill: rgba(255, 0, 60, 0.8); filter: drop-shadow(0 0 12px var(--red)); }
+        /* AVATAR BIOMECÁNICO POTENCIADO */
+        .avatar-mesh { fill: rgba(0,240,255,0.05); stroke: rgba(0,240,255,0.5); stroke-width: 1.5; stroke-linejoin: round; transition: all 0.5s ease; filter: drop-shadow(0 0 5px rgba(0,240,255,0.2)); }
+        .sensor-node { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); fill: rgba(255,255,255,0.1); stroke: rgba(255,255,255,0.3); stroke-width: 1; }
+        .sensor-node.optimal { fill: rgba(0, 240, 255, 0.8); filter: drop-shadow(0 0 10px var(--cyan)); stroke: #fff; }
+        .sensor-node.fatigued { fill: rgba(255, 0, 60, 0.9); filter: drop-shadow(0 0 15px var(--red)); stroke: #fff; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
 
         .cinzel { font-family: 'Cinzel', serif; }
         .tech-mono { font-family: 'Share Tech Mono', monospace; }
 
-        .lang-switch { display: flex; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
-        .lang-btn { background: transparent; border: none; color: #888; padding: 4px 10px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-family: 'Share Tech Mono', monospace; }
+        .lang-switch { display: flex; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; background: rgba(0,0,0,0.5); }
+        .lang-btn { background: transparent; border: none; color: #888; padding: 4px 12px; font-size: 10px; font-weight: 800; cursor: pointer; transition: all 0.3s; font-family: 'Share Tech Mono', monospace; }
         .lang-btn.active { background: white; color: black; }
 
-        /* WIZARD */
         #clinicalOnboarding { position: fixed; inset: 0; background: var(--bg); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
         .step-module { display: none; width: 100%; max-w: 400px; animation: fadeUp 0.5s; }
         .step-module.active { display: block; }
@@ -49,20 +50,20 @@
 
     <div class="ambient-glow"></div>
 
+    <div class="fixed top-4 right-4 z-[10002]">
+        <div class="lang-switch">
+            <button onclick="setLang('en')" id="btnEnGlobal" class="lang-btn active">EN</button>
+            <button onclick="setLang('es')" id="btnEsGlobal" class="lang-btn">ES</button>
+        </div>
+    </div>
+
     <div id="clinicalOnboarding">
-        <div class="absolute top-8 w-full flex justify-center flex-col items-center">
+        <div class="absolute top-10 w-full flex justify-center flex-col items-center">
             <h1 class="cinzel text-3xl text-white tracking-[0.4em] uppercase mb-1">Vanguardia</h1>
             <div class="h-[1px] w-24 bg-gradient-to-r from-transparent via-cyan-400 to-transparent"></div>
         </div>
 
-        <div class="absolute top-6 right-6 z-50">
-            <div class="lang-switch">
-                <button onclick="setLang('en')" id="btnEnOb" class="lang-btn active">EN</button>
-                <button onclick="setLang('es')" id="btnEsOb" class="lang-btn">ES</button>
-            </div>
-        </div>
-
-        <div id="step1" class="step-module active">
+        <div id="step1" class="step-module active mt-12">
             <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-6 border-b border-white/10 pb-2" data-i18n="id_protocol">PROTOCOLO DE IDENTIDAD</h2>
             <div class="space-y-4">
                 <div>
@@ -78,7 +79,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_age">Edad Chronológica</label>
+                        <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_age">Edad</label>
                         <input type="number" id="obAge" class="input-clinical w-full text-center text-sm" placeholder="00">
                     </div>
                 </div>
@@ -86,12 +87,12 @@
             <button onclick="nextStep(2)" class="w-full btn-cyber py-4 mt-8 text-xs" data-i18n="btn_continue">Inicializar Biometría</button>
         </div>
 
-        <div id="step2" class="step-module">
+        <div id="step2" class="step-module mt-12">
             <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-6 border-b border-white/10 pb-2" data-i18n="bio_protocol">PARÁMETROS BIOMÉTRICOS</h2>
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div>
                     <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_height">Estatura (cm)</label>
-                    <input type="number" id="obHeight" class="input-clinical w-full text-center text-xl" placeholder="170">
+                    <input type="number" id="obHeight" class="input-clinical w-full text-center text-xl" placeholder="170" oninput="calcularIMCOnboarding()">
                 </div>
                 <div>
                     <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_weight">Masa (Kg)</label>
@@ -102,23 +103,15 @@
             <div class="bg-black/40 border border-white/5 p-4 rounded-lg text-center mb-6">
                 <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="lbl_bmi">Índice de Masa Corporal (IMC)</p>
                 <p id="obIMC" class="text-2xl tech-mono text-white">00.0</p>
+                <p class="text-[7px] text-cyan-400 uppercase tracking-widest mt-1" data-i18n="desc_bmi">Relación peso/estatura</p>
             </div>
 
-            <div>
-                <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_goal">Objetivo Clínico</label>
-                <select id="obGoal" class="input-clinical w-full text-center text-sm appearance-none">
-                    <option value="Oxidación de Grasa" data-i18n="obj_fat">Oxidación de Tejido Adiposo</option>
-                    <option value="Hipertrofia" data-i18n="obj_hyp">Hipertrofia (Ganancia Magra)</option>
-                    <option value="Recomposición" data-i18n="obj_rec">Recomposición Metabólica</option>
-                    <option value="Tonicidad" data-i18n="obj_ton">Tonicidad y Acondicionamiento</option>
-                </select>
-            </div>
-            <button onclick="nextStep(3)" class="w-full btn-cyber py-4 mt-8 text-xs" data-i18n="btn_continue">Proceder</button>
+            <button onclick="nextStep(3)" class="w-full btn-cyber py-4 mt-4 text-xs" data-i18n="btn_continue">Proceder</button>
         </div>
 
-        <div id="step3" class="step-module">
+        <div id="step3" class="step-module mt-12">
             <h2 class="cinzel text-xl text-cyan-400 tracking-widest mb-2 border-b border-white/10 pb-2" data-i18n="path_protocol">HISTORIAL PATOLÓGICO</h2>
-            <p class="text-gray-500 text-[10px] mb-6 tracking-widest uppercase" data-i18n="path_sub">Prevención de estrés articular cruzado.</p>
+            <p class="text-gray-500 text-[9px] mb-6 tracking-widest uppercase tech-mono" data-i18n="path_sub">Prevención de estrés articular cruzado.</p>
             
             <label class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 block" data-i18n="lbl_path">Restricciones Estructurales</label>
             <select id="obPain" class="input-clinical w-full text-center text-sm appearance-none mb-8">
@@ -134,20 +127,14 @@
 
     <div id="mainContent" style="display: none;">
         
-        <header class="px-6 py-4 border-b border-white/5 bg-black/60 backdrop-blur-xl sticky top-0 z-50 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div>
-                    <h1 class="cinzel text-xl text-white tracking-[0.3em] uppercase">Vanguardia.</h1>
-                    <p class="text-[8px] text-cyan-400 tech-mono tracking-widest uppercase mt-1">ID: <span id="userName" class="text-white">USER</span> | IMC: <span id="userIMC">00.0</span></p>
-                </div>
+        <header class="px-6 py-4 border-b border-white/5 bg-black/60 backdrop-blur-xl sticky top-0 z-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h1 class="cinzel text-xl text-white tracking-[0.3em] uppercase">Vanguardia.</h1>
+                <p class="text-[8px] text-cyan-400 tech-mono tracking-widest uppercase mt-1">ID: <span id="userName" class="text-white">USER</span> | IMC: <span id="userIMC">00.0</span></p>
             </div>
             
-            <div class="flex items-center gap-4">
-                <div class="lang-switch">
-                    <button onclick="setLang('en')" id="btnEnMain" class="lang-btn active">EN</button>
-                    <button onclick="setLang('es')" id="btnEsMain" class="lang-btn">ES</button>
-                </div>
-                <button onclick="toggleVista()" id="btnVista" class="border border-white/20 text-white hover:bg-white hover:text-black transition px-4 py-1.5 rounded text-[9px] uppercase tracking-widest tech-mono" data-i18n="nav_coach">Modo Diagnóstico</button>
+            <div class="flex items-center gap-4 w-full sm:w-auto justify-end pr-16 sm:pr-0">
+                <button onclick="toggleVista()" id="btnVista" class="border border-white/20 text-white hover:bg-white hover:text-black transition px-4 py-2 rounded text-[9px] uppercase tracking-widest tech-mono w-full sm:w-auto text-center" data-i18n="nav_coach">Modo Diagnóstico</button>
             </div>
         </header>
 
@@ -155,7 +142,7 @@
             
             <div id="vistaMicro" class="vista activa">
                 
-                <div class="glass-panel p-5 border-l-2 border-l-cyan-400 flex justify-between items-center mb-8">
+                <div class="glass-panel p-5 border-l-2 border-l-cyan-400 flex justify-between items-center mb-8 bg-[#0a1128]/40">
                     <div>
                         <h2 class="text-[9px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-1" data-i18n="ai_directive">Directriz Ontológica</h2>
                         <p id="aiMessage" class="text-sm text-cyan-100 font-medium tracking-wide tech-mono leading-relaxed" data-i18n="ai_load">Calibrando telemetría...</p>
@@ -168,7 +155,7 @@
                         <div class="glass-panel p-8">
                             <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
                                 <h3 class="cinzel text-lg text-white tracking-widest uppercase" data-i18n="mod_exec">Módulo de Ejecución</h3>
-                                <button type="button" onclick="toggleCamera()" class="border border-purple-500 text-purple-400 hover:bg-purple-900/30 px-3 py-1 text-[9px] uppercase tracking-widest transition rounded tech-mono" data-i18n="btn_cam">Análisis Video</button>
+                                <button type="button" onclick="toggleCamera()" class="border border-purple-500 text-purple-400 hover:bg-purple-900/30 px-3 py-1 text-[9px] uppercase tracking-widest transition rounded tech-mono flex items-center gap-2"><span class="text-xs">📷</span> <span data-i18n="btn_cam">Análisis Video</span></button>
                             </div>
 
                             <div id="videoContainer" class="hidden mb-6 rounded-lg overflow-hidden border border-purple-500/50 shadow-[0_0_15px_rgba(176,38,255,0.2)] relative">
@@ -183,25 +170,30 @@
                                     <select id="dominioSelector" class="input-clinical w-full text-sm appearance-none">
                                         <option value="Cuádriceps" data-i18n="mus_quad">Tren Inferior: Cuádriceps</option>
                                         <option value="Isquios/Glúteo" data-i18n="mus_ham">Tren Inferior: Isquiosurales y Glúteo</option>
-                                        <option value="Pectoral" data-i18n="mus_chest">Tren Superior: Pectoral Mayor/Menor</option>
-                                        <option value="Dorsal" data-i18n="mus_back">Tren Superior: Dorsal Ancho / Romboides</option>
-                                        <option value="Deltoides" data-i18n="mus_shoul">Complejo Articular: Deltoides</option>
-                                        <option value="Bíceps" data-i18n="mus_bic">Brazos: Bíceps Braquial</option>
-                                        <option value="Tríceps" data-i18n="mus_tri">Brazos: Tríceps Braquial</option>
-                                        <option value="Core" data-i18n="mus_core">Zona Media: Core / Recto Abdominal</option>
+                                        <option value="Pectoral" data-i18n="mus_chest">Tren Superior: Pectoral</option>
+                                        <option value="Dorsal" data-i18n="mus_back">Tren Superior: Dorsal / Espalda</option>
+                                        <option value="Deltoides" data-i18n="mus_shoul">Articular: Deltoides / Hombros</option>
+                                        <option value="Brazos" data-i18n="mus_arm">Brazos: Bíceps / Tríceps</option>
+                                        <option value="Core" data-i18n="mus_core">Zona Media: Core Abdominal</option>
                                     </select>
                                 </div>
 
                                 <div class="grid grid-cols-3 gap-4">
                                     <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_sets">Series</label><input type="number" id="series" required class="input-clinical w-full text-center text-xl text-white"></div>
-                                    <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_reps">Repeticiones</label><input type="number" id="reps" required class="input-clinical w-full text-center text-xl text-white" oninput="calcularTUT()"></div>
+                                    <div><label class="text-[9px] text-gray-500 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_reps">Reps</label><input type="number" id="reps" required class="input-clinical w-full text-center text-xl text-white" oninput="calcularTUT()"></div>
                                     <div><label class="text-[9px] text-cyan-400 uppercase tracking-widest text-center block mb-2" data-i18n="lbl_kg">Carga (Kg)</label><input type="number" id="carga" required class="input-clinical w-full text-center text-xl text-cyan-400 border-cyan-400/30"></div>
                                 </div>
 
-                                <div class="bg-black/40 border border-white/5 p-4 rounded-lg">
+                                <div class="bg-black/40 border border-white/5 p-5 rounded-lg">
                                     <div class="flex justify-between items-center mb-4">
-                                        <label class="text-[9px] text-gray-400 uppercase tracking-widest" data-i18n="lbl_cadence">Protocolo I.C.U. (Cadencia)</label>
-                                        <span class="text-[8px] text-gray-500 uppercase tech-mono">TUT: <strong id="tutDisplay" class="text-white">0s</strong></span>
+                                        <div>
+                                            <label class="text-[9px] text-gray-400 uppercase tracking-widest block" data-i18n="lbl_cadence">Protocolo I.C.U.</label>
+                                            <p class="text-[7px] text-gray-600 tech-mono uppercase mt-1" data-i18n="desc_icu">Control biomecánico del movimiento</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <span class="text-[9px] text-cyan-400 uppercase tech-mono tracking-widest">TUT: <strong id="tutDisplay" class="text-white text-sm">0s</strong></span>
+                                            <p class="text-[6px] text-gray-500 tech-mono uppercase mt-1" data-i18n="desc_tut">Tiempo Bajo Tensión Muscular</p>
+                                        </div>
                                     </div>
                                     <div class="grid grid-cols-3 gap-4">
                                         <div><p class="text-[8px] text-center text-cyan-400 uppercase mb-1 tech-mono" data-i18n="cad_ecc">Excéntrica</p><input type="number" id="cadExc" value="3" class="input-clinical w-full p-2 text-center text-sm" oninput="calcularTUT()"></div>
@@ -211,13 +203,19 @@
                                 </div>
 
                                 <div class="pt-2">
-                                    <label class="text-[9px] text-gray-500 uppercase tracking-widest flex justify-between mb-3"><span data-i18n="lbl_rpe">Percepción de Esfuerzo (RPE)</span><span id="rpeVal" class="text-white tech-mono">5.0 / 10.0</span></label>
+                                    <div class="flex justify-between mb-3">
+                                        <div>
+                                            <label class="text-[9px] text-gray-500 uppercase tracking-widest block" data-i18n="lbl_rpe">Percepción de Esfuerzo (RPE)</label>
+                                            <p class="text-[7px] text-gray-600 tech-mono uppercase mt-1" data-i18n="desc_rpe">Escala de fatiga subjetiva</p>
+                                        </div>
+                                        <span id="rpeVal" class="text-white tech-mono font-bold">5.0 / 10.0</span>
+                                    </div>
                                     <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-white/10 rounded appearance-none" oninput="actualizarRPE(this.value)">
                                 </div>
                                 
                                 <div class="mt-8 relative">
                                     <button id="btnSubmit" type="submit" class="w-full py-4 btn-cyber rounded text-[10px]" data-i18n="btn_compute">Computar Tensión Tisular</button>
-                                    <div id="restTimerBox" class="hidden w-full py-4 bg-black/80 border border-cyan-400/50 text-cyan-400 uppercase text-center text-[10px] tracking-widest rounded tech-mono"><span data-i18n="lbl_rest">Fase de Recuperación</span> // <span id="restTimerDisplay" class="text-white">0s</span></div>
+                                    <div id="restTimerBox" class="hidden w-full py-4 bg-black/80 border border-cyan-400/50 text-cyan-400 uppercase text-center text-[10px] tracking-widest rounded tech-mono"><span data-i18n="lbl_rest">Fase de Recuperación</span> // <span id="restTimerDisplay" class="text-white text-sm">0s</span></div>
                                 </div>
                             </form>
                         </div>
@@ -225,18 +223,18 @@
 
                     <div class="lg:col-span-5 flex flex-col gap-6">
                         
-                        <div class="glass-panel p-6 flex flex-col items-center justify-center flex-grow relative overflow-hidden bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-cyan-900/10 via-[#030508] to-[#030508]">
+                        <div id="reportAvatar" class="glass-panel p-6 flex flex-col items-center justify-center flex-grow relative overflow-hidden bg-[#030508] border border-cyan-400/10 shadow-[inset_0_0_50px_rgba(0,240,255,0.03)]">
                             <div class="absolute top-4 left-6">
-                                <h3 class="text-[9px] text-gray-500 uppercase tracking-[0.2em] cinzel" data-i18n="map_tissue">Mapeo Tisular</h3>
+                                <h3 class="text-[10px] text-gray-300 uppercase tracking-[0.2em] cinzel" data-i18n="map_tissue">Mapeo Tisular</h3>
                                 <p class="text-[7px] text-cyan-400 tech-mono mt-1 uppercase" data-i18n="map_live">Telemetría en Vivo</p>
                             </div>
                             
-                            <div class="w-full h-80 flex justify-center mt-6">
-                                <svg id="avatarSVG" viewBox="0 0 200 400" class="h-full w-auto opacity-80 drop-shadow-[0_0_15px_rgba(0,240,255,0.1)]"></svg>
+                            <div class="w-full h-96 flex justify-center mt-8">
+                                <svg id="avatarSVG" viewBox="0 0 200 400" class="h-full w-auto drop-shadow-[0_0_15px_rgba(0,240,255,0.2)] overflow-visible"></svg>
                             </div>
                         </div>
 
-                        <div id="recetaMetabolica" class="glass-panel p-6 hidden flex-col justify-center border-t-2 border-t-green-400">
+                        <div id="recetaMetabolica" class="glass-panel p-6 hidden flex-col justify-center border-t-2 border-t-green-400 bg-black/50">
                             <p class="text-[9px] text-green-400 uppercase tracking-widest mb-4 tech-mono" data-i18n="rx_met">Prescripción Metabólica Post-Sesión</p>
                             <div class="grid grid-cols-2 gap-4 text-center">
                                 <div><p class="text-2xl font-black text-white tech-mono" id="metAgua">0<span class="text-xs text-gray-500 ml-1">ml</span></p><p class="text-[8px] text-gray-500 uppercase mt-1 tracking-widest" data-i18n="rx_h2o">Reposición Hídrica</p></div>
@@ -249,21 +247,31 @@
             </div>
 
             <div id="vistaMacro" class="vista space-y-6">
-                <div class="glass-panel p-8">
-                    <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
+                <div class="glass-panel p-8" id="pdfExportArea">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-white/10 pb-4 mb-6 gap-4">
                         <div>
                             <h2 class="cinzel text-xl text-white uppercase tracking-widest" data-i18n="diag_panel">Panel de Diagnóstico Clínico</h2>
-                            <p class="text-[9px] text-gray-500 tech-mono uppercase mt-1">Vanguardia Analytics</p>
+                            <p class="text-[9px] text-cyan-400 tech-mono uppercase mt-1">Vanguardia Analytics Suite</p>
+                        </div>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <button onclick="enviarWhatsApp()" class="flex-1 md:flex-none border border-green-500/50 bg-green-900/20 text-green-400 hover:bg-green-500 hover:text-black transition px-4 py-2 text-[9px] uppercase tracking-widest rounded tech-mono text-center flex items-center justify-center gap-1">
+                                <span class="text-xs">💬</span> <span data-i18n="btn_wpp">Enviar Reporte</span>
+                            </button>
+                            <button onclick="generarReportePDF()" class="flex-1 md:flex-none border border-cyan-500/50 bg-cyan-900/20 text-cyan-400 hover:bg-cyan-500 hover:text-black transition px-4 py-2 text-[9px] uppercase tracking-widest rounded tech-mono text-center">
+                                <span data-i18n="btn_pdf">Descargar PDF</span>
+                            </button>
                         </div>
                     </div>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                         <div class="bg-black/50 p-6 rounded-lg border border-white/5">
-                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2" data-i18n="c_vol">Tonelaje Estructural Acumulado</p>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="c_vol">Tonelaje Estructural Acumulado</p>
+                            <p class="text-[7px] text-gray-600 uppercase tracking-widest mb-3 tech-mono" data-i18n="desc_vol">Carga total desplazada en el ciclo</p>
                             <p class="text-3xl tech-mono text-cyan-400" id="statsVol">0.0 <span class="text-sm text-gray-600">kg</span></p>
                         </div>
                         <div class="bg-black/50 p-6 rounded-lg border border-white/5">
-                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-2" data-i18n="c_snc">Estado del Sistema Nervioso Central</p>
+                            <p class="text-[9px] text-gray-500 uppercase tracking-widest mb-1" data-i18n="c_snc">Estado del Sistema Nervioso (SNC)</p>
+                            <p class="text-[7px] text-gray-600 uppercase tracking-widest mb-3 tech-mono" data-i18n="desc_snc">Nivel de fatiga del sistema central</p>
                             <p class="text-xl tech-mono text-purple-400 uppercase tracking-widest mt-2" id="statsSNC">Óptimo</p>
                         </div>
                     </div>
@@ -282,22 +290,22 @@
     </div>
 
     <script>
-        // MOTOR BILINGÜE Y DE DATOS
+        // MOTOR BILINGÜE
         const i18n = {
             en: {
                 id_protocol: "IDENTITY PROTOCOL", lbl_name: "Subject Name", ph_name: "Client ID", lbl_sex: "Biological Sex", opt_m: "Male", opt_f: "Female", lbl_age: "Chronological Age",
-                bio_protocol: "BIOMETRIC PARAMETERS", lbl_height: "Height (cm)", lbl_weight: "Mass (Kg)", lbl_bmi: "Body Mass Index (BMI)",
-                lbl_goal: "Clinical Goal", obj_fat: "Adipose Tissue Oxidation", obj_hyp: "Hypertrophy (Lean Mass)", obj_rec: "Metabolic Recomposition", obj_ton: "Toning and Conditioning",
+                bio_protocol: "BIOMETRIC PARAMETERS", lbl_height: "Height (cm)", lbl_weight: "Mass (Kg)", lbl_bmi: "Body Mass Index (BMI)", desc_bmi: "Weight to height ratio",
                 path_protocol: "PATHOLOGICAL HISTORY", path_sub: "Prevention of cross-articular stress.", lbl_path: "Structural Restrictions",
                 path_none: "Optimal Structural Integrity", path_knee: "Patellar Complex Pathology", path_back: "Lumbar / Sacral Compression", path_shoul: "Rotator Cuff Deficit",
-                btn_continue: "Initialize Biometrics", btn_finish: "Deploy Master Interface", nav_coach: "Diagnostic Mode",
+                btn_continue: "Initialize Biometrics", btn_finish: "Deploy Master Interface", nav_coach: "Diagnostic Mode", nav_user: "Execution Mode",
                 ai_directive: "Ontological Directive", ai_load: "Calibrating telemetry...", mod_exec: "Execution Module", btn_cam: "Video Analysis",
-                lbl_target: "Anatomical Target", mus_quad: "Lower Body: Quadriceps", mus_ham: "Lower Body: Hamstrings / Glutes", mus_chest: "Upper Body: Pectoralis", mus_back: "Upper Body: Lats / Rhomboids", mus_shoul: "Articular Complex: Deltoids", mus_bic: "Arms: Biceps Brachii", mus_tri: "Arms: Triceps Brachii", mus_core: "Midsection: Core / Rectus Abdominis",
-                lbl_sets: "Sets", lbl_reps: "Repetitions", lbl_kg: "Load (Kg)", lbl_cadence: "I.C.U. Protocol (Cadence)", cad_ecc: "Eccentric", cad_iso: "Isometric", cad_con: "Concentric",
-                lbl_rpe: "Perceived Exertion (RPE)", btn_compute: "Compute Tissue Tension", lbl_rest: "Recovery Phase",
+                lbl_target: "Anatomical Target", mus_quad: "Lower Body: Quadriceps", mus_ham: "Lower Body: Hamstrings / Glutes", mus_chest: "Upper Body: Pectoralis", mus_back: "Upper Body: Lats / Back", mus_shoul: "Articular: Deltoids / Shoulders", mus_bic: "Arms: Biceps", mus_tri: "Arms: Triceps", mus_core: "Midsection: Core",
+                lbl_sets: "Sets", lbl_reps: "Repetitions", lbl_kg: "Load (Kg)", 
+                lbl_cadence: "I.C.U. Protocol", desc_icu: "Biomechanical movement control", desc_tut: "Time Under Muscle Tension", cad_ecc: "Eccentric", cad_iso: "Isometric", cad_con: "Concentric",
+                lbl_rpe: "Perceived Exertion (RPE)", desc_rpe: "Subjective fatigue scale", btn_compute: "Compute Tissue Tension", lbl_rest: "Recovery Phase",
                 map_tissue: "Tissue Mapping", map_live: "Live Telemetry", rx_met: "Post-Session Metabolic Prescription", rx_h2o: "Hydration Replenishment", rx_carb: "Glycogen Load",
-                diag_panel: "Clinical Diagnostic Panel", c_vol: "Accumulated Structural Tonnage", c_snc: "Central Nervous System Status", c_history: "Execution Log",
-                // Mensajes AI
+                diag_panel: "Clinical Diagnostic Panel", btn_wpp: "Send Report", btn_pdf: "Download PDF", 
+                c_vol: "Accumulated Structural Tonnage", desc_vol: "Total load displaced in cycle", c_snc: "Central Nervous System Status", desc_snc: "Central system fatigue level", c_history: "Execution Log",
                 ai_opt: "Systemic parameters at 100%. Protocol authorized for maximum structural tension without limitation.",
                 ai_fat: "Neurological fatigue detected. Decrease absolute load by 20% to allow tissue regeneration.",
                 ai_warn: "Restriction active in [X]. Redirecting vectors to avoid axial load on the affected joint.",
@@ -305,18 +313,18 @@
             },
             es: {
                 id_protocol: "PROTOCOLO DE IDENTIDAD", lbl_name: "Nombre del Sujeto", ph_name: "ID Cliente", lbl_sex: "Sexo Biológico", opt_m: "Masculino", opt_f: "Femenino", lbl_age: "Edad Cronológica",
-                bio_protocol: "PARÁMETROS BIOMÉTRICOS", lbl_height: "Estatura (cm)", lbl_weight: "Masa (Kg)", lbl_bmi: "Índice de Masa Corporal (IMC)",
-                lbl_goal: "Objetivo Clínico", obj_fat: "Oxidación de Tejido Adiposo", obj_hyp: "Hipertrofia (Ganancia Magra)", obj_rec: "Recomposición Metabólica", obj_ton: "Tonicidad y Acondicionamiento",
+                bio_protocol: "PARÁMETROS BIOMÉTRICOS", lbl_height: "Estatura (cm)", lbl_weight: "Masa (Kg)", lbl_bmi: "Índice de Masa Corporal (IMC)", desc_bmi: "Relación peso/estatura",
                 path_protocol: "HISTORIAL PATOLÓGICO", path_sub: "Prevención de estrés articular cruzado.", lbl_path: "Restricciones Estructurales",
-                path_none: "Integridad Estructural Óptima", path_knee: "Patología en Complejo Patelar", path_back: "Compresión Lumbar / Sacro", path_shoul: "Déficit en Manguito Rotador",
-                btn_continue: "Inicializar Biometría", btn_finish: "Desplegar Interfaz Maestra", nav_coach: "Modo Diagnóstico",
+                path_none: "Integridad Estructural Óptima", path_knee: "Patología en Complejo Patelar / Rodilla", path_back: "Compresión Lumbar / Sacro", path_shoul: "Déficit en Manguito Rotador / Hombro",
+                btn_continue: "Inicializar Biometría", btn_finish: "Desplegar Interfaz Maestra", nav_coach: "Modo Diagnóstico", nav_user: "Modo Ejecución",
                 ai_directive: "Directriz Ontológica", ai_load: "Calibrando telemetría...", mod_exec: "Módulo de Ejecución", btn_cam: "Análisis Video",
-                lbl_target: "Target Anatómico", mus_quad: "Tren Inferior: Cuádriceps", mus_ham: "Tren Inferior: Isquiosurales y Glúteo", mus_chest: "Tren Superior: Pectoral Mayor/Menor", mus_back: "Tren Superior: Dorsal Ancho / Romboides", mus_shoul: "Complejo Articular: Deltoides", mus_bic: "Brazos: Bíceps Braquial", mus_tri: "Brazos: Tríceps Braquial", mus_core: "Zona Media: Core / Recto Abdominal",
-                lbl_sets: "Series", lbl_reps: "Repeticiones", lbl_kg: "Carga (Kg)", lbl_cadence: "Protocolo I.C.U. (Cadencia)", cad_ecc: "Excéntrica", cad_iso: "Isométrica", cad_con: "Concéntrica",
-                lbl_rpe: "Percepción de Esfuerzo (RPE)", btn_compute: "Computar Tensión Tisular", lbl_rest: "Fase de Recuperación",
+                lbl_target: "Target Anatómico", mus_quad: "Tren Inferior: Cuádriceps", mus_ham: "Tren Inferior: Isquiosurales y Glúteo", mus_chest: "Tren Superior: Pectoral", mus_back: "Tren Superior: Dorsal / Espalda", mus_shoul: "Articular: Deltoides / Hombros", mus_bic: "Brazos: Bíceps", mus_tri: "Brazos: Tríceps", mus_core: "Zona Media: Core",
+                lbl_sets: "Series", lbl_reps: "Repeticiones", lbl_kg: "Carga (Kg)", 
+                lbl_cadence: "Protocolo I.C.U.", desc_icu: "Control biomecánico del movimiento", desc_tut: "Tiempo Bajo Tensión Muscular", cad_ecc: "Excéntrica", cad_iso: "Isométrica", cad_con: "Concéntrica",
+                lbl_rpe: "Percepción de Esfuerzo (RPE)", desc_rpe: "Escala de fatiga subjetiva", btn_compute: "Computar Tensión Tisular", lbl_rest: "Fase de Recuperación",
                 map_tissue: "Mapeo Tisular", map_live: "Telemetría en Vivo", rx_met: "Prescripción Metabólica Post-Sesión", rx_h2o: "Reposición Hídrica", rx_carb: "Carga Glucogénica",
-                diag_panel: "Panel de Diagnóstico Clínico", c_vol: "Tonelaje Estructural Acumulado", c_snc: "Estado del Sistema Nervioso Central", c_history: "Registro de Ejecución",
-                // Mensajes AI
+                diag_panel: "Panel de Diagnóstico Clínico", btn_wpp: "Enviar Reporte", btn_pdf: "Descargar PDF", 
+                c_vol: "Tonelaje Estructural Acumulado", desc_vol: "Carga total desplazada en el ciclo", c_snc: "Estado del Sistema Nervioso (SNC)", desc_snc: "Nivel de fatiga del sistema central", c_history: "Registro de Ejecución",
                 ai_opt: "Parámetros sistémicos al 100%. Protocolo autorizado para máxima tensión estructural sin limitación.",
                 ai_fat: "Fatiga neurológica detectada. Disminuir carga absoluta en un 20% para permitir regeneración tisular.",
                 ai_warn: "Restricción activa en [X]. Redirigiendo vectores para evitar carga axial sobre la articulación afectada.",
@@ -327,19 +335,24 @@
         let currLang = 'es';
         function setLang(l) {
             currLang = l;
-            document.getElementById('btnEnOb').classList.toggle('active', l === 'en');
-            document.getElementById('btnEsOb').classList.toggle('active', l === 'es');
-            document.getElementById('btnEnMain').classList.toggle('active', l === 'en');
-            document.getElementById('btnEsMain').classList.toggle('active', l === 'es');
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('btn' + (l==='en'?'En':'Es') + 'Global').classList.add('active');
             
             document.querySelectorAll('[data-i18n]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n')]) el.innerHTML = i18n[l][el.getAttribute('data-i18n')]; });
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { if(i18n[l][el.getAttribute('data-i18n-placeholder')]) el.placeholder = i18n[l][el.getAttribute('data-i18n-placeholder')]; });
             document.getElementById('htmlTag').lang = l;
+            
+            // Update Toggle Button Text based on state
+            if(document.getElementById('vistaMacro').classList.contains('activa')) {
+                document.getElementById('btnVista').innerText = i18n[l].nav_user;
+            } else {
+                document.getElementById('btnVista').innerText = i18n[l].nav_coach;
+            }
+
             if(db && db.nombre) renderAI(); 
         }
 
-        // --- CYBER-ANATOMÍA SVGs ---
-        // Vectores geométricos estilizados para representación de escáner.
+        // --- CYBER-ANATOMÍA SVGs (VISIBILIDAD MAXIMIZADA) ---
         const pathMale = `
             <g class="avatar-mesh">
                 <polygon points="85,30 115,30 120,60 100,75 80,60"/>
@@ -372,22 +385,19 @@
             </g>
         `;
 
-        let db = JSON.parse(localStorage.getItem('vanguardia_apex')) || null;
+        let db = JSON.parse(localStorage.getItem('vanguardia_apex_v2')) || null;
 
         document.addEventListener("DOMContentLoaded", () => {
             setLang('es');
-            if (!db) { document.getElementById('clinicalOnboarding').style.display = 'flex'; } 
-            else { initApp(); }
+            if (!db) { document.getElementById('clinicalOnboarding').style.display = 'flex'; document.getElementById('btnEnGlobal').parentElement.style.display = 'flex'; } 
+            else { document.getElementById('btnEnGlobal').parentElement.style.display = 'none'; initApp(); }
         });
 
         // --- WIZARD Y CÁLCULOS ---
         function calcularIMCOnboarding() {
             let h = parseFloat(document.getElementById('obHeight').value) / 100;
             let w = parseFloat(document.getElementById('obWeight').value);
-            if(h > 0 && w > 0) {
-                let imc = (w / (h * h)).toFixed(1);
-                document.getElementById('obIMC').innerText = imc;
-            }
+            if(h > 0 && w > 0) { document.getElementById('obIMC').innerText = (w / (h * h)).toFixed(1); }
         }
 
         function nextStep(s) {
@@ -404,15 +414,12 @@
 
             db = {
                 nombre: document.getElementById('obName').value || 'Subject-01',
-                sexo: document.getElementById('obSex').value,
-                edad: document.getElementById('obAge').value || 25,
-                peso: w, altura: h*100, imc: imc,
-                meta: document.getElementById('obGoal').value,
-                dolor: document.getElementById('obPain').value,
-                historial: []
+                sexo: document.getElementById('obSex').value, edad: document.getElementById('obAge').value || 25,
+                peso: w, altura: h*100, imc: imc, dolor: document.getElementById('obPain').value, historial: []
             };
-            localStorage.setItem('vanguardia_apex', JSON.stringify(db));
+            localStorage.setItem('vanguardia_apex_v2', JSON.stringify(db));
             document.getElementById('clinicalOnboarding').style.display = 'none';
+            document.getElementById('btnEnGlobal').parentElement.style.display = 'none'; // Hide floating lang once in app
             initApp();
         }
 
@@ -421,7 +428,6 @@
             document.getElementById('mainContent').style.display = 'block';
             document.getElementById('userName').innerText = db.nombre;
             document.getElementById('userIMC').innerText = db.imc;
-            document.getElementById('bioPeso').value = db.peso;
             
             document.getElementById('avatarSVG').innerHTML = db.sexo === 'F' ? pathFemale : pathMale;
             renderAI(); actualizarMapaDeCalor();
@@ -429,8 +435,7 @@
 
         function renderAI() {
             let msg = i18n[currLang].ai_opt;
-            let fatigaTotal = 0;
-            const ahora = new Date().getTime();
+            let fatigaTotal = 0; const ahora = new Date().getTime();
             db.historial.forEach(s => { if (ahora - s.ts < 48 * 3600 * 1000) fatigaTotal += (s.rpe * s.series); });
 
             if(fatigaTotal > 50) msg = i18n[currLang].ai_fat;
@@ -448,8 +453,7 @@
 
         function actualizarRPE(v) {
             document.getElementById('rpeVal').innerText = `${parseFloat(v).toFixed(1)} / 10.0`; 
-            const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c';
-            document.getElementById('rpeVal').style.color = c;
+            const c = v < 5 ? '#00ff88' : v < 8 ? '#facc15' : '#ff003c'; document.getElementById('rpeVal').style.color = c;
         }
 
         // --- CÁMARA ---
@@ -460,7 +464,7 @@
                 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
                         streamActivo = stream; video.srcObject = stream; vBox.classList.remove('hidden');
-                    }).catch(err => alert("Permiso de cámara denegado / Camera permission denied."));
+                    }).catch(err => alert("Permiso de cámara denegado."));
                 }
             } else { if(streamActivo) { streamActivo.getTracks().forEach(track => track.stop()); } video.srcObject = null; vBox.classList.add('hidden'); }
         }
@@ -471,10 +475,10 @@
             h.forEach(s => {
                 if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
                     let imp = parseFloat(s.rpe) * parseInt(s.series);
-                    if(s.dominio.includes("Pectoral") || s.dominio.includes("Deltoides")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
-                    if(s.dominio.includes("Dorsal")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
-                    if(s.dominio.includes("Cuádriceps") || s.dominio.includes("Isquios")) { fatiga.piernas += imp; }
-                    if(s.dominio.includes("Bíceps") || s.dominio.includes("Tríceps")) { fatiga.brazos += imp; }
+                    if(s.ej.includes("Pectoral") || s.ej.includes("Deltoides")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
+                    if(s.ej.includes("Dorsal")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
+                    if(s.ej.includes("Cuádriceps") || s.ej.includes("Isquios")) { fatiga.piernas += imp; }
+                    if(s.ej.includes("Bíceps") || s.ej.includes("Tríceps") || s.ej.includes("Brazos")) { fatiga.brazos += imp; }
                 }
             });
             
@@ -492,13 +496,8 @@
             const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const rpe = parseFloat(document.getElementById('rpe').value); const dom = document.getElementById('dominioSelector').value;
             const ts = new Date().getTime(); 
 
-            // Actualizar peso si cambió
-            db.peso = parseFloat(document.getElementById('bioPeso').value);
-            db.imc = (db.peso / ((db.altura/100) * (db.altura/100))).toFixed(1);
-            document.getElementById('userIMC').innerText = db.imc;
-
             db.historial.push({ ts: ts, fecha: new Date().toLocaleDateString(), ej: dom, carga, reps, series, rpe });
-            localStorage.setItem('vanguardia_apex', JSON.stringify(db));
+            localStorage.setItem('vanguardia_apex_v2', JSON.stringify(db));
 
             // Metabólico
             const ton = carga * reps * series;
@@ -513,20 +512,32 @@
             restInt = setInterval(() => { t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; if(t <= 0) { clearInterval(restInt); document.getElementById('restTimerBox').classList.add('hidden'); document.getElementById('btnSubmit').classList.remove('hidden'); } }, 1000);
         };
 
-        // --- COACH MODE ---
+        // --- COACH MODE / EXPORT ---
         function toggleVista() { 
             document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa'); 
             if(document.getElementById('vistaMacro').classList.contains('activa')) { 
-                document.getElementById('btnVista').innerText = currLang === 'en' ? "Execution Mode" : "Modo Ejecución"; 
+                document.getElementById('btnVista').innerText = i18n[currLang].nav_user; 
                 renderCoachMode(); 
-            } else { document.getElementById('btnVista').innerText = currLang === 'en' ? "Diagnostic Mode" : "Modo Diagnóstico"; } 
+            } else { document.getElementById('btnVista').innerText = i18n[currLang].nav_coach; } 
         }
 
         function renderCoachMode() {
             let vol = 0; db.historial.forEach(s => vol += (s.carga * s.reps * s.series));
             document.getElementById('statsVol').innerHTML = `${vol.toLocaleString()} <span class="text-sm text-gray-600">kg</span>`;
             const list = document.getElementById('listaMacro'); list.innerHTML = "";
-            [...db.historial].reverse().slice(0, 20).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-2"><span class="text-cyan-400">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps)</span></div>`);
+            [...db.historial].reverse().slice(0, 30).forEach(s => list.innerHTML += `<div class="border-b border-white/5 pb-2"><span class="text-cyan-400">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps)</span></div>`);
+        }
+
+        function enviarWhatsApp() {
+            let vol = 0; db.historial.forEach(s => vol += (s.carga * s.reps * s.series));
+            const msg = `*VANGUARDIA ANALYTICS*%0A*ID Cliente:* ${db.nombre}%0A*IMC:* ${db.imc}%0A*Tonelaje Acumulado:* ${vol}kg%0A*Estado SNC:* ${document.getElementById('statsSNC').innerText}%0A_Reporte generado automáticamente por Vanguardia Elite._`;
+            window.open(`https://wa.me/?text=${msg}`, '_blank');
+        }
+
+        function generarReportePDF() { 
+            const element = document.getElementById('pdfExportArea');
+            const opt = { margin: 1, filename: `Vanguardia_Report_${db.nombre}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' } };
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
