@@ -3,91 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vanguardia | Centro de Gestión Elite</title>
+    <title>Vanguardia | Biomecánica de Élite</title>
     <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#050b14">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&family=Cinzel:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
     <style>
-        :root { 
-            --cyan-neon: #00f0ff; 
-            --purple-neon: #b026ff; 
-            --green-neon: #39ff14; 
-            --red-neon: #ff003c;
-            --bg-dark: #050b14;
-        }
+        :root { --cyan-neon: #00f0ff; --purple-neon: #b026ff; --green-neon: #39ff14; --red-neon: #ff003c; --bg-dark: #050b14; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #e2e8f0; overflow-x: hidden; margin: 0; }
-        
-        .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 50% 120%, rgba(176, 38, 255, 0.1) 0%, transparent 50%); opacity: 1; pointer-events: none; z-index: -1; }
-        .glass-card { background: rgba(5, 11, 20, 0.6); border: 1px solid rgba(0, 240, 255, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 240, 255, 0.05); backdrop-filter: blur(15px); }
+        .ambient-bg { position: fixed; inset: 0; background: radial-gradient(circle at 50% -20%, rgba(0, 240, 255, 0.1) 0%, transparent 60%), radial-gradient(circle at 50% 120%, rgba(176, 38, 255, 0.1) 0%, transparent 50%); opacity: 1; pointer-events: none; z-index: -1; }
+        .glass-card { background: rgba(5, 11, 20, 0.7); border: 1px solid rgba(0, 240, 255, 0.15); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 240, 255, 0.05); backdrop-filter: blur(15px); }
         
         #modalPreVuelo, #modalPerfiles { background: rgba(5, 11, 20, 0.95); backdrop-filter: blur(20px); display: none; }
-        .vista { display: none; animation: fadeIn 0.4s ease forwards; }
-        .vista.activa { display: block; }
+        .vista { display: none; animation: fadeIn 0.4s ease forwards; } .vista.activa { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        .supp-check { appearance: none; width: 18px; height: 18px; border: 1px solid var(--cyan-neon); border-radius: 3px; background: rgba(0, 240, 255, 0.1); cursor: pointer; transition: all 0.3s; }
-        .supp-check:checked { background: var(--green-neon); border-color: var(--green-neon); box-shadow: 0 0 15px var(--green-neon); }
+        .supp-check { appearance: none; width: 16px; height: 16px; border: 1px solid var(--cyan-neon); border-radius: 3px; background: rgba(0, 240, 255, 0.1); cursor: pointer; transition: all 0.3s; }
+        .supp-check:checked { background: var(--green-neon); border-color: var(--green-neon); box-shadow: 0 0 10px var(--green-neon); }
 
-        #authGateway { position: fixed; inset: 0; background: radial-gradient(circle at center, #0a1128 0%, #000000 100%); z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        /* PASARELA BIOMÉTRICA */
+        #authGateway { position: fixed; inset: 0; background: radial-gradient(circle at center, #0a1128 0%, #000000 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .auth-door-open { animation: doorOpen 0.8s cubic-bezier(0.7, 0, 0.3, 1) forwards; }
         @keyframes doorOpen { 0% { transform: scale(1); opacity: 1; filter: brightness(1); } 100% { transform: scale(1.5); opacity: 0; filter: brightness(2); visibility: hidden; } }
-
-        .fingerprint-btn { width: 120px; height: 140px; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 20px; transition: all 0.3s; border: 1px solid rgba(0, 240, 255, 0.1); background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1); }
-        .fingerprint-icon { width: 90px; height: 110px; fill: rgba(0, 240, 255, 0.3); transition: fill 0.3s, filter 0.3s; }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-neon), 0 0 40px var(--cyan-neon); opacity: 0; border-radius: 5px; }
-        
-        .scanning .fingerprint-btn { border-color: var(--cyan-neon); box-shadow: inset 0 0 40px rgba(0, 240, 255, 0.3), 0 0 30px rgba(0, 240, 255, 0.2); }
+        .fingerprint-btn { width: 100px; height: 120px; position: relative; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 20px; transition: all 0.3s; border: 1px solid rgba(0, 240, 255, 0.2); background: rgba(0, 240, 255, 0.05); }
+        .fingerprint-icon { width: 80px; height: 100px; fill: rgba(0, 240, 255, 0.4); transition: fill 0.3s, filter 0.3s; }
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: var(--cyan-neon); box-shadow: 0 0 20px var(--cyan-neon); opacity: 0; }
         .scanning .fingerprint-icon { fill: var(--cyan-neon); filter: drop-shadow(0 0 10px var(--cyan-neon)); }
         .scanning .scan-line { opacity: 1; animation: scanAnim 1.2s ease-in-out infinite alternate; }
         @keyframes scanAnim { 0% { top: 5%; } 100% { top: 95%; } }
-
-        .auth-pin { letter-spacing: 0.6em; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 1.8rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--cyan-neon); outline: none; transition: all 0.3s; padding: 10px; text-shadow: 0 0 5px var(--cyan-neon); }
-        .btn-tech { background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.2)); border: 1px solid var(--cyan-neon); color: var(--cyan-neon); box-shadow: 0 0 10px rgba(0, 240, 255, 0.1); transition: all 0.3s; }
-        .btn-tech:hover { background: var(--cyan-neon); color: #000; box-shadow: 0 0 20px var(--cyan-neon); }
-        .btn-tech-purple { background: linear-gradient(45deg, rgba(176, 38, 255, 0.1), rgba(176, 38, 255, 0.2)); border: 1px solid var(--purple-neon); color: #e9d5ff; box-shadow: 0 0 10px rgba(176, 38, 255, 0.1); }
-        .btn-tech-purple:hover { background: var(--purple-neon); color: #fff; box-shadow: 0 0 20px var(--purple-neon); }
+        .auth-pin { letter-spacing: 0.6em; text-align: center; font-family: 'Share Tech Mono', monospace; font-size: 1.5rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(0, 240, 255, 0.3); border-radius: 8px; color: var(--cyan-neon); outline: none; padding: 10px; }
+        
+        .btn-tech { background: linear-gradient(45deg, rgba(0, 240, 255, 0.1), rgba(0, 240, 255, 0.2)); border: 1px solid var(--cyan-neon); color: var(--cyan-neon); transition: all 0.3s; }
+        .btn-tech:hover { background: var(--cyan-neon); color: #000; box-shadow: 0 0 15px var(--cyan-neon); }
         .text-tech { font-family: 'Share Tech Mono', monospace; }
+
+        /* AVATAR BIOMECÁNICO (MAPA DE CALOR) */
+        .avatar-path { fill: rgba(0,240,255,0.02); stroke: rgba(0,240,255,0.3); stroke-width: 2; }
+        .sensor { transition: fill 0.8s ease; fill: rgba(255,255,255,0.1); }
+        .sensor.fresco { fill: var(--cyan-neon); filter: drop-shadow(0 0 8px var(--cyan-neon)); opacity: 0.8; }
+        .sensor.recuperando { fill: var(--purple-neon); filter: drop-shadow(0 0 12px var(--purple-neon)); opacity: 0.9; }
+        .sensor.fatigado { fill: var(--red-neon); filter: drop-shadow(0 0 15px var(--red-neon)); animation: pulse 2s infinite; opacity: 1; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body class="min-h-screen pb-10">
 
     <button id="btnInstallPWA" class="hidden fixed top-4 right-4 btn-tech text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-full z-[10001]">Instalar App</button>
 
-    <div id="onboardingScreen" class="fixed inset-0 bg-[#050b14] z-[10000] flex flex-col items-center justify-center p-8 transition-opacity duration-800">
-        <h1 class="text-4xl font-black text-white tracking-[0.3em] uppercase mb-4 text-center" style="font-family: 'Cinzel', serif; text-shadow: 0 0 20px rgba(255,255,255,0.5);">Vanguardia</h1>
-        <p class="text-xs text-[#00f0ff] uppercase tracking-[0.2em] mb-12 text-center text-tech drop-shadow-[0_0_5px_#00f0ff]">Ingeniería Biomecánica & Biohacking</p>
-        
-        <div class="space-y-6 w-full max-w-sm mb-12">
-            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--cyan-neon)]">
-                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">1. Hipertrofia Clínica</h3>
-                <p class="text-[9px] text-gray-400 leading-relaxed">Dosificación exacta de tensión mecánica para crecimiento celular.</p>
-            </div>
-            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--purple-neon)]">
-                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">2. Neuro-Recuperación</h3>
-                <p class="text-[9px] text-gray-400 leading-relaxed">Telemetría del SNC para evitar sobreentrenamiento.</p>
-            </div>
-            <div class="glass-card p-5 rounded-xl border-l-4 border-l-[var(--green-neon)]">
-                <h3 class="text-[10px] text-white uppercase font-bold tracking-widest mb-1">3. Optimización Química</h3>
-                <p class="text-[9px] text-gray-400 leading-relaxed">Prescripciones hídricas y de nutrientes para regeneración.</p>
-            </div>
-        </div>
-        <button onclick="cerrarOnboarding()" class="px-10 py-4 btn-tech font-black uppercase tracking-widest text-[10px] rounded-full">Acceder al Servidor</button>
-    </div>
-
     <div id="authGateway">
-        <h1 class="text-3xl font-black text-white tracking-[0.3em] uppercase mb-2" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
+        <h1 class="text-3xl font-black text-white tracking-[0.3em] uppercase mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]" style="font-family: 'Cinzel', serif;">Vanguardia</h1>
         <p class="text-[10px] text-[var(--cyan-neon)] uppercase tracking-[0.3em] mb-12 text-tech">Protocolo de Seguridad</p>
-        
         <div class="mb-10 w-full px-12 max-w-xs">
             <input type="password" id="pinAcceso" maxlength="4" placeholder="••••" class="auth-pin w-full">
-            <p class="text-[8px] text-center text-gray-500 uppercase mt-3 tracking-widest">Ingrese Código de Autenticación</p>
+            <p class="text-[8px] text-center text-gray-500 uppercase mt-3 tracking-widest">Código de Acceso</p>
         </div>
-
         <div id="biometricSensor" class="fingerprint-btn" onmousedown="iniciarEscaneo()" onmouseup="detenerEscaneo()" onmouseleave="detenerEscaneo()" ontouchstart="iniciarEscaneo()" ontouchend="detenerEscaneo()">
             <svg viewBox="0 0 24 24" class="fingerprint-icon">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4h-2zm0 6h2v2h-2z" fill="inherit"/>
@@ -95,11 +67,74 @@
             </svg>
             <div class="scan-line"></div>
         </div>
-        <p class="text-[9px] text-[var(--cyan-neon)] uppercase tracking-widest mt-6 animate-pulse text-tech" id="textoSensor">Esperando Huella Digital...</p>
+        <p class="text-[9px] text-[var(--cyan-neon)] uppercase tracking-widest mt-6 animate-pulse text-tech" id="textoSensor">Esperando Huella...</p>
     </div>
 
     <div id="mainContent" style="display: none;">
         <div id="ambient" class="ambient-bg"></div>
+
+        <div id="modalPerfiles" class="fixed inset-0 z-[300] items-center justify-center p-6 flex">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl overflow-y-auto max-h-[90vh]">
+                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--cyan-neon)] mb-6 text-center text-tech">NUEVO CONTRATO</h2>
+                <div class="space-y-4">
+                    <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black/50 border border-[var(--cyan-neon)]/30 rounded p-3 text-[var(--cyan-neon)] text-xs outline-none text-center"></select>
+                    <div class="pt-4 border-t border-[var(--cyan-neon)]/20 space-y-3">
+                        <input type="text" id="nuevoNombre" placeholder="Nombre Completo" class="w-full bg-black/50 border border-white/20 rounded p-3 text-center text-white text-xs outline-none focus:border-[var(--cyan-neon)]">
+                        <select id="nuevoNivel" class="w-full bg-black/50 border border-white/20 rounded p-2 text-xs text-gray-300 outline-none">
+                            <option value="Principiante">Nivel: Principiante (Acondicionamiento)</option>
+                            <option value="Intermedio">Nivel: Intermedio (Estructura)</option>
+                            <option value="Avanzado">Nivel: Avanzado (Fallo Muscular)</option>
+                        </select>
+                        <select id="nuevaFase" class="w-full bg-black/50 border border-white/20 rounded p-2 text-xs text-gray-300 outline-none">
+                            <option value="Hipertrofia Clínica">Fase: Estética e Hipertrofia</option>
+                            <option value="Fuerza Máxima">Fase: Fuerza Máxima y Potencia</option>
+                            <option value="Biohacking">Fase: Recomposición Metabólica</option>
+                        </select>
+                        <button onclick="crearPerfil()" class="w-full py-3 btn-tech font-bold uppercase tracking-widest text-[10px] rounded">Registrar Sistema</button>
+                    </div>
+                    <button onclick="cerrarModalPerfiles()" class="w-full py-4 mt-2 bg-transparent border border-gray-600 text-gray-400 font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-white/5">Ingresar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
+            <div class="glass-card w-full max-w-sm p-8 rounded-3xl overflow-y-auto max-h-[90vh]">
+                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--purple-neon)] mb-6 text-center text-tech">DIAGNÓSTICO INICIAL</h2>
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[8px] font-bold uppercase text-[var(--cyan-neon)] block mb-1 text-center">Sueño (Hrs)</label>
+                            <input type="number" id="inputSueño" placeholder="7" class="w-full bg-black/50 border border-[var(--cyan-neon)]/30 rounded p-2 text-center text-white text-lg outline-none font-black text-tech">
+                        </div>
+                        <div>
+                            <label class="text-[8px] font-bold uppercase text-[var(--cyan-neon)] block mb-1 text-center">Estrés (1-10)</label>
+                            <input type="number" id="inputEstres" value="3" class="w-full bg-black/50 border border-[var(--cyan-neon)]/30 rounded p-2 text-center text-white text-lg outline-none font-black text-tech">
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-[var(--cyan-neon)]/20">
+                        <label class="text-[9px] font-bold uppercase text-[var(--red-neon)] block mb-2 text-center tracking-widest">Escáner de Dolor Articular</label>
+                        <select id="inputDolor" class="w-full bg-black/50 border border-[var(--red-neon)]/50 text-[var(--red-neon)] rounded p-3 text-center text-xs outline-none text-tech">
+                            <option value="Ninguno">SISTEMA ÓPTIMO (Sin dolor)</option>
+                            <option value="Hombros">Alerta: Manguito Rotador / Hombros</option>
+                            <option value="Lumbar">Alerta: Zona Lumbar / Sacro</option>
+                            <option value="Rodillas">Alerta: Tendón Patelar / Rodillas</option>
+                        </select>
+                    </div>
+
+                    <div class="pt-4 border-t border-[var(--cyan-neon)]/20">
+                        <label class="text-[9px] font-bold uppercase text-[var(--green-neon)] block mb-3 text-center tracking-widest">Química Base</label>
+                        <div class="grid grid-cols-2 gap-3 text-[9px] uppercase tracking-tighter text-gray-300">
+                            <label class="flex items-center gap-2"><input type="checkbox" id="supp-creatina" class="supp-check"> Creatina</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="supp-omega" class="supp-check"> Omega 3</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="supp-magnesio" class="supp-check"> Magnesio</label>
+                            <label class="flex items-center gap-2"><input type="checkbox" id="supp-proteina" class="supp-check"> Proteína</label>
+                        </div>
+                    </div>
+                    <button onclick="finalizarCheckIn()" class="w-full py-4 bg-[var(--purple-neon)] text-white font-black uppercase tracking-widest text-[10px] rounded-xl hover:bg-purple-700 shadow-[0_0_15px_rgba(176,38,255,0.4)]">Computar Biometría</button>
+                </div>
+            </div>
+        </div>
 
         <nav class="p-4 flex justify-between items-center border-b border-[var(--cyan-neon)]/20 relative z-10 bg-black/80 backdrop-blur-xl sticky top-0">
             <div class="text-lg font-black tracking-[0.2em] uppercase flex items-center gap-3" style="font-family: 'Cinzel', serif;">
@@ -108,198 +143,321 @@
                     <span id="nombreAtletaNav">Cliente</span>
                 </button>
             </div>
-            <div id="badgeSesiones" class="text-[9px] px-3 py-1 rounded border border-[var(--green-neon)]/50 text-[var(--green-neon)] bg-[var(--green-neon)]/10 font-bold uppercase tracking-widest">
-                Sesiones: 0
-            </div>
-            <button onclick="toggleVista()" id="btnVista" class="text-[9px] btn-tech font-bold uppercase px-4 py-2 rounded tracking-widest">Expediente</button>
+            <div id="badgeNivel" class="text-[8px] px-3 py-1 rounded bg-gray-800 border border-gray-600 text-gray-300 font-bold uppercase tracking-widest">NIVEL</div>
+            <button onclick="toggleVista()" id="btnVista" class="text-[9px] btn-tech font-bold uppercase px-4 py-2 rounded tracking-widest">Panel Médico</button>
         </nav>
 
         <main id="reportContent" class="max-w-7xl mx-auto p-4 space-y-6">
+            
             <div id="vistaMicro" class="vista activa space-y-6">
+                
+                <div class="glass-card p-4 rounded-xl border-l-4 border-l-[var(--cyan-neon)] flex justify-between items-center bg-[#0a1128]/40" id="panelDirectriz">
+                    <div class="w-full">
+                        <h2 class="text-[10px] font-bold tracking-[0.2em] text-[var(--cyan-neon)] uppercase text-tech flex items-center gap-2">Protocolo del Día <span id="faseActualBadge" class="text-[7px] border border-[var(--cyan-neon)] px-1 rounded">Fase</span></h2>
+                        <div id="textoDirectriz" class="text-[10px] text-gray-300 mt-2 leading-relaxed tracking-wide">Analizando...</div>
+                    </div>
+                </div>
+
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
-                    <div class="lg:col-span-6 glass-card p-6 rounded-2xl relative">
-                        <form id="formVanguardia" class="space-y-5">
-                            <div class="border border-[var(--cyan-neon)]/20 p-4 rounded-xl bg-[#0a1128]/50">
-                                <label class="text-[9px] font-bold uppercase tracking-widest text-[var(--cyan-neon)] block mb-3 text-tech">Mecánica de Impacto</label>
-                                <select id="dominioSelector" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-white text-xs outline-none focus:border-[var(--cyan-neon)]">
-                                    <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Piernas)</option>
-                                    <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Isquios)</option>
-                                    <option value="Empuje (Pecho, Hombros)">Empuje (Tren Superior)</option>
-                                    <option value="Tracción (Espalda, Bíceps)">Tracción (Tren Superior)</option>
-                                    <option value="Metabólico">Metabólico Sistémico</option>
-                                </select>
-                                <input type="text" id="ejercicioNombre" required placeholder="Nombre del movimiento..." class="w-full bg-transparent border-b border-[var(--cyan-neon)]/30 p-3 text-white text-sm mt-3 outline-none">
-                            </div>
+                    
+                    <div class="lg:col-span-6 space-y-6">
+                        <div class="glass-card p-6 rounded-2xl">
+                            <form id="formVanguardia" class="space-y-5">
+                                <div class="grid grid-cols-2 gap-4 mb-2 pb-4 border-b border-white/10">
+                                    <div><label class="text-[8px] text-gray-500 uppercase tracking-widest">Peso (Kg)</label><input type="number" id="bioPeso" class="w-full bg-transparent border-b border-white/20 p-2 text-white font-bold text-center text-sm outline-none"></div>
+                                    <div class="flex items-center justify-center">
+                                        <button type="button" onclick="toggleCamera()" class="btn-tech-purple px-4 py-2 text-[9px] uppercase font-bold tracking-widest rounded-full w-full flex items-center justify-center gap-2">📷 Activar Análisis Video</button>
+                                    </div>
+                                </div>
 
-                            <div class="grid grid-cols-3 gap-4">
-                                <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] text-gray-400 uppercase text-center block mb-1">Series</label><input type="number" id="series" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black"></div>
-                                <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] text-gray-400 uppercase text-center block mb-1">Reps</label><input type="number" id="reps" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black"></div>
-                                <div class="bg-[var(--cyan-neon)]/10 p-2 rounded border border-[var(--cyan-neon)]/30"><label class="text-[8px] text-[var(--cyan-neon)] uppercase text-center block mb-1">Carga(Kg)</label><input type="number" id="carga" required class="w-full bg-transparent text-center text-[var(--cyan-neon)] font-black outline-none text-2xl drop-shadow-[0_0_5px_#00f0ff]"></div>
-                            </div>
+                                <div class="border border-[var(--cyan-neon)]/20 p-4 rounded-xl bg-[#0a1128]/50">
+                                    <label class="text-[9px] font-bold uppercase tracking-widest text-[var(--cyan-neon)] block mb-3 text-tech">Selector Biomecánico</label>
+                                    <select id="dominioSelector" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-white text-xs outline-none">
+                                        <option value="Piernas (Sentadillas, Prensa)">Cadena Anterior (Cuádriceps)</option>
+                                        <option value="Piernas Traseras (Peso Muerto)">Cadena Posterior (Isquios/Glúteo)</option>
+                                        <option value="Empuje (Pecho, Hombros)">Empuje Horizontal/Vertical</option>
+                                        <option value="Tracción (Espalda, Bíceps)">Tracción Horizontal/Vertical</option>
+                                        <option value="Metabólico">Estímulo Metabólico / Core</option>
+                                    </select>
+                                    <input type="text" id="ejercicioNombre" required placeholder="Ejercicio específico..." class="w-full bg-transparent border-b border-[var(--cyan-neon)]/30 p-3 text-white text-sm mt-3 outline-none">
+                                </div>
 
-                            <div class="pt-5 border-t border-white/10">
-                                <label class="text-[9px] font-bold text-gray-400 uppercase flex justify-between tracking-widest text-tech"><span>Nivel de Esfuerzo (RPE)</span><span id="rpeVal" class="text-[#4ade80] font-black">5/10</span></label>
-                                <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none mt-4" oninput="actualizarRPE(this.value)">
-                            </div>
-                            
-                            <div class="relative mt-8">
-                                <button type="submit" id="btnSubmit" class="w-full py-5 btn-tech font-black uppercase tracking-[0.2em] text-[11px] rounded">Registrar Impacto</button>
-                                <div id="restTimerBox" class="hidden w-full py-5 bg-[#0a1128] border border-[var(--cyan-neon)] text-[var(--cyan-neon)] font-black uppercase text-center text-lg rounded">⏳ DESCANSANDO: <span id="restTimerDisplay">0s</span></div>
-                            </div>
-                        </form>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] font-bold text-gray-400 uppercase text-center block mb-1">Series</label><input type="number" id="series" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black text-tech"></div>
+                                    <div class="bg-black/30 p-2 rounded border border-white/10"><label class="text-[8px] font-bold text-gray-400 uppercase text-center block mb-1">Reps</label><input type="number" id="reps" required class="w-full bg-transparent text-center text-white outline-none text-2xl font-black text-tech" oninput="calcularTUT()"></div>
+                                    <div class="bg-[var(--cyan-neon)]/10 p-2 rounded border border-[var(--cyan-neon)]/30 shadow-[inset_0_0_10px_rgba(0,240,255,0.1)]"><label class="text-[8px] font-bold text-[var(--cyan-neon)] uppercase text-center block mb-1">Kilos</label><input type="number" id="carga" required class="w-full bg-transparent text-center text-[var(--cyan-neon)] font-black outline-none text-2xl text-tech drop-shadow-[0_0_5px_#00f0ff]"></div>
+                                </div>
+
+                                <div class="pt-5 border-t border-white/10">
+                                    <div class="flex justify-between items-end mb-3">
+                                        <label class="text-[9px] font-bold text-[var(--purple-neon)] uppercase tracking-widest block text-tech">Protocolo de Cadencia</label>
+                                        <span class="text-[8px] text-gray-400 uppercase tracking-widest">TUT Total: <strong id="tutDisplay" class="text-[var(--purple-neon)] text-sm text-tech">0s</strong></span>
+                                    </div>
+                                    <div class="grid grid-cols-3 gap-3">
+                                        <div><label class="text-[7px] text-gray-500 uppercase text-center block mb-1">Excéntrica</label><input type="number" id="cadExc" value="3" class="w-full bg-black border border-[var(--purple-neon)]/30 rounded p-2 text-center text-white text-sm outline-none text-tech" oninput="calcularTUT()"></div>
+                                        <div><label class="text-[7px] text-gray-500 uppercase text-center block mb-1">Pausa</label><input type="number" id="cadIso" value="0" class="w-full bg-black border border-[var(--purple-neon)]/30 rounded p-2 text-center text-white text-sm outline-none text-tech" oninput="calcularTUT()"></div>
+                                        <div><label class="text-[7px] text-gray-500 uppercase text-center block mb-1">Concéntrica</label><input type="number" id="cadCon" value="1" class="w-full bg-black border border-[var(--purple-neon)]/30 rounded p-2 text-center text-white text-sm outline-none text-tech" oninput="calcularTUT()"></div>
+                                    </div>
+                                    <input type="hidden" id="tut" value="0">
+                                </div>
+
+                                <div class="pt-5 border-t border-white/10">
+                                    <label class="text-[9px] font-bold text-gray-400 uppercase flex justify-between tracking-widest text-tech"><span>Nivel de Esfuerzo (RPE)</span><span id="rpeVal" class="text-[#4ade80] font-black text-sm drop-shadow-[0_0_5px_#4ade80]">5/10</span></label>
+                                    <input type="range" id="rpe" min="1" max="10" value="5" class="w-full h-1 bg-gray-800 rounded-lg appearance-none mt-4" style="accent-color: #4ade80;" oninput="actualizarRPE(this.value)">
+                                </div>
+                                
+                                <div class="relative mt-8">
+                                    <button id="btnSubmit" type="submit" class="w-full py-5 btn-tech font-black uppercase tracking-[0.2em] text-[11px] rounded">Procesar Tensión Mecánica</button>
+                                    <div id="restTimerBox" class="hidden w-full py-5 bg-[#0a1128] border border-[var(--cyan-neon)] text-[var(--cyan-neon)] font-black uppercase tracking-[0.2em] text-center text-lg rounded text-tech shadow-[0_0_15px_rgba(0,240,255,0.3)]"><span class="animate-pulse">⏳</span> RECUPERACIÓN: <span id="restTimerDisplay">0s</span></div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <div class="lg:col-span-6 flex flex-col gap-6">
-                        <div class="glass-card p-6 rounded-2xl h-80 flex flex-col items-center">
-                            <h3 class="text-[9px] text-[var(--cyan-neon)] font-bold uppercase tracking-[0.3em] mb-4 text-tech">Radar Biomecánico</h3>
-                            <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
+                        
+                        <div id="videoContainer" class="hidden glass-card p-4 rounded-2xl flex-col items-center border border-[var(--purple-neon)] shadow-[0_0_20px_rgba(176,38,255,0.2)]">
+                            <div class="text-[9px] text-[var(--purple-neon)] font-bold uppercase mb-2 animate-pulse text-tech">Analizador de Técnica Activo</div>
+                            <video id="cameraFeed" autoplay playsinline muted class="w-full h-48 rounded-xl object-cover bg-black border border-white/10"></video>
                         </div>
-                        <div class="glass-card p-6 rounded-2xl flex-grow border-l-4 border-l-[var(--green-neon)]" id="insightBox">
-                            <h2 class="text-[9px] font-bold text-white uppercase mb-3 border-b border-white/10 pb-2 tracking-widest text-tech">Diagnóstico del Servidor</h2>
-                            <div id="bioInsight" class="text-xs font-bold text-[var(--green-neon)] leading-relaxed">Esperando datos...</div>
+
+                        <div class="glass-card p-4 rounded-2xl flex justify-center items-center h-56 relative overflow-hidden bg-black/40 border border-white/5">
+                            <h3 class="absolute top-2 left-4 text-[8px] text-gray-500 uppercase tracking-widest text-tech">Escáner Tisular</h3>
+                            <svg viewBox="0 0 200 400" class="h-full w-auto opacity-100">
+                                <path class="avatar-path" d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 Z"/>
+                                <path class="avatar-path" d="M70,75 L130,75 L145,150 L55,150 Z"/>
+                                <path class="avatar-path" d="M55,75 L30,170 L20,240 M145,75 L170,170 L180,240"/>
+                                <path class="avatar-path" d="M75,150 L60,280 L55,380 M125,150 L140,280 L145,380"/>
+                                <circle id="sensor-pecho" cx="100" cy="100" r="15" class="sensor fresco"/><circle id="sensor-espalda" cx="100" cy="125" r="20" class="sensor fresco"/><circle id="sensor-brazo1" cx="45" cy="120" r="12" class="sensor fresco"/><circle id="sensor-brazo2" cx="155" cy="120" r="12" class="sensor fresco"/><circle id="sensor-piernas1" cx="68" cy="210" r="18" class="sensor fresco"/><circle id="sensor-piernas2" cx="132" cy="210" r="18" class="sensor fresco"/><circle id="sensor-cadenaPost1" cx="60" cy="280" r="12" class="sensor fresco"/><circle id="sensor-cadenaPost2" cx="140" cy="280" r="12" class="sensor fresco"/>
+                            </svg>
                         </div>
+
+                        <div id="recetaMetabolica" class="glass-card p-5 rounded-2xl border-l-4 border-l-[var(--green-neon)] hidden flex-col justify-center">
+                            <p class="text-[9px] text-[var(--green-neon)] uppercase tracking-widest font-bold border-b border-[var(--green-neon)]/20 pb-2 mb-4 text-tech">Prescripción Bioquímica Post-Sesión</p>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="bg-black/30 p-3 rounded-lg"><p class="text-2xl font-black text-white text-tech" id="metAgua">0<span class="text-xs text-gray-500"> ml</span></p><p class="text-[8px] text-gray-400 uppercase mt-1">Hidratación Intra</p></div>
+                                <div class="bg-black/30 p-3 rounded-lg"><p class="text-2xl font-black text-white text-tech" id="metCarbs">0<span class="text-xs text-gray-500"> g</span></p><p class="text-[8px] text-gray-400 uppercase mt-1">Carbohidratos Post</p></div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
 
             <div id="vistaMacro" class="vista space-y-6">
                 <div class="flex gap-2 border-b border-[var(--cyan-neon)]/30 pb-4 mb-4">
-                    <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-5 py-3 text-[9px] uppercase font-bold btn-tech rounded">Expediente Cliente</button>
-                    <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-5 py-3 text-[9px] uppercase font-bold border border-white/20 text-gray-400 rounded">Gestión Global</button>
+                    <button onclick="switchMacroTab('individual')" id="tabIndiv" class="px-5 py-3 text-[9px] uppercase font-bold tracking-widest btn-tech rounded">Reporte Biomecánico</button>
+                    <button onclick="switchMacroTab('global')" id="tabGlobal" class="px-5 py-3 text-[9px] uppercase font-bold tracking-widest border border-white/20 text-gray-400 rounded hover:bg-white/5">Gestor Global</button>
                 </div>
+
                 <div id="macroIndividual" class="space-y-6">
                     <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-2xl font-black text-white uppercase tracking-widest" style="font-family: 'Cinzel', serif;">Auditoría Estructural</h1>
-                        <button onclick="generarReportePDF()" class="bg-white text-black text-[9px] font-bold px-4 py-2 rounded uppercase tracking-widest">PDF</button>
+                        <h1 class="text-2xl font-black text-white uppercase tracking-widest" style="font-family: 'Cinzel', serif;">Evolución Clínica</h1>
+                        <button onclick="generarReportePDF()" class="bg-transparent border border-gray-500 text-gray-300 hover:bg-gray-800 transition text-[9px] font-bold px-4 py-2 rounded uppercase tracking-widest">Descargar PDF</button>
                     </div>
-                    <div class="glass-card p-6 rounded-2xl h-80 relative"><canvas id="macroChart"></canvas></div>
-                    <div id="resumenBio" class="glass-card p-6 rounded-2xl text-xs text-white space-y-2 uppercase leading-relaxed"></div>
-                    <div id="listaMacro" class="glass-card p-6 rounded-2xl text-[10px] text-gray-300 space-y-3 h-40 overflow-y-auto"></div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 rounded-2xl h-80 relative flex flex-col items-center">
+                            <h3 class="text-[9px] text-[var(--cyan-neon)] uppercase font-bold tracking-widest mb-2 text-tech">Balance 360°</h3>
+                            <div class="flex-grow w-full"><canvas id="radarChart"></canvas></div>
+                        </div>
+                        <div class="glass-card p-6 rounded-2xl"><h3 class="text-[9px] text-[var(--purple-neon)] uppercase font-bold mb-4 tracking-widest text-tech">Historial de Impactos</h3><div id="listaMacro" class="text-[10px] text-gray-300 space-y-3 h-64 overflow-y-auto pr-2 tracking-wide font-mono"></div></div>
+                    </div>
                 </div>
+
                 <div id="macroGlobal" class="space-y-6 hidden"><div id="gridAtletasGlobal" class="grid grid-cols-1 md:grid-cols-3 gap-5"></div></div>
             </div>
-
-            <div class="mt-16 pt-8 border-t border-white/10 flex flex-col items-center justify-center pb-8 w-full">
+            
+            <div class="mt-16 pt-8 border-t border-[var(--cyan-neon)]/20 flex flex-col items-center justify-center pb-8 w-full">
                 <span class="text-[9px] text-gray-500 uppercase tracking-[0.5em] mb-2 text-tech">Engineered By</span>
-                
-                <img src="/public/firma%20juan%20gabriel.jpg" alt="Firma Juan Gabriel" style="height: 100px; filter: invert(1) contrast(1.5); mix-blend-mode: screen; opacity: 0.9; margin-bottom: -15px; pointer-events: none;" onerror="this.src='/firma%20juan%20gabriel.jpg'">
-                
+                <img src="/firma%20juan%20gabriel.jpg" alt="Firma" style="height: 100px; filter: invert(1) contrast(1.5); mix-blend-mode: screen; opacity: 0.9; margin-bottom: -15px; pointer-events: none;" onerror="this.src='firma%20juan%20gabriel.jpg'">
                 <span class="text-sm font-black text-white tracking-[0.2em] uppercase z-10" style="font-family: 'Cinzel', serif;">Juan Gabriel Lopez</span>
             </div>
         </main>
-
-        <div id="modalPerfiles" class="fixed inset-0 z-[300] items-center justify-center p-6 flex">
-            <div class="glass-card w-full max-w-sm p-8 rounded-3xl">
-                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--cyan-neon)] mb-6 text-center text-tech">SUSCRIPCIONES</h2>
-                <select id="selectorPerfiles" onchange="cambiarPerfil()" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-[var(--cyan-neon)] outline-none mb-6"></select>
-                <input type="text" id="nuevoNombre" placeholder="Nuevo Cliente" class="w-full bg-black/50 border border-white/20 rounded p-3 text-white mb-3 text-center outline-none">
-                <button onclick="crearPerfil()" class="w-full py-3 btn-tech font-bold uppercase text-[10px] rounded">Activar Contrato</button>
-                <button onclick="cerrarModalPerfiles()" class="w-full py-3 mt-4 text-gray-500 uppercase text-[9px]">Cerrar</button>
-            </div>
-        </div>
-
-        <div id="modalPreVuelo" class="fixed inset-0 z-[200] items-center justify-center p-6">
-            <div class="glass-card w-full max-w-sm p-8 rounded-3xl">
-                <h2 class="text-xs font-black tracking-[0.4em] text-[var(--purple-neon)] mb-6 text-center text-tech">TELEMETRÍA</h2>
-                <label class="text-[9px] text-gray-400 block mb-2 uppercase">Horas de Sueño</label>
-                <input type="number" id="inputSueño" value="7" class="w-full bg-black border border-[var(--cyan-neon)]/30 rounded p-3 text-[var(--cyan-neon)] text-2xl text-center font-black outline-none mb-6">
-                <label class="text-[9px] text-gray-400 block mb-2 uppercase">Estrés (1-10)</label>
-                <input type="range" id="inputEstres" min="1" max="10" value="3" class="w-full accent-[var(--red-neon)] mb-8">
-                <button onclick="finalizarCheckIn()" class="w-full py-4 btn-tech-purple font-black uppercase text-[10px] rounded-xl">Cargar Sistema</button>
-            </div>
-        </div>
     </div>
 
     <script>
-        // --- LOGICA ACCESO ---
+        // INIT Y SEGURIDAD
         document.addEventListener("DOMContentLoaded", () => {
-            const onboarded = localStorage.getItem('vanguardia_v23_ready');
-            if(!onboarded) document.getElementById('onboardingScreen').style.display = 'flex';
-            else { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; }
+            const onboarded = localStorage.getItem('vanguardia_v24_onboarded');
+            if(!onboarded) document.getElementById('authGateway').style.display = 'flex';
+            else { document.getElementById('authGateway').style.display = 'flex'; }
         });
 
-        function cerrarOnboarding() {
-            localStorage.setItem('vanguardia_v23_ready', 'true');
-            document.getElementById('onboardingScreen').style.opacity = '0';
-            setTimeout(() => { document.getElementById('onboardingScreen').style.display = 'none'; document.getElementById('authGateway').style.display = 'flex'; }, 800);
-        }
-
-        let scanTimer;
+        let scanTimer; let hapticInterval;
         function iniciarEscaneo() {
-            if(document.getElementById('pinAcceso').value.length < 4) return alert("PIN Requerido");
-            document.getElementById('biometricSensor').classList.add('scanning');
-            document.getElementById('textoSensor').innerText = "ESCANER ADN ACTIVO...";
-            scanTimer = setTimeout(desbloquear, 2000);
+            const pin = document.getElementById('pinAcceso').value; if (pin.length < 4) return alert("PIN de 4 dígitos requerido.");
+            document.getElementById('biometricSensor').classList.add('scanning'); document.getElementById('textoSensor').innerText = "VERIFICANDO ADN DIGITAL..."; 
+            if (navigator.vibrate) hapticInterval = setInterval(() => { navigator.vibrate(50); }, 150);
+            scanTimer = setTimeout(desbloquearSistema, 2000);
         }
-        function detenerEscaneo() { clearTimeout(scanTimer); document.getElementById('biometricSensor').classList.remove('scanning'); document.getElementById('textoSensor').innerText = "ESCANEO INTERRUMPIDO"; }
-        function desbloquear() {
+        function detenerEscaneo() { clearTimeout(scanTimer); clearInterval(hapticInterval); document.getElementById('biometricSensor').classList.remove('scanning'); document.getElementById('textoSensor').innerText = "ESCANEO INTERRUMPIDO"; }
+        function desbloquearSistema() {
+            clearInterval(hapticInterval); if (navigator.vibrate) navigator.vibrate([100, 50, 300]); 
+            document.getElementById('textoSensor').innerText = "ACCESO AUTORIZADO"; document.getElementById('textoSensor').style.color = '#39ff14';
             document.getElementById('authGateway').classList.add('auth-door-open');
-            setTimeout(() => { 
-                document.getElementById('authGateway').style.display = 'none'; 
-                document.getElementById('mainContent').style.display = 'block'; 
-                initApp();
-            }, 800);
+            setTimeout(() => { document.getElementById('authGateway').style.display = 'none'; document.getElementById('mainContent').style.display = 'block'; initMultiTenant(); }, 800);
         }
 
-        // --- LOGICA CORE ---
-        let db = JSON.parse(localStorage.getItem('vanguardia_v23_db')) || { perfilActivo: 'Cliente Elite', perfiles: { 'Cliente Elite': { sueno: 7, estres: 3, sesiones: 12, restantes: 12, historial: [] } } };
+        // BASE DE DATOS Y GESTIÓN
+        const InterfazSensorial = { init: function() { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }, vibrar: function(p) { if(navigator.vibrate) navigator.vibrate(p); }, tick: function() { this.vibrar(15); }, alerta: function() { this.vibrar([100,50,200]); } };
+        let db = JSON.parse(localStorage.getItem('vanguardia_db_v24')) || { perfilActivo: 'Cliente Elite', perfiles: { 'Cliente Elite': { sueno: 7, estres: 3, nivel: 'Intermedio', fase: 'Hipertrofia Clínica', dolor: 'Ninguno', peso: 75, suplementos: [true,true,true,true], historial: [] } } };
 
-        function initApp() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
-        function guardar() { localStorage.setItem('vanguardia_v23_db', JSON.stringify(db)); }
+        function initMultiTenant() { actualizarListaPerfiles(); cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'flex'; }
+        function actualizarListaPerfiles() { const s = document.getElementById('selectorPerfiles'); s.innerHTML = ''; for(const n in db.perfiles) { s.innerHTML += `<option value="${n}">${n}</option>`; } s.value = db.perfilActivo; }
+        
+        function crearPerfil() { 
+            const n = document.getElementById('nuevoNombre').value.trim(); const lvl = document.getElementById('nuevoNivel').value; const f = document.getElementById('nuevaFase').value;
+            if(!n || db.perfiles[n]) return alert("Nombre inválido."); 
+            db.perfiles[n] = { sueno: 7, estres: 3, nivel: lvl, fase: f, dolor: 'Ninguno', peso: 70, suplementos: [false,false,false,false], historial: [] }; 
+            db.perfilActivo = n; guardarDB(); actualizarListaPerfiles(); document.getElementById('nuevoNombre').value = ''; InterfazSensorial.tick(); 
+        }
+        function cambiarPerfil() { db.perfilActivo = document.getElementById('selectorPerfiles').value; guardarDB(); InterfazSensorial.tick(); }
+        function cargarPerfilActivo() { 
+            const p = db.perfiles[db.perfilActivo]; document.getElementById('nombreAtletaNav').innerText = db.perfilActivo; document.getElementById('badgeNivel').innerText = `NIVEL: ${p.nivel.toUpperCase()}`; document.getElementById('faseActualBadge').innerText = p.fase;
+            document.getElementById('inputSueño').value = p.sueno; document.getElementById('inputEstres').value = p.estres; document.getElementById('bioPeso').value = p.peso || 70;
+            if(p.suplementos) { document.getElementById('supp-creatina').checked = p.suplementos[0]; document.getElementById('supp-omega').checked = p.suplementos[1]; document.getElementById('supp-magnesio').checked = p.suplementos[2]; document.getElementById('supp-proteina').checked = p.suplementos[3]; }
+            actualizarMapaDeCalor(); renderRadar(); dictarRutinaInteligente();
+        }
         function abrirModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'flex'; }
-        function cerrarModalPerfiles() { document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
-        function actualizarListaPerfiles() {
-            const s = document.getElementById('selectorPerfiles'); s.innerHTML = '';
-            for(let n in db.perfiles) s.innerHTML += `<option value="${n}">${n}</option>`;
-            s.value = db.perfilActivo;
+        function cerrarModalPerfiles() { cargarPerfilActivo(); document.getElementById('modalPerfiles').style.display = 'none'; document.getElementById('modalPreVuelo').style.display = 'flex'; }
+        function guardarDB() { localStorage.setItem('vanguardia_db_v24', JSON.stringify(db)); actualizarMapaDeCalor(); }
+
+        // CHECK IN Y PREVENCIÓN DE LESIONES
+        function finalizarCheckIn() {
+            InterfazSensorial.init(); const p = db.perfiles[db.perfilActivo];
+            p.sueno = document.getElementById('inputSueño').value || 7; p.estres = document.getElementById('inputEstres').value || 3; p.dolor = document.getElementById('inputDolor').value;
+            p.suplementos = [ document.getElementById('supp-creatina').checked, document.getElementById('supp-omega').checked, document.getElementById('supp-magnesio').checked, document.getElementById('supp-proteina').checked ];
+            guardarDB(); document.getElementById('modalPreVuelo').style.display = 'none'; dictarRutinaInteligente();
         }
-        function crearPerfil() {
-            const n = document.getElementById('nuevoNombre').value; if(!n) return;
-            db.perfiles[n] = { sueno: 7, estres: 3, sesiones: 12, restantes: 12, historial: [] };
-            db.perfilActivo = n; guardar(); actualizarListaPerfiles();
+
+        // EL CEREBRO: DICTA RUTINA SEGÚN NIVEL Y PROTEGE ARTICULACIONES
+        function dictarRutinaInteligente() {
+            const p = db.perfiles[db.perfilActivo]; const panel = document.getElementById('panelDirectriz'); const txt = document.getElementById('textoDirectriz');
+            let readiness = 100 - ((7 - p.sueno) * 15) - ((p.estres - 3) * 10);
+            
+            // Lógica por Niveles
+            let instruccion = "";
+            if(p.nivel === 'Principiante') instruccion = "Priorizar control motor y aprendizaje biomecánico. No buscar el fallo técnico. ";
+            if(p.nivel === 'Intermedio') instruccion = "Buscar sobrecarga progresiva controlada. Dejar 1-2 reps en recámara (RIR 2). ";
+            if(p.nivel === 'Avanzado') instruccion = "Autorización para estrés sistémico máximo. Buscar fallo muscular en la última serie. ";
+
+            // Lógica de Prevención de Lesiones
+            let alerta = "";
+            if(p.dolor !== 'Ninguno') {
+                alerta = `<br><span class="text-[var(--red-neon)] font-black mt-2 block animate-pulse">ALERTA CLÍNICA: Dolor reportado en ${p.dolor}. Evitar cargas axiales en dicha articulación. Modificar vectores.</span>`;
+                panel.classList.replace('border-l-[var(--cyan-neon)]', 'border-l-[var(--red-neon)]');
+            } else { panel.classList.replace('border-l-[var(--red-neon)]', 'border-l-[var(--cyan-neon)]'); }
+
+            if(readiness < 60) { txt.innerHTML = `SNC Fatigado (${readiness}%). Reducir volumen de entrenamiento hoy. <br><strong>Directiva:</strong> ${instruccion} ${alerta}`; } 
+            else { txt.innerHTML = `SNC Óptimo (${readiness}%). Sistema habilitado para intensidad. <br><strong>Directiva:</strong> ${instruccion} ${alerta}`; }
         }
-        function cambiarPerfil() { db.perfilActivo = document.getElementById('selectorPerfiles').value; cargarPerfilActivo(); }
-        function cargarPerfilActivo() {
-            const p = db.perfiles[db.perfilActivo]; document.getElementById('nombreAtletaNav').innerText = db.perfilActivo;
-            document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
+
+        function calcularTUT() {
+            const exc = parseFloat(document.getElementById('cadExc').value) || 0; const iso = parseFloat(document.getElementById('cadIso').value) || 0; const con = parseFloat(document.getElementById('cadCon').value) || 0; const reps = parseInt(document.getElementById('reps').value) || 0; const total = (exc + iso + con) * reps;
+            document.getElementById('tutDisplay').innerText = `${total}s`; document.getElementById('tut').value = total;
+        }
+
+        function actualizarRPE(v) {
+            document.getElementById('rpeVal').innerText = v + '/10'; const c = v < 5 ? '#4ade80' : v < 8 ? '#facc15' : '#ff003c';
+            document.getElementById('rpeVal').style.color = c; document.getElementById('rpeVal').style.textShadow = `0 0 5px ${c}`;
+            document.getElementById('rpe').style.accentColor = c; InterfazSensorial.tick(); 
+        }
+
+        // MOTOR DE VIDEO
+        let streamActivo = null;
+        function toggleCamera() {
+            const vBox = document.getElementById('videoContainer'); const video = document.getElementById('cameraFeed');
+            if (vBox.classList.contains('hidden')) {
+                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function(stream) {
+                        streamActivo = stream; video.srcObject = stream; vBox.classList.remove('hidden');
+                    }).catch(err => alert("Permiso de cámara denegado."));
+                }
+            } else { if(streamActivo) { streamActivo.getTracks().forEach(track => track.stop()); } video.srcObject = null; vBox.classList.add('hidden'); }
+        }
+
+        // AVATAR HEATMAP
+        function actualizarMapaDeCalor() {
+            const h = db.perfiles[db.perfilActivo].historial; const ahora = new Date().getTime(); let fatiga = { pecho: 0, espalda: 0, piernas: 0, brazos: 0 };
+            h.forEach(s => {
+                if (s.ts && (ahora - s.ts < 48 * 3600 * 1000)) {
+                    let imp = parseFloat(s.rpe) * parseInt(s.series);
+                    if(s.dominio.includes("Empuje")) { fatiga.pecho += imp; fatiga.brazos += imp*0.5; }
+                    if(s.dominio.includes("Tracción")) { fatiga.espalda += imp; fatiga.brazos += imp*0.5; }
+                    if(s.dominio.includes("Piernas")) { fatiga.piernas += imp; }
+                    if(s.dominio.includes("Metabólico")) { fatiga.pecho+=imp*0.3; fatiga.espalda+=imp*0.3; fatiga.piernas+=imp*0.3; }
+                }
+            });
+            const aplicar = (id, f) => { let el = document.getElementById(id); if(!el) return; el.className.baseVal = "sensor"; if(f > 30) el.classList.add('fatigado'); else if(f > 10) el.classList.add('recuperando'); else el.classList.add('fresco'); };
+            aplicar('sensor-pecho', fatiga.pecho); aplicar('sensor-espalda', fatiga.espalda); aplicar('sensor-brazo1', fatiga.brazos); aplicar('sensor-brazo2', fatiga.brazos); aplicar('sensor-piernas1', fatiga.piernas); aplicar('sensor-piernas2', fatiga.piernas); aplicar('sensor-cadenaPost1', fatiga.piernas); aplicar('sensor-cadenaPost2', fatiga.piernas);
+        }
+
+        let restInt;
+        function iniciarDescansoLogico(rpe) {
+            let t = rpe >= 8 ? 120 : 60; document.getElementById('btnSubmit').classList.add('hidden'); document.getElementById('restTimerBox').classList.remove('hidden');
+            restInt = setInterval(() => { t--; document.getElementById('restTimerDisplay').innerText = `${t}s`; if(t <= 0) { clearInterval(restInt); document.getElementById('restTimerBox').classList.add('hidden'); document.getElementById('btnSubmit').classList.remove('hidden'); InterfazSensorial.alerta(); } }, 1000);
+        }
+
+        // REGISTRO Y CÁLCULOS
+        document.getElementById('formVanguardia').onsubmit = function(e) {
+            e.preventDefault(); const p = db.perfiles[db.perfilActivo];
+            p.peso = document.getElementById('bioPeso').value || 70;
+            const carga = parseFloat(document.getElementById('carga').value); const reps = parseInt(document.getElementById('reps').value); const series = parseInt(document.getElementById('series').value); const tut = parseFloat(document.getElementById('tut').value); const rpe = parseFloat(document.getElementById('rpe').value); const dom = document.getElementById('dominioSelector').value;
+            const ts = new Date().getTime(); 
+            
+            // Penalización por lesión cruzada
+            let riesgo = (( (carga/(p.peso))*2 ) + (rpe*0.5) + (tut/60)).toFixed(1);
+            if(p.dolor === 'Rodillas' && dom.includes('Piernas')) { riesgo = (riesgo * 2).toFixed(1); InterfazSensorial.alerta(); alert("ALERTA BIOMECÁNICA: Movimiento contraindicado por dolor patelar."); }
+            if(p.dolor === 'Hombros' && dom.includes('Empuje')) { riesgo = (riesgo * 2).toFixed(1); InterfazSensorial.alerta(); alert("ALERTA BIOMECÁNICA: Riesgo severo para manguito rotador."); }
+            
+            let rm1 = (carga * (1 + (reps / 30))).toFixed(1);
+
+            p.historial.push({ ts: ts, fecha: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }), ej: document.getElementById('ejercicioNombre').value, carga, reps, series, rpe, rm1, riesgo, dominio: dom });
+            guardarDB();
+
+            // Inteligencia Metabólica (Prescripción)
+            const tonelaje = carga * reps * series;
+            const agua = ((tonelaje / 1000) * 150).toFixed(0); 
+            const carbs = ((tonelaje / 1000) * 6).toFixed(1);
+            document.getElementById('metAgua').innerHTML = `${agua}<span class="text-xs text-gray-500"> ml</span>`;
+            document.getElementById('metCarbs').innerHTML = `${carbs}<span class="text-xs text-gray-500"> g</span>`;
+            document.getElementById('recetaMetabolica').classList.remove('hidden'); document.getElementById('recetaMetabolica').classList.add('flex');
+
+            iniciarDescansoLogico(rpe); renderRadar();
+        };
+
+        let radarInst;
+        function renderRadar() {
+            const ctx = document.getElementById('radarChart').getContext('2d'); const p = db.perfiles[db.perfilActivo]; const h = p.historial;
+            let fuer = h.length > 0 ? Math.min(10, h[h.length-1].rm1 / 15) : 0; let vol = h.length > 0 ? Math.min(10, h.length / 5) : 0; let reco = Math.min(10, p.sueno * 1.2); let adh = p.suplementos ? p.suplementos.filter(x => x).length * 2.5 : 0; let disc = p.estres < 5 ? 9 : 5;
+            if(radarInst) radarInst.destroy();
+            radarInst = new Chart(ctx, { type: 'radar', data: { labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'ADHERENCIA', 'DISCIPLINA'], datasets: [{ data: [fuer, vol, reco, adh, disc], backgroundColor: 'rgba(0, 240, 255, 0.2)', borderColor: '#00f0ff', borderWidth: 2, pointBackgroundColor: '#00f0ff' }] }, options: { scales: { r: { min: 0, max: 10, ticks: { display: false }, grid: { color: 'rgba(0, 240, 255, 0.15)' }, angleLines: { color: 'rgba(0, 240, 255, 0.2)' }, pointLabels: { color: '#00f0ff', font: { size: 9, family: 'Share Tech Mono' } } } }, plugins: { legend: { display: false } } } });
+        }
+
+        function toggleVista() { document.getElementById('vistaMicro').classList.toggle('activa'); document.getElementById('vistaMacro').classList.toggle('activa'); if(document.getElementById('vistaMacro').classList.contains('activa')) { document.getElementById('btnVista').innerText = "Volver al Servidor"; switchMacroTab('individual'); } else { document.getElementById('btnVista').innerText = "Panel Médico"; renderRadar(); } }
+        function switchMacroTab(tab) { if(tab === 'individual') { document.getElementById('macroIndividual').classList.remove('hidden'); document.getElementById('macroGlobal').classList.add('hidden'); document.getElementById('tabIndiv').classList.add('btn-tech'); document.getElementById('tabIndiv').classList.remove('bg-transparent', 'border', 'border-white/20', 'text-gray-400'); document.getElementById('tabGlobal').classList.remove('btn-tech'); document.getElementById('tabGlobal').classList.add('bg-transparent', 'border', 'border-white/20', 'text-gray-400'); renderListaMacro(); } else { document.getElementById('macroIndividual').classList.add('hidden'); document.getElementById('macroGlobal').classList.remove('hidden'); document.getElementById('tabGlobal').classList.add('btn-tech'); document.getElementById('tabGlobal').classList.remove('bg-transparent', 'border', 'border-white/20', 'text-gray-400'); document.getElementById('tabIndiv').classList.remove('btn-tech'); document.getElementById('tabIndiv').classList.add('bg-transparent', 'border', 'border-white/20', 'text-gray-400'); renderizarVisionGlobal(); } }
+        
+        function renderListaMacro() {
+            const h = db.perfiles[db.perfilActivo].historial;
+            document.getElementById('resumenBio').innerHTML = `Fase: <strong class="text-[var(--cyan-neon)]">${db.perfiles[db.perfilActivo].fase}</strong><br>Nivel: <strong class="text-white">${db.perfiles[db.perfilActivo].nivel}</strong><br>Lesión Rep.: <strong class="text-[var(--red-neon)]">${db.perfiles[db.perfilActivo].dolor}</strong>`;
+            const list = document.getElementById('listaMacro'); list.innerHTML = "";
+            [...h].reverse().slice(0, 15).forEach(s => list.innerHTML += `<div class="border-b border-white/10 pb-2"><span class="text-[var(--cyan-neon)]">${s.fecha}</span> - <strong class="text-white">${s.ej}</strong> <span class="text-gray-500">(${s.carga}kg x ${s.reps} reps)</span></div>`);
             renderRadar();
         }
-        function finalizarCheckIn() {
-            db.perfiles[db.perfilActivo].sueno = document.getElementById('inputSueño').value;
-            document.getElementById('modalPreVuelo').style.display = 'none';
-        }
-        function actualizarRPE(v) {
-            document.getElementById('rpeVal').innerText = v + '/10';
-            const c = v < 5 ? '#4ade80' : v < 8 ? '#facc15' : '#ff003c';
-            document.getElementById('rpeVal').style.color = c;
-        }
 
-        document.getElementById('formVanguardia').onsubmit = (e) => {
-            e.preventDefault(); const p = db.perfiles[db.perfilActivo];
-            const c = document.getElementById('carga').value; const r = document.getElementById('reps').value;
-            const rm1 = (c * (1 + (r / 30))).toFixed(1);
-            if(p.restantes > 0) p.restantes--; document.getElementById('badgeSesiones').innerText = `SESIONES: ${p.restantes}`;
-            p.historial.push({ fecha: new Date().toLocaleDateString(), ej: document.getElementById('ejercicioNombre').value, carga: c, reps: r, rm1: rm1 });
-            guardar(); renderRadar();
-            alert("Sesión Computada Correctamente");
+        function renderizarVisionGlobal() {
+            const grid = document.getElementById('gridAtletasGlobal'); grid.innerHTML = "";
+            for(const n in db.perfiles) {
+                const p = db.perfiles[n];
+                grid.innerHTML += `<div class="glass-card p-6 rounded-2xl border border-[var(--cyan-neon)]/30">
+                    <h3 class="text-sm font-black text-white uppercase mb-1">${n}</h3>
+                    <p class="text-[9px] text-[var(--cyan-neon)] mb-1 uppercase tracking-widest">${p.fase}</p>
+                    <p class="text-[8px] text-gray-400 uppercase tracking-widest mb-3">Nivel: ${p.nivel}</p>
+                </div>`;
+            }
         }
-
-        function renderRadar() {
-            const ctx = document.getElementById('radarChart'); if(!ctx) return;
-            new Chart(ctx, { type: 'radar', data: { labels: ['FUERZA', 'VOLUMEN', 'RECUPERACIÓN', 'SNC', 'DISCIPLINA'], datasets: [{ data: [8, 7, 9, 6, 10], borderColor: '#00f0ff', backgroundColor: 'rgba(0, 240, 255, 0.2)' }] }, options: { scales: { r: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { display: false } } }, plugins: { legend: { display: false } } } });
-        }
-
-        function toggleVista() {
-            document.getElementById('vistaMicro').classList.toggle('activa');
-            document.getElementById('vistaMacro').classList.toggle('activa');
-            if(document.getElementById('vistaMacro').classList.contains('activa')) renderMacro();
-        }
-        function renderMacro() {
-            const h = db.perfiles[db.perfilActivo].historial;
-            const ctx = document.getElementById('macroChart');
-            new Chart(ctx, { type: 'line', data: { labels: h.map(x=>x.fecha), datasets: [{ label: 'Fuerza', data: h.map(x=>x.rm1), borderColor: '#b026ff' }] }, options: { responsive: true, maintainAspectRatio: false } });
-            document.getElementById('listaMacro').innerHTML = h.reverse().map(x => `<div class="border-b border-white/10 pb-2">${x.fecha} - ${x.ej} (${x.carga}kg)</div>`).join('');
-        }
+        function generarReportePDF() { html2pdf().from(document.getElementById('reportContent')).save(); }
     </script>
 </body>
 </html>
